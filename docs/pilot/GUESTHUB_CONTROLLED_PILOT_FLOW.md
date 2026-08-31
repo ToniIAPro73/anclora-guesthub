@@ -1,15 +1,15 @@
-# SyncXML Controlled Pilot Flow
+# GuestHub Controlled Pilot Flow
 
 ## Objetivo
 
-Definir el flujo de piloto controlado con responsables, estados, puntos de revision humana y flags relevantes, manteniendo SyncXML como producto de validacion asistida y no de acceso abierto.
+Definir el flujo de piloto controlado con responsables, estados, puntos de revision humana y flags relevantes, manteniendo GuestHub como producto de validacion asistida y no de acceso abierto.
 
 ## Diagrama textual
 
 1. Usuario externo llega a landing publica.
 2. Usuario envia `POST /api/pilot/request` desde `/piloto`.
-3. SyncXML valida formato, rate limits y consentimiento de datos sinteticos.
-4. SyncXML reenvia la solicitud a Nexus si el webhook esta configurado.
+3. GuestHub valida formato, rate limits y consentimiento de datos sinteticos.
+4. GuestHub reenvia la solicitud a Nexus si el webhook esta configurado.
 5. Nexus decide el flujo interno:
    - rechazo directo si el caso contradice el piloto;
    - revision manual si hay ambiguedad;
@@ -24,18 +24,18 @@ Definir el flujo de piloto controlado con responsables, estados, puntos de revis
 
 | Estado | Significado | Responsable |
 |---|---|---|
-| `requested` | solicitud recibida por SyncXML/Nexus | SyncXML + Nexus |
+| `requested` | solicitud recibida por GuestHub/Nexus | GuestHub + Nexus |
 | `in_review` | evaluacion humana pendiente | equipo Anclora |
 | `accepted` | aprobado manualmente para piloto | Toni / equipo |
 | `rejected` | no encaja con el alcance actual | Toni / equipo |
 | `revoked` | acceso retirado tras haber sido concedido | Toni / equipo |
 | `expired` | acceso temporal caducado | sistema + equipo |
 
-Nota: en la base de datos de SyncXML solo viven los estados de acceso del usuario provisionado (`active`, `revoked`, `expired`). Los estados previos a provisionado pertenecen sobre todo al workflow de Nexus.
+Nota: en la base de datos de GuestHub solo viven los estados de acceso del usuario provisionado (`active`, `revoked`, `expired`). Los estados previos a provisionado pertenecen sobre todo al workflow de Nexus.
 
 ## Responsables
 
-- SyncXML: capturar la solicitud, aplicar rate limit y no exponer acceso abierto.
+- GuestHub: capturar la solicitud, aplicar rate limit y no exponer acceso abierto.
 - Nexus: recibir webhook, consolidar la solicitud y coordinar la revision.
 - Hermes: recomendador auxiliar o validador de copy; nunca aprobador final.
 - Toni / equipo: decision final de alta, rechazo, revocacion y pruebas SES sensibles.
@@ -51,15 +51,15 @@ Nota: en la base de datos de SyncXML solo viven los estados de acceso del usuari
 
 ## Flags y variables relevantes
 
-- `NEXUS_SYNCXML_WEBHOOK_URL`
-- `NEXUS_SYNCXML_WEBHOOK_SECRET`
+- `NEXUS_GUESTHUB_WEBHOOK_URL`
+- `NEXUS_GUESTHUB_WEBHOOK_SECRET`
 - `RESEND_API_KEY`
 - `RESEND_FROM`
-- `SYNCXML_PILOT_REQUEST_TO`
-- `SYNCXML_LOCAL_DEMO`
-- `SYNCXML_ADMIN_ACCESS_ENABLED`
-- `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION`
-- `SYNCXML_SES_ALLOW_PRODUCTION_SEND`
+- `GUESTHUB_PILOT_REQUEST_TO`
+- `GUESTHUB_LOCAL_DEMO`
+- `GUESTHUB_ADMIN_ACCESS_ENABLED`
+- `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION`
+- `GUESTHUB_SES_ALLOW_PRODUCTION_SEND`
 
 ## Criterios de aceptacion
 

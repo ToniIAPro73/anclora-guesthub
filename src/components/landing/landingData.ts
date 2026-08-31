@@ -38,18 +38,18 @@ function mailto(subject: string, body?: string) {
 }
 
 export const PILOT_MAILTO = mailto(
-  "Solicitud de piloto controlado — Anclora SyncXML",
-  "Hola,\n\nMe gustaría solicitar un piloto controlado de Anclora SyncXML con datos sintéticos o anonimizados.\n\nAlojamiento / gestor:\nNº de inmuebles aprox.:\nHerramienta actual (Excel/PMS):\n\nGracias.",
+  "Solicitud de piloto controlado — Anclora GuestHub",
+  "Hola,\n\nMe gustaría solicitar un piloto controlado de Anclora GuestHub con datos sintéticos o anonimizados.\n\nAlojamiento / gestor:\nNº de inmuebles aprox.:\nHerramienta actual (Excel/PMS):\n\nGracias.",
 );
 export const DIAGNOSTIC_MAILTO = mailto(
-  "Solicitud de diagnóstico inicial — Anclora SyncXML",
-  "Hola,\n\nMe gustaría solicitar un diagnóstico inicial de mi flujo Excel/XLSX para valorar el encaje con Anclora SyncXML.\n\nAlojamiento / gestor:\nNº de inmuebles aprox.:\nHerramienta actual (Excel/PMS):\n\nGracias.",
+  "Solicitud de diagnóstico inicial — Anclora GuestHub",
+  "Hola,\n\nMe gustaría solicitar un diagnóstico inicial de mi flujo Excel/XLSX para valorar el encaje con Anclora GuestHub.\n\nAlojamiento / gestor:\nNº de inmuebles aprox.:\nHerramienta actual (Excel/PMS):\n\nGracias.",
 );
 export const PLAN_MAILTO = mailto(
-  "Plan a medida — Anclora SyncXML",
+  "Plan a medida — Anclora GuestHub",
   "Hola,\n\nTras valorar el piloto, me gustaría hablar sobre un plan a medida.\n\nAlojamiento / gestor:\nVolumen aproximado de reservas:\n\nGracias.",
 );
-export const CONTACT_MAILTO = mailto("Contacto — Anclora SyncXML");
+export const CONTACT_MAILTO = mailto("Contacto — Anclora GuestHub");
 
 export const NAV_LINKS = [
   { label: "Producto", href: "#producto" },
@@ -348,6 +348,6 @@ export const APP_MODAL_CHECKLIST = [
   "No debes subir datos reales de huéspedes.",
   "Debes usar solo datos sintéticos, anonimizados o muestras controladas.",
   "El XML generado es revisable, no oficialmente aceptado por SES.HOSPEDAJES.",
-  "Anclora SyncXML no ofrece asesoramiento legal ni garantiza cumplimiento normativo.",
+  "Anclora GuestHub no ofrece asesoramiento legal ni garantiza cumplimiento normativo.",
   "No hay integración oficial ni envío automático a SES.HOSPEDAJES.",
 ];

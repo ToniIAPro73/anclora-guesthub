@@ -17,6 +17,8 @@ type StoredReservation = {
   xml: string;
 };
 
+// In-memory globalThis key kept as legacy "syncXml*" after the Anclora SyncXML →
+// Anclora GuestHub rename (2026-08) — no persistence, rename is aesthetic risk only.
 const memoryStore = globalThis as unknown as { syncXmlReservations?: StoredReservation[] };
 memoryStore.syncXmlReservations ??= [];
 

@@ -6,23 +6,23 @@ import { fileURLToPath } from "node:url";
 const LANGS = {
   es: {
     input: "manual-usuario.md",
-    output: "anclora-syncxml-manual-usuario-es.pdf",
-    htmlOutput: "anclora-syncxml-manual-usuario-es.html",
-    title: "Anclora SyncXML - Manual de Usuario",
+    output: "anclora-guesthub-manual-usuario-es.pdf",
+    htmlOutput: "anclora-guesthub-manual-usuario-es.html",
+    title: "Anclora GuestHub - Manual de Usuario",
     lang: "es",
   },
   en: {
     input: "manual-usuario.en.md",
-    output: "anclora-syncxml-user-manual-en.pdf",
-    htmlOutput: "anclora-syncxml-user-manual-en.html",
-    title: "Anclora SyncXML - User Manual",
+    output: "anclora-guesthub-user-manual-en.pdf",
+    htmlOutput: "anclora-guesthub-user-manual-en.html",
+    title: "Anclora GuestHub - User Manual",
     lang: "en",
   },
   de: {
     input: "manual-usuario.de.md",
-    output: "anclora-syncxml-benutzerhandbuch-de.pdf",
-    htmlOutput: "anclora-syncxml-benutzerhandbuch-de.html",
-    title: "Anclora SyncXML - Benutzerhandbuch",
+    output: "anclora-guesthub-benutzerhandbuch-de.pdf",
+    htmlOutput: "anclora-guesthub-benutzerhandbuch-de.html",
+    title: "Anclora GuestHub - Benutzerhandbuch",
     lang: "de",
   },
 };

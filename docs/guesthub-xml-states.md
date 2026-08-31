@@ -1,4 +1,4 @@
-# Estados del XML en Anclora SyncXML
+# Estados del XML en Anclora GuestHub
 
 La plataforma maneja diferentes estados lógicos para el ciclo de vida del XML de SES.HOSPEDAJES, de cara a no emitir "claims" de validación excesivos antes de tiempo.
 

@@ -56,6 +56,8 @@ export type PrecheckinSubmissionResult = {
   submissionHash?: string;
 };
 
+// In-memory globalThis key kept as legacy "syncXml*" after the Anclora SyncXML →
+// Anclora GuestHub rename (2026-08) — no persistence, rename is aesthetic risk only.
 const store = globalThis as unknown as { syncXmlPrecheckinSessions?: PrecheckinSession[] };
 store.syncXmlPrecheckinSessions ??= [];
 

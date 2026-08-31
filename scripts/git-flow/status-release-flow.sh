@@ -5,7 +5,7 @@
 set -euo pipefail
 
 echo "==================================================================="
-echo "GIT FLOW STATUS — Anclora SyncXML"
+echo "GIT FLOW STATUS — Anclora GuestHub"
 echo "==================================================================="
 echo ""
 

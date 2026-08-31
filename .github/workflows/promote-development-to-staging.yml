@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
 
 env:
-  DATABASE_URL: "postgresql://user:password@localhost:5432/syncxml"
-  DIRECT_URL: "postgresql://user:password@localhost:5432/syncxml"
+  DATABASE_URL: "postgresql://user:password@localhost:5432/guesthub"
+  DIRECT_URL: "postgresql://user:password@localhost:5432/guesthub"
   SESSION_SECRET: "ci-session-secret-ci-session-secret"
-  SYNCXML_ENCRYPTION_KEY: "ci-encryption-key-ci-encryption-key-32"
-  SYNCXML_ENABLE_PERSISTENT_STORAGE: "false"
-  SYNCXML_LOCAL_DEMO: "true"
-  SYNCXML_ADMIN_PASSWORD: "ci-admin-password"
+  GUESTHUB_ENCRYPTION_KEY: "ci-encryption-key-ci-encryption-key-32"
+  GUESTHUB_ENABLE_PERSISTENT_STORAGE: "false"
+  GUESTHUB_LOCAL_DEMO: "true"
+  GUESTHUB_ADMIN_PASSWORD: "ci-admin-password"
   NEXT_PUBLIC_APP_URL: "http://localhost:3000"
   AUTH_URL: "http://localhost:3000"
   AUTH_TRUST_HOST: "true"

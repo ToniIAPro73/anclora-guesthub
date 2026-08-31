@@ -6,8 +6,9 @@ import { getInternalReplyTo } from "@/lib/email/delivery";
 import { generateTemporaryPassword, hashPassword } from "@/lib/password";
 import { pseudonymizeSession } from "@/lib/audit";
 import { authRateLimiter, getRateLimitKey, passwordRecoveryLimiter } from "@/lib/security/rateLimit";
+import { envValue } from "@/lib/security/env";
 
-const APP_NAME = "Anclora SyncXML";
+const APP_NAME = "Anclora GuestHub";
 const BRAND_BG = "#070A12";
 const BRAND_SURFACE = "#101827";
 const BRAND_ACCENT = "#BFA46A";
@@ -36,7 +37,7 @@ function buildRecoveryEmail(input: {
 }) {
   const baseUrl = input.appUrl.replace(/\/$/, "");
   const loginUrl = `${baseUrl}/login`;
-  const logoUrl = `${baseUrl}/brand/anclora-syncxml-email.png`;
+  const logoUrl = `${baseUrl}/brand/anclora-guesthub-email.png`;
   const expiresAt = input.expiresAt.toISOString();
   const subject = `${APP_NAME} - nueva contraseña temporal`;
   const text = [
@@ -95,7 +96,9 @@ export async function POST(request: Request) {
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL;
-  const appUrl = process.env.SYNCXML_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://anclora-syncxml.vercel.app";
+  // Dual-read GUESTHUB_APP_URL ?? SYNCXML_APP_URL (rename 2026-08).
+  // Legacy endpoint: anclora-syncxml.vercel.app — pending owner domain decision.
+  const appUrl = envValue("GUESTHUB_APP_URL", "SYNCXML_APP_URL") || process.env.NEXT_PUBLIC_APP_URL || "https://anclora-syncxml.vercel.app";
 
   if (!hasDatabase() || !resendApiKey || !resendFrom) return NextResponse.json({ ok: true });
 

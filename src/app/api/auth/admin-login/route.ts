@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { setSessionCookie } from "@/lib/auth";
-import { getSessionSecret } from "@/lib/security/env";
+import { envValue, getSessionSecret } from "@/lib/security/env";
 import { authRateLimiter, getRateLimitKey } from "@/lib/security/rateLimit";
 
 export async function POST(request: Request) {
   const rateLimit = authRateLimiter.check(getRateLimitKey(request));
   if (!rateLimit.allowed) return NextResponse.json({ error: "Demasiados intentos" }, { status: 429 });
 
-  const adminPassword = process.env.SYNCXML_ADMIN_PASSWORD || "";
-  const adminEmail = (process.env.SYNCXML_ADMIN_EMAIL || "antonio@anclora.com").toLowerCase();
+  // Dual-read: canonical GUESTHUB_* first, legacy SYNCXML_* fallback (rename 2026-08).
+  const adminPassword = envValue("GUESTHUB_ADMIN_PASSWORD", "SYNCXML_ADMIN_PASSWORD") || "";
+  const adminEmail = (envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "antonio@anclora.com").toLowerCase();
   if (!adminPassword || !getSessionSecret()) {
     return NextResponse.json(
       {

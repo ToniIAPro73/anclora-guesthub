@@ -64,7 +64,7 @@ export function AdminLoginView() {
           mode="admin"
           title="Acceso a la aplicación"
           badge="ADMINISTRADOR"
-          description="Entrada privada para administrar Anclora SyncXML y continuar pruebas internas."
+          description="Entrada privada para administrar Anclora GuestHub y continuar pruebas internas."
           footer={
             <p>
               URL no publicada en la landing. Usa únicamente credenciales internas autorizadas.

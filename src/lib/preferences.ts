@@ -7,6 +7,8 @@ export const DEFAULT_LANGUAGE: AppLanguage = DEFAULT_APP_LOCALE;
 export const themeModes: AppTheme[] = ["dark", "light", "system"];
 export const languages: AppLanguage[] = [...ACTIVE_APP_LOCALES];
 
+// Legacy cookie names kept after the Anclora SyncXML → Anclora GuestHub rename
+// (2026-08): renaming them would reset saved theme/language preferences.
 export const PREFERENCE_COOKIE_NAMES = {
   theme: "anclora-syncxml-theme",
   language: "anclora-syncxml-language",

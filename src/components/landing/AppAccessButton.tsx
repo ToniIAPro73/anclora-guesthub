@@ -132,7 +132,7 @@ export function AppAccessButton({
             </div>
 
             <p id="app-access-desc" className="l-text mt-4 text-sm">
-              Estás accediendo a Anclora SyncXML en fase pre-MVP / validación
+              Estás accediendo a Anclora GuestHub en fase pre-MVP / validación
               controlada.
             </p>
 

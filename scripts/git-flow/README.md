@@ -1,4 +1,4 @@
-# Git Flow Scripts — Anclora SyncXML
+# Git Flow Scripts — Anclora GuestHub
 
 Conjunto de scripts para automatizar el flujo de ramas entre `development`, `staging` y `production`.
 
@@ -271,4 +271,4 @@ git push origin development
 
 ---
 
-*Git Flow Scripts v1.0 — Anclora SyncXML*
+*Git Flow Scripts v1.0 — Anclora GuestHub*

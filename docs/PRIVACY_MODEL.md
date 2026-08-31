@@ -38,7 +38,7 @@ La auditoria registra eventos tecnicos sin PII: fecha, evento, sesion pseudonimi
 
 ## Almacenamiento
 
-La base de datos no se usa para persistir datos personales salvo `SYNCXML_ENABLE_PERSISTENT_STORAGE=true`. En ese caso, los campos personales de huesped se cifran y el payload normalizado se minimiza para no guardar Excel/XML completo.
+La base de datos no se usa para persistir datos personales salvo `GUESTHUB_ENABLE_PERSISTENT_STORAGE=true`. En ese caso, los campos personales de huesped se cifran y el payload normalizado se minimiza para no guardar Excel/XML completo.
 
 ## Cifrado
 

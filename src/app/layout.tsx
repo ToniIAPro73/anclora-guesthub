@@ -8,11 +8,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sora = Sora({ subsets: ["latin"], variable: "--font-sora" });
 
 export const metadata: Metadata = {
+  // Legacy endpoint: anclora-syncxml.vercel.app — pending owner domain decision.
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://anclora-syncxml.vercel.app",
   ),
-  title: "Anclora SyncXML",
-  description: "Excel seguro de reservas a XML de hospedaje por reserva.",
+  title: "Anclora GuestHub",
+  description: "Gestión de huéspedes, check-in y operación de alquiler vacacional.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -27,6 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
       <head>
+        {/* Legacy storage/cookie keys (anclora-syncxml-*) kept intentionally after the
+            Anclora SyncXML → Anclora GuestHub rename (2026-08): renaming them would
+            reset saved theme/language for returning users. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
