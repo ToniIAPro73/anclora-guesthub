@@ -16,7 +16,7 @@ export function AppLogo({
   const mark = (
     <img
       className="app-logo-mark"
-      src="/brand/anclora-syncxml.png"
+      src="/brand/anclora-guesthub.png"
       alt=""
       aria-hidden="true"
       style={{ width: size, height: size }}
@@ -30,7 +30,7 @@ export function AppLogo({
   return (
     <div className={`flex items-center gap-3 font-heading text-lg font-bold text-premium ${className}`}>
       {withContainer ? <span className="icon-tile">{mark}</span> : mark}
-      <span>Anclora SyncXML</span>
+      <span>Anclora GuestHub</span>
     </div>
   );
 }

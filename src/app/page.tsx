@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { LandingExperience } from "@/components/landing/LandingExperience";
 
-const title = "Anclora SyncXML — Revisión de huéspedes desde Excel a XML revisable";
+const title = "Anclora GuestHub — Gestión de huéspedes y alquiler vacacional";
 const description =
-  "Herramienta ligera para revisar datos de huéspedes desde Excel/XLSX y generar XML revisable orientado al flujo SES.HOSPEDAJES, con privacidad por defecto y validación controlada.";
+  "Gestión de huéspedes, check-in y operación de alquiler vacacional: revisa datos de huéspedes desde Excel/XLSX y genera XML revisable orientado al flujo SES.HOSPEDAJES, con privacidad por defecto y validación controlada.";
 
 export const metadata: Metadata = {
   title,
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
     title,
     description,
     type: "website",
-    siteName: "Anclora SyncXML",
-    images: [{ url: "/brand/anclora-syncxml.png" }],
+    siteName: "Anclora GuestHub",
+    images: [{ url: "/brand/anclora-guesthub.png" }],
   },
   twitter: {
     card: "summary",

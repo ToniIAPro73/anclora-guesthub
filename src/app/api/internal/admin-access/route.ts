@@ -12,7 +12,7 @@ function denied() {
 /**
  * Controlled admin access endpoint.
  *
- *   GET /api/internal/admin-access?token=<SYNCXML_ADMIN_ACCESS_TOKEN>
+ *   GET /api/internal/admin-access?token=<GUESTHUB_ADMIN_ACCESS_TOKEN>
  *
  * On success it creates a normal admin session cookie and redirects to the
  * configured internal route. The token is never logged or echoed back.

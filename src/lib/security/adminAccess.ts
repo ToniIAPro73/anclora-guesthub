@@ -1,9 +1,10 @@
 /**
- * Admin access control for SyncXML
+ * Admin access control for GuestHub
  * Restricts sensitive operations to admin users only
  */
 
 import { NextResponse } from "next/server";
+import { envValue } from "./env";
 
 /**
  * Check if current environment allows admin SES access
@@ -13,7 +14,7 @@ export function isAdminAccessAllowedInEnv(): boolean {
   const isProduction = env === "production";
 
   if (isProduction) {
-    return process.env.SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION === "true";
+    return envValue("GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION", "SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION") === "true";
   }
 
   return true; // Allow in dev/preview
@@ -62,17 +63,19 @@ export function sesAccessDeniedResponse(reason: "pilot" | "admin-disabled" | "en
  * Read admin access configuration from environment
  */
 export function readAdminAccessConfig() {
+  // Dual-read: canonical GUESTHUB_* names first, legacy SYNCXML_* as fallback
+  // (product rename Anclora SyncXML → Anclora GuestHub, 2026-08).
   return {
-    enabled: process.env.SYNCXML_ADMIN_ACCESS_ENABLED === "true",
-    token: process.env.SYNCXML_ADMIN_ACCESS_TOKEN || "",
+    enabled: envValue("GUESTHUB_ADMIN_ACCESS_ENABLED", "SYNCXML_ADMIN_ACCESS_ENABLED") === "true",
+    token: envValue("GUESTHUB_ADMIN_ACCESS_TOKEN", "SYNCXML_ADMIN_ACCESS_TOKEN") || "",
     env: process.env.NODE_ENV || "development",
-    allowedEnvs: (process.env.SYNCXML_ADMIN_ACCESS_ALLOWED_ENV || "")
+    allowedEnvs: (envValue("GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV", "SYNCXML_ADMIN_ACCESS_ALLOWED_ENV") || "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean),
-    allowInProduction: process.env.SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION === "true",
-    email: process.env.SYNCXML_ADMIN_EMAIL || "admin@anclora.com",
-    redirect: process.env.SYNCXML_ADMIN_ACCESS_REDIRECT || "/app",
+    allowInProduction: envValue("GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION", "SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION") === "true",
+    email: envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "admin@anclora.com",
+    redirect: envValue("GUESTHUB_ADMIN_ACCESS_REDIRECT", "SYNCXML_ADMIN_ACCESS_REDIRECT") || "/app",
   };
 }
 

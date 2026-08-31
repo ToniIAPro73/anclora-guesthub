@@ -1,4 +1,4 @@
-# Vercel Preview Setup: Anclora SyncXML
+# Vercel Preview Setup: Anclora GuestHub
 
 **Versión:** 1.0  
 **Fecha:** 2026-06-05  
@@ -8,7 +8,9 @@
 
 ## Visión general
 
-Anclora SyncXML se despliega en Vercel con tres environments:
+Anclora GuestHub se despliega en Vercel con tres environments:
+
+> **Nota (rename 2026-08):** las URLs `anclora-syncxml*.vercel.app` son endpoints legacy del proyecto Vercel actual, pendientes de decisión del propietario sobre dominio/proyecto. No inventar dominios nuevos.
 
 | Environment | URL | Uso | Deploy |
 |---|---|---|---|
@@ -24,10 +26,10 @@ Anclora SyncXML se despliega en Vercel con tres environments:
 
 ```env
 # SES credentials (pueden ser reales del responsable técnico)
-SYNCXML_SES_ENDPOINT=https://...
-SYNCXML_SES_USERNAME=...
-SYNCXML_SES_PASSWORD=...
-SYNCXML_SES_LANDLORD_CODE=...
+GUESTHUB_SES_ENDPOINT=https://...
+GUESTHUB_SES_USERNAME=...
+GUESTHUB_SES_PASSWORD=...
+GUESTHUB_SES_LANDLORD_CODE=...
 
 # Database (Production debería ser real, Preview no)
 DATABASE_URL=postgresql://...
@@ -48,14 +50,14 @@ BLOB_READ_WRITE_TOKEN=...
 SESSION_SECRET=<valor-seguro>
 
 # Admin Access (Preview OK, Production muy restrictivo)
-SYNCXML_ADMIN_ACCESS_ENABLED=true|false
-SYNCXML_ADMIN_ACCESS_TOKEN=<token-seguro>
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV=development,preview
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
+GUESTHUB_ADMIN_ACCESS_ENABLED=true|false
+GUESTHUB_ADMIN_ACCESS_TOKEN=<token-seguro>
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV=development,preview
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
 
 # Feature Flags
-SYNCXML_ENABLE_SES_TESTING=true|false
-SYNCXML_ENABLE_ADMIN_PANEL=true|false
+GUESTHUB_ENABLE_SES_TESTING=true|false
+GUESTHUB_ENABLE_ADMIN_PANEL=true|false
 
 # URLs
 NEXT_PUBLIC_APP_URL=https://<preview-url>
@@ -88,8 +90,8 @@ vim .env.local
 DATABASE_URL=postgresql://localhost/syncxml_dev
 SESSION_SECRET=dev-secret-random-string-change-in-prod
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-SYNCXML_ADMIN_ACCESS_ENABLED=true
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV=development,preview
+GUESTHUB_ADMIN_ACCESS_ENABLED=true
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV=development,preview
 ```
 
 ### Preview (Vercel)
@@ -109,10 +111,10 @@ En `Project Settings → Environment Variables`:
 
 ```env
 SESSION_SECRET=<generar-valor-seguro>
-SYNCXML_ADMIN_ACCESS_ENABLED=true
-SYNCXML_ADMIN_ACCESS_TOKEN=<generar-valor-seguro>
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV=preview,development
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
+GUESTHUB_ADMIN_ACCESS_ENABLED=true
+GUESTHUB_ADMIN_ACCESS_TOKEN=<generar-valor-seguro>
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV=preview,development
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
 NEXT_PUBLIC_APP_URL=https://<preview-url>
 AUTH_URL=https://<preview-url>
 AUTH_TRUST_HOST=true
@@ -123,10 +125,10 @@ LOG_LEVEL=debug
 **NO copiar a Preview (dejar vacío o usar stub):**
 ```env
 # Dejar en blanco o usar valores stub para Preview:
-SYNCXML_SES_ENDPOINT=
-SYNCXML_SES_USERNAME=
-SYNCXML_SES_PASSWORD=
-SYNCXML_SES_LANDLORD_CODE=
+GUESTHUB_SES_ENDPOINT=
+GUESTHUB_SES_USERNAME=
+GUESTHUB_SES_PASSWORD=
+GUESTHUB_SES_LANDLORD_CODE=
 
 # Usar DB Preview si existe, no Production
 DATABASE_URL=<preview-db-url>
@@ -152,11 +154,11 @@ Después de actualizar variables:
 Si necesitas acceso admin local dentro de Preview:
 
 ```
-https://<preview-url>/api/internal/admin-access?token=<SYNCXML_ADMIN_ACCESS_TOKEN>
+https://<preview-url>/api/internal/admin-access?token=<GUESTHUB_ADMIN_ACCESS_TOKEN>
 ```
 
 Este enlace:
-- Verifica token con `SYNCXML_ADMIN_ACCESS_TOKEN`
+- Verifica token con `GUESTHUB_ADMIN_ACCESS_TOKEN`
 - Crea sesión admin temporal
 - Redirige a `/app` con acceso admin
 - **Solo funciona en Preview/Dev**, no en Production (por defecto)
@@ -172,10 +174,10 @@ En `Project Settings → Environment Variables`, scope "Production":
 **Requeridas (sin valores sensibles, excepto necesario):**
 ```env
 SESSION_SECRET=<valor-muy-seguro-production>
-SYNCXML_ADMIN_ACCESS_ENABLED=false
-SYNCXML_ADMIN_ACCESS_TOKEN=<no-usar-en-prod-o-muy-seguro>
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV=development
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
+GUESTHUB_ADMIN_ACCESS_ENABLED=false
+GUESTHUB_ADMIN_ACCESS_TOKEN=<no-usar-en-prod-o-muy-seguro>
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV=development
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
 NEXT_PUBLIC_APP_URL=https://anclora-syncxml.vercel.app
 AUTH_URL=https://anclora-syncxml.vercel.app
 AUTH_TRUST_HOST=true
@@ -186,17 +188,17 @@ LOG_LEVEL=warn
 **Opcionales (si se necesitan):**
 ```env
 # SES Preproducción (si responsable técnico necesita)
-SYNCXML_SES_ENDPOINT=https://ses-api-preprod.com
-SYNCXML_SES_USERNAME=<username-preprod>
-SYNCXML_SES_PASSWORD=<password-preprod>
-SYNCXML_SES_LANDLORD_CODE=<code>
-SYNCXML_SES_ALLOW_PRODUCTION_SEND=false
+GUESTHUB_SES_ENDPOINT=https://ses-api-preprod.com
+GUESTHUB_SES_USERNAME=<username-preprod>
+GUESTHUB_SES_PASSWORD=<password-preprod>
+GUESTHUB_SES_LANDLORD_CODE=<code>
+GUESTHUB_SES_ALLOW_PRODUCTION_SEND=false
 
 # Resend (si se activa email)
 RESEND_API_KEY=<key>
-RESEND_FROM="Anclora SyncXML <piloto@syncxml.anclora.com>"
+RESEND_FROM="Anclora GuestHub <piloto@syncxml.anclora.com>"
 RESEND_REPLY_TO=antonio@anclora.com
-SYNCXML_FEEDBACK_TO=antonio@anclora.com
+GUESTHUB_FEEDBACK_TO=antonio@anclora.com
 ```
 
 Antes de probar con destinatarios Gmail/Yahoo, el dominio de `RESEND_FROM`
@@ -207,12 +209,12 @@ pueden llegar a spam aunque Resend los marque como entregados.
 #### 2. Admin access en Production
 
 **Por defecto:** BLOQUEADO
-- `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false`
+- `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false`
 - El endpoint `/api/internal/admin-access` retorna 404
 
 **Para habilitar (emergencia técnica):**
 1. Toni revisa la necesidad
-2. Edita variable: `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true`
+2. Edita variable: `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true`
 3. Redeploy
 4. Usa enlace admin
 5. **Inmediatamente después**, volver a `false` y redeploy
@@ -232,7 +234,7 @@ Output:
 
 ```
 SESSION_SECRET=<valor-aleatorio-32-chars>
-SYNCXML_ADMIN_ACCESS_TOKEN=<valor-aleatorio-64-chars>
+GUESTHUB_ADMIN_ACCESS_TOKEN=<valor-aleatorio-64-chars>
 ```
 
 Copiar a Vercel Settings → Environment Variables
@@ -246,7 +248,7 @@ npm run validate:preview
 Checks:
 - ¿DATABASE_URL apunta a preview DB?
 - ¿SES credentials están vacías?
-- ¿SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false?
+- ¿GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false?
 - ¿SESSION_SECRET es seguro?
 
 ### Deploy a Preview manualmente
@@ -269,7 +271,7 @@ vercel deploy --prebuilt
 
 ### Admin access returns 404
 
-1. Check `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION` value
+1. Check `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION` value
 2. In Preview: should be `false` or not set (Preview is allowed)
 3. In Production: must be explicitly `true`
 4. If `true` but still 404: redeploy to pick up change
@@ -277,7 +279,7 @@ vercel deploy --prebuilt
 ### SES operations fail
 
 1. Check if you're in Preview (SES should fail gracefully)
-2. Check `SYNCXML_SES_ENDPOINT` is configured
+2. Check `GUESTHUB_SES_ENDPOINT` is configured
 3. Check token/credentials are valid
 4. Check environment is `pre` (preproduction), not `prod`
 
@@ -292,10 +294,10 @@ vercel deploy --prebuilt
 
 ## Security checklist
 
-- [ ] Production: `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false`
+- [ ] Production: `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false`
 - [ ] Preview: SES credentials empty or stub
 - [ ] Preview: Using preview DB, not production
-- [ ] Preview: `SYNCXML_ADMIN_ACCESS_ALLOWED_ENV` does not include prod
+- [ ] Preview: `GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV` does not include prod
 - [ ] All: `SESSION_SECRET` is cryptographically random (not hardcoded)
 - [ ] All: No tokens/keys in `.env.example` (template only)
 - [ ] CI/CD: No secrets leaking in logs
@@ -309,10 +311,10 @@ vercel deploy --prebuilt
 |----------|---------|-------------|---------|------------|
 | `SESSION_SECRET` | Session encryption | Random | Random | Random (different) |
 | `DATABASE_URL` | DB connection | Local/test | Preview DB | Production DB |
-| `SYNCXML_ADMIN_ACCESS_ENABLED` | Enable admin routes | `true` | `true` | `false` |
-| `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION` | Allow production admin | `false` | `false` | `false` |
-| `SYNCXML_SES_ENDPOINT` | SES API endpoint | Empty | Empty | Preprod URL |
-| `SYNCXML_SES_USERNAME` | SES username | Empty | Empty | Preprod user |
+| `GUESTHUB_ADMIN_ACCESS_ENABLED` | Enable admin routes | `true` | `true` | `false` |
+| `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION` | Allow production admin | `false` | `false` | `false` |
+| `GUESTHUB_SES_ENDPOINT` | SES API endpoint | Empty | Empty | Preprod URL |
+| `GUESTHUB_SES_USERNAME` | SES username | Empty | Empty | Preprod user |
 | `NEXT_PUBLIC_APP_URL` | Public app URL | `http://localhost:3000` | Preview URL | Production URL |
 | `AUTH_URL` | Auth callback URL | `http://localhost:3000` | Preview URL | Production URL |
 | `LOG_LEVEL` | Logging level | `debug` | `debug` | `warn` |
@@ -327,5 +329,6 @@ vercel deploy --prebuilt
 
 ---
 
-*Anclora SyncXML — Vercel Preview Setup*  
+*Anclora GuestHub — Vercel Preview Setup*
+
 *v1.0 — 2026-06-05*

@@ -8,7 +8,7 @@
 
 ## Visión general
 
-Cuando un usuario solicita acceso al piloto controlado de Anclora SyncXML:
+Cuando un usuario solicita acceso al piloto controlado de Anclora GuestHub:
 
 1. **Recibe confirmación automática** de solicitud recibida (enviada vía anclora-nexus)
 2. **Espera revisión manual** por responsable técnico (Toni) en anclora-nexus
@@ -163,7 +163,7 @@ const downloadUrl = `https://anclora-syncxml.vercel.app/pilot-assets/pilot-demo-
 
 Opción C (en el email como texto):
 ```
-Descarga: https://github.com/ToniIAPro73/anclora-syncXML/raw/main/test-data/pilot-demo-stable.xlsx
+Descarga: https://github.com/ToniIAPro73/anclora-guesthub/raw/main/test-data/pilot-demo-stable.xlsx
 ```
 
 ### Guía rápida
@@ -177,7 +177,7 @@ Descarga: https://github.com/ToniIAPro73/anclora-syncXML/raw/main/test-data/pilo
 
 Opción A (URL a repo GitHub):
 ```
-https://github.com/ToniIAPro73/anclora-syncXML/blob/main/docs/pilot/PILOT_QUICK_START_ES.md
+https://github.com/ToniIAPro73/anclora-guesthub/blob/main/docs/pilot/PILOT_QUICK_START_ES.md
 ```
 
 Opción B (URL a sitio interno):
@@ -198,17 +198,17 @@ El email DEBE incluir este disclaimer en el idioma del usuario:
 
 ### Español
 ```
-Durante esta fase, el piloto no realiza envíos oficiales ni envíos autónomos al entorno SES.HOSPEDAJES. Cualquier prueba técnica contra preproducción SES, si procede, será ejecutada únicamente por el responsable técnico de Anclora SyncXML con datos sintéticos o anonimizados.
+Durante esta fase, el piloto no realiza envíos oficiales ni envíos autónomos al entorno SES.HOSPEDAJES. Cualquier prueba técnica contra preproducción SES, si procede, será ejecutada únicamente por el responsable técnico de Anclora GuestHub con datos sintéticos o anonimizados.
 ```
 
 ### Inglés
 ```
-During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora SyncXML using synthetic or anonymized data.
+During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora GuestHub using synthetic or anonymized data.
 ```
 
 ### Alemán
 ```
-In dieser Phase führt der Pilot keine offiziellen oder eigenständigen Übermittlungen an die SES.HOSPEDAJES-Umgebung durch. Technische Tests gegen die SES-Vorproduktionsumgebung werden, falls erforderlich, ausschließlich vom technischen Verantwortlichen von Anclora SyncXML mit synthetischen oder anonymisierten Daten durchgeführt.
+In dieser Phase führt der Pilot keine offiziellen oder eigenständigen Übermittlungen an die SES.HOSPEDAJES-Umgebung durch. Technische Tests gegen die SES-Vorproduktionsumgebung werden, falls erforderlich, ausschließlich vom technischen Verantwortlichen von Anclora GuestHub mit synthetischen oder anonymisierten Daten durchgeführt.
 ```
 
 ---
@@ -302,5 +302,6 @@ export async function POST(req: NextRequest) {
 
 ---
 
-*Anclora SyncXML — Guía de Email de Aceptación*  
+*Anclora GuestHub — Guía de Email de Aceptación*
+
 *v1.0 — 2026-06-05*

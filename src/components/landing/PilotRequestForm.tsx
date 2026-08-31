@@ -88,6 +88,8 @@ export function PilotRequestForm() {
           acceptsSyntheticOrAnonymizedData,
           acceptsPilotConditions,
           locale,
+          // Legacy contract value with Nexus intake — kept after the
+          // Anclora SyncXML → Anclora GuestHub rename (2026-08).
           source: "syncxml_landing",
           inmuebles,
           reservas,

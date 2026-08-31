@@ -1,8 +1,8 @@
-# SyncXML Document Parsing Strategy
+# GuestHub Document Parsing Strategy
 
 ## Decision ejecutiva
 
-No forzar MinerU en el flujo principal de SyncXML. El parser core del producto sigue siendo el importador XLSX y la validacion local del XML. MinerU o parsers documentales solo deben entrar como capacidad auxiliar y reversible.
+No forzar MinerU en el flujo principal de GuestHub. El parser core del producto sigue siendo el importador XLSX y la validacion local del XML. MinerU o parsers documentales solo deben entrar como capacidad auxiliar y reversible.
 
 ## Casos de uso reales
 

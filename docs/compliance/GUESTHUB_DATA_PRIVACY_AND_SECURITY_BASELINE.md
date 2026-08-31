@@ -1,8 +1,8 @@
-# SyncXML Data Privacy And Security Baseline
+# GuestHub Data Privacy And Security Baseline
 
 ## Objetivo
 
-Fijar una baseline operativa y tecnica para SyncXML en piloto controlado. No sustituye DPA, DPIA ni validacion legal futura.
+Fijar una baseline operativa y tecnica para GuestHub en piloto controlado. No sustituye DPA, DPIA ni validacion legal futura.
 
 ## Categorias de datos
 
@@ -39,7 +39,7 @@ Fijar una baseline operativa y tecnica para SyncXML en piloto controlado. No sus
 ## Retencion
 
 - Modo por defecto: sin conservacion duradera.
-- Persistencia opcional: solo con `SYNCXML_ENABLE_PERSISTENT_STORAGE=true`.
+- Persistencia opcional: solo con `GUESTHUB_ENABLE_PERSISTENT_STORAGE=true`.
 - Cualquier retencion de datos reales sigue pendiente de politica formal con finalidad, duracion, borrado y responsables.
 
 ## Entornos

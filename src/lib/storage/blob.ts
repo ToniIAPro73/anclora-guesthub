@@ -12,6 +12,8 @@ export async function storeEncryptedFile(input: {
   if (!process.env.BLOB_READ_WRITE_TOKEN) throw new Error("BLOB_READ_WRITE_TOKEN no configurado");
   const encrypted = encryptBuffer(input.buffer);
   const safeFileName = `${Date.now()}-${sanitizeFileName(input.fileName)}`;
+  // Legacy blob prefix "syncxml/" kept after the Anclora SyncXML → Anclora
+  // GuestHub rename (2026-08): renaming it would orphan persisted objects.
   const blobPath = `syncxml/${input.reservationId}/${input.type.toLowerCase()}/${safeFileName}.enc`;
   const blob = await put(blobPath, encrypted.encrypted, {
     access: "private",

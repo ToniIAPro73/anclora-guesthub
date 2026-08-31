@@ -6,7 +6,9 @@ import { setTimeout as delay } from "node:timers/promises";
 
 const root = path.resolve(import.meta.dirname, "..");
 const outDir = path.join(root, "docs", "manual", "screenshots");
-const baseUrl = process.env.SYNCXML_CAPTURE_URL ?? "http://127.0.0.1:3021";
+// Dual-read: canonical GUESTHUB_CAPTURE_URL first, legacy SYNCXML_CAPTURE_URL
+// fallback (rename 2026-08). Storage keys/cookies below stay legacy intentionally.
+const baseUrl = process.env.GUESTHUB_CAPTURE_URL ?? process.env.SYNCXML_CAPTURE_URL ?? "http://127.0.0.1:3021";
 const chrome = [
   "/usr/bin/google-chrome",
   "/usr/bin/google-chrome-stable",
@@ -45,27 +47,27 @@ try {
 
   for (const lang of ["es", "en", "de"]) {
     await prepareApp(cdp, lang);
-    await capture(cdp, `${baseUrl}/app?lang=${lang}`, `syncxml-${lang}-import.png`, "main", "light");
+    await capture(cdp, `${baseUrl}/app?lang=${lang}`, `guesthub-${lang}-import.png`, "main", "light");
 
     await clickByText(cdp, demoLabel(lang));
     await waitForSessionParsed(cdp);
-    await capture(cdp, null, `syncxml-${lang}-review.png`, "main", "light");
+    await capture(cdp, null, `guesthub-${lang}-review.png`, "main", "light");
 
     const xmlSession = await buildXmlSession(cdp);
     const injectionId = await injectAppSession(cdp, xmlSession);
     await reload(cdp, `${baseUrl}/app?lang=${lang}`);
     await waitForSelector(cdp, ".ses-panel");
-    await capture(cdp, null, `syncxml-${lang}-xml.png`, "main", "light");
+    await capture(cdp, null, `guesthub-${lang}-xml.png`, "main", "light");
 
     await scrollToText(cdp, precheckinPanelLabel(lang));
-    await capture(cdp, null, `syncxml-${lang}-precheckin-panel.png`, ".ses-panel", "dark");
+    await capture(cdp, null, `guesthub-${lang}-precheckin-panel.png`, ".ses-panel", "dark");
     await clickByText(cdp, createPrecheckinLabel(lang));
     const tokenPath = await waitForPrecheckinLink(cdp);
-    await capture(cdp, null, `syncxml-${lang}-precheckin-panel.png`, ".ses-panel", "dark");
-    await capture(cdp, `${baseUrl}${tokenPath}?lang=${lang}`, `syncxml-${lang}-precheckin-form.png`, "main", "dark");
+    await capture(cdp, null, `guesthub-${lang}-precheckin-panel.png`, ".ses-panel", "dark");
+    await capture(cdp, `${baseUrl}${tokenPath}?lang=${lang}`, `guesthub-${lang}-precheckin-form.png`, "main", "dark");
 
-    await capture(cdp, `${baseUrl}/dashboard?lang=${lang}`, `syncxml-${lang}-dashboard.png`, "main", "dark");
-    await capture(cdp, `${baseUrl}/dashboard?lang=${lang}`, `syncxml-${lang}-dashboard-detail.png`, "main", "dark");
+    await capture(cdp, `${baseUrl}/dashboard?lang=${lang}`, `guesthub-${lang}-dashboard.png`, "main", "dark");
+    await capture(cdp, `${baseUrl}/dashboard?lang=${lang}`, `guesthub-${lang}-dashboard-detail.png`, "main", "dark");
     await cdp.send("Page.removeScriptToEvaluateOnNewDocument", { identifier: injectionId });
   }
 

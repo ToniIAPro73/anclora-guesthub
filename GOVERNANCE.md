@@ -2,7 +2,7 @@
 
 ## Current governance model
 
-Anclora SyncXML is currently maintainer-led.
+Anclora GuestHub is currently maintainer-led.
 
 At this stage, the project is still in pre-MVP / controlled validation, so
 technical direction, release readiness and scope decisions are curated

@@ -1,8 +1,8 @@
 <div class="cover-page">
 
-<div class="cover-logo"><img src="screenshots/logo-anclora-syncxml.png" alt="Anclora SyncXML" /></div>
+<div class="cover-logo"><img src="screenshots/logo-anclora-guesthub.png" alt="Anclora GuestHub" /></div>
 
-<div class="cover-brand">Anclora SyncXML</div>
+<div class="cover-brand">Anclora GuestHub</div>
 
 <div class="cover-title">Manual de Usuario</div>
 
@@ -13,7 +13,7 @@
   <div class="cover-date">20 julio 2026</div>
 </div>
 
-<div class="cover-disclaimer">SyncXML prepara, valida y exporta datos estructurados para el flujo SES.HOSPEDAJES. No sustituye la revision humana, el portal oficial, la evidencia de preproduccion ni el criterio legal del responsable del tratamiento.</div>
+<div class="cover-disclaimer">GuestHub prepara, valida y exporta datos estructurados para el flujo SES.HOSPEDAJES. No sustituye la revision humana, el portal oficial, la evidencia de preproduccion ni el criterio legal del responsable del tratamiento.</div>
 
 </div>
 
@@ -40,15 +40,15 @@
 
 ## 1. Alcance del producto
 
-![Pantalla inicial de importacion](screenshots/syncxml-es-import.png)
+![Pantalla inicial de importacion](screenshots/guesthub-es-import.png)
 
-**Anclora SyncXML** transforma un Excel de reserva en datos revisables y en un XML preparado para el flujo SES.HOSPEDAJES. La aplicacion esta orientada a validacion controlada, reduccion de errores operativos y trabajo con datos sensibles bajo minimizacion.
+**Anclora GuestHub** transforma un Excel de reserva en datos revisables y en un XML preparado para el flujo SES.HOSPEDAJES. La aplicacion esta orientada a validacion controlada, reduccion de errores operativos y trabajo con datos sensibles bajo minimizacion.
 
 La version actual se usa en **piloto controlado**. El acceso se concede tras revision manual y no implica aprobacion automatica, garantia legal ni envio productivo a SES.
 
 ### Lo que permite hacer
 
-| Necesidad | Como ayuda SyncXML |
+| Necesidad | Como ayuda GuestHub |
 | --- | --- |
 | Importar reservas | Lee `.xlsx` y detecta reserva, alojamiento, pago y viajeros. |
 | Validar datos | Marca errores y avisos antes de generar XML. |
@@ -123,7 +123,7 @@ Antes de subir un archivo, confirma que el caso encaja con el piloto.
 
 ## 4. Importacion documental
 
-![Flujo de importacion en espanol](screenshots/syncxml-es-import.png)
+![Flujo de importacion en espanol](screenshots/guesthub-es-import.png)
 
 La importacion inicia el flujo operativo y aplica controles antes de leer el archivo.
 
@@ -150,7 +150,7 @@ Si el archivo no es valido, esta vacio o no se puede leer, la aplicacion muestra
 
 ## 5. Revision guiada
 
-![Revision de datos importados](screenshots/syncxml-es-review.png)
+![Revision de datos importados](screenshots/guesthub-es-review.png)
 
 La revision guiada permite corregir los datos antes de generar XML.
 
@@ -186,7 +186,7 @@ La revision guiada permite corregir los datos antes de generar XML.
 
 ## 6. XML y descarga
 
-![Vista visual del XML generado](screenshots/syncxml-es-xml.png)
+![Vista visual del XML generado](screenshots/guesthub-es-xml.png)
 
 Cuando los errores criticos esten corregidos, pulsa **Generar XML**. La aplicacion crea una vista visual y una vista tecnica.
 
@@ -204,7 +204,7 @@ Cuando los errores criticos esten corregidos, pulsa **Generar XML**. La aplicaci
 
 El nombre del archivo descargado usa el formato:
 
-`syncxml-numeroReserva-DDMMRRHH24MISS.xml`
+`guesthub-numeroReserva-DDMMRRHH24MISS.xml`
 
 La descarga queda bloqueada si existen incidencias criticas. Si solo hay avisos, revisalos y deja evidencia interna de la decision.
 
@@ -212,9 +212,9 @@ La descarga queda bloqueada si existen incidencias criticas. Si solo hay avisos,
 
 ## 7. SES y pre-check-in
 
-![Panel SES y pre-check-in de prueba](screenshots/syncxml-es-precheckin-panel.png)
+![Panel SES y pre-check-in de prueba](screenshots/guesthub-es-precheckin-panel.png)
 
-SyncXML incluye acciones SES asistidas. Su disponibilidad depende de credenciales, entorno y rol.
+GuestHub incluye acciones SES asistidas. Su disponibilidad depende de credenciales, entorno y rol.
 
 | Accion | Control |
 | --- | --- |
@@ -229,7 +229,7 @@ Los usuarios piloto no deben enviar a SES. Las rutas de envio aplican control de
 
 ### Pre-check-in de prueba
 
-![Formulario publico de pre-check-in](screenshots/syncxml-es-precheckin-form.png)
+![Formulario publico de pre-check-in](screenshots/guesthub-es-precheckin-form.png)
 
 El panel de pre-check-in genera enlaces temporales para completar datos de viajeros antes de la revision.
 
@@ -246,7 +246,7 @@ Controles del modo actual:
 
 ## 8. Dashboard operativo
 
-![Dashboard con reserva consolidada](screenshots/syncxml-es-dashboard-detail.png)
+![Dashboard con reserva consolidada](screenshots/guesthub-es-dashboard-detail.png)
 
 El dashboard permite buscar reservas, revisar estado y descargar XML cuando el modo de almacenamiento configurado lo permite.
 
@@ -291,7 +291,7 @@ El feedback se envia al canal configurado del equipo Anclora y no sustituye sopo
 
 ## 10. Seguridad y privacidad
 
-SyncXML trabaja con informacion personal. Usa estos controles diarios:
+GuestHub trabaja con informacion personal. Usa estos controles diarios:
 
 | Control | Motivo |
 | --- | --- |
@@ -304,7 +304,7 @@ SyncXML trabaja con informacion personal. Usa estos controles diarios:
 | Controlar accesos | Solo usuarios aprobados deben abrir reservas con PII. |
 | Evitar logs sensibles | No copiar PII en incidencias, chats o tickets. |
 
-> SyncXML no ofrece asesoramiento legal. El responsable del tratamiento debe aprobar privacidad, DPA, retencion y procedimiento de uso.
+> GuestHub no ofrece asesoramiento legal. El responsable del tratamiento debe aprobar privacidad, DPA, retencion y procedimiento de uso.
 
 ---
 
@@ -337,4 +337,4 @@ SyncXML trabaja con informacion personal. Usa estos controles diarios:
 | PII | Informacion personal identificable. |
 | INE | Instituto Nacional de Estadistica; fuente de codigos municipales. |
 
-<div class="footer-brand">Anclora SyncXML · Manual de Usuario · Version 1.1 · 20 julio 2026</div>
+<div class="footer-brand">Anclora GuestHub · Manual de Usuario · Version 1.1 · 20 julio 2026</div>

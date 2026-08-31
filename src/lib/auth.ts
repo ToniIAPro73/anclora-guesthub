@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { authDisabled, canUsePasswordAuth, getSessionSecret, isExplicitLocalDemoMode, validateRuntimeConfig } from "./security/env";
+import { authDisabled, canUsePasswordAuth, envValue, getSessionSecret, isExplicitLocalDemoMode, validateRuntimeConfig } from "./security/env";
 
+// Legacy cookie name kept after the Anclora SyncXML → Anclora GuestHub rename
+// (2026-08): renaming it would invalidate all active sessions.
 export const COOKIE_NAME = "anclora-syncxml-session";
 
 export type SessionUser = {
@@ -38,7 +40,7 @@ function readSignedSession(value?: string): SessionUser | null {
 }
 
 function canUseLegacySecretCookie() {
-  return process.env.NODE_ENV !== "production" && process.env.SYNCXML_ALLOW_LEGACY_SECRET_COOKIE === "true";
+  return process.env.NODE_ENV !== "production" && envValue("GUESTHUB_ALLOW_LEGACY_SECRET_COOKIE", "SYNCXML_ALLOW_LEGACY_SECRET_COOKIE") === "true";
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -48,7 +50,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const signed = readSignedSession(value);
   if (signed) return signed;
   if (canUseLegacySecretCookie() && value && value === getSessionSecret()) {
-    return { email: process.env.SYNCXML_ADMIN_EMAIL || "antonio@anclora.com", role: "admin" };
+    return { email: envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "antonio@anclora.com", role: "admin" };
   }
   return null;
 }
@@ -83,7 +85,7 @@ export function getSessionOwnerId(user: SessionUser) {
 export async function setSessionCookie(response: NextResponse, user?: SessionUser) {
   const sessionSecret = getSessionSecret();
   if (!sessionSecret) return response;
-  const sessionUser = user ?? { id: "admin", email: process.env.SYNCXML_ADMIN_EMAIL || "antonio@anclora.com", role: "admin" as const };
+  const sessionUser = user ?? { id: "admin", email: envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "antonio@anclora.com", role: "admin" as const };
   response.cookies.set(COOKIE_NAME, signSession(sessionUser), {
     httpOnly: true,
     sameSite: "lax",

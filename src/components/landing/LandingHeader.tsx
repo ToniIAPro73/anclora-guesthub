@@ -75,14 +75,14 @@ export function LandingHeader() {
       <div className="l-container flex h-[var(--l-header-h)] items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2.5" aria-label={copy.aria.home}>
           <img
-            src="/brand/anclora-syncxml.png"
+            src="/brand/anclora-guesthub.png"
             alt={copy.aria.logoAlt}
             width={34}
             height={34}
             className="h-8 w-8 rounded-full"
           />
           <span className="font-heading text-base font-semibold tracking-tight text-white">
-            Anclora SyncXML
+            Anclora GuestHub
           </span>
         </Link>
 

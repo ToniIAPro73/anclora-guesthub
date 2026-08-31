@@ -1,8 +1,8 @@
-# AI System Card - Anclora SyncXML
+# AI System Card - Anclora GuestHub
 
 ## Identificacion
 
-- Producto: Anclora SyncXML
+- Producto: Anclora GuestHub
 - Feature IA / sistema: baseline del sistema y de capacidades IA previstas o auxiliares
 - Owner: Toni / Anclora Group
 - Estado: `review`
@@ -10,7 +10,7 @@
 
 ## Estado y alcance
 
-Anclora SyncXML debe tratarse como producto en `piloto controlado / pre-MVP`. Esta card es una baseline interna de preparacion y control. No constituye asesoramiento juridico, no garantiza cumplimiento del AI Act y no acredita integracion oficial plena con SES.HOSPEDAJES.
+Anclora GuestHub debe tratarse como producto en `piloto controlado / pre-MVP`. Esta card es una baseline interna de preparacion y control. No constituye asesoramiento juridico, no garantiza cumplimiento del AI Act y no acredita integracion oficial plena con SES.HOSPEDAJES.
 
 ## Finalidad
 
@@ -51,7 +51,7 @@ Preparar, validar, revisar y exportar XML revisable a partir de datos de reserva
 - no sustituye PMS, gestorias ni asesoramiento legal;
 - no decide por si mismo cumplimiento legal;
 - no debe enviar automaticamente a sistemas oficiales sin revision humana;
-- no puntua ni rechaza personas de forma automatizada dentro de SyncXML;
+- no puntua ni rechaza personas de forma automatizada dentro de GuestHub;
 - no debe tratarse como sistema de record legal por defecto.
 
 ## Datos tratados
@@ -74,7 +74,7 @@ Preparar, validar, revisar y exportar XML revisable a partir de datos de reserva
 
 ## Integracion SES.HOSPEDAJES
 
-SyncXML prepara y revisa XML orientado al flujo SES.HOSPEDAJES. La app mantiene el envio de produccion bloqueado por defecto. La evidencia de aceptacion en preproduccion y la validacion operativa completa siguen siendo requisitos previos para cualquier claim fuerte.
+GuestHub prepara y revisa XML orientado al flujo SES.HOSPEDAJES. La app mantiene el envio de produccion bloqueado por defecto. La evidencia de aceptacion en preproduccion y la validacion operativa completa siguen siendo requisitos previos para cualquier claim fuerte.
 
 ## Integracion Hermes
 
@@ -136,7 +136,7 @@ No forma parte del flujo core de huespedes. Solo tiene sentido para documentacio
 - `tests/privacy-encryption.test.ts`
 - `tests/privacy-first-pilot.test.ts`
 - `docs/audit/*`
-- `docs/ses/SYNCXML_SES_PREPRODUCTION_EVIDENCE.md`
+- `docs/ses/GUESTHUB_SES_PREPRODUCTION_EVIDENCE.md`
 
 ## Estado de madurez
 

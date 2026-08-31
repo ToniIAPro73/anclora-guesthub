@@ -80,6 +80,10 @@ async function fetchJson(url: string, init: RequestInit, timeoutMs = 25000) {
   }
 }
 
+// NOTE (rename 2026-08, Anclora SyncXML → Anclora GuestHub): the exported symbol
+// `SyncXmlWorkflow`, the sessionStorage key "syncxml-session" and the window
+// events "syncxml:new" / "syncxml:auth-changed" are intentionally kept as legacy
+// identifiers — renaming them would break in-progress sessions for no real gain.
 export function SyncXmlWorkflow() {
   const { dictionary: t } = usePreferences();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -361,7 +365,7 @@ export function SyncXmlWorkflow() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `syncxml-paquete-conservacion-${parsed.reservation.reference || "reserva"}.zip`;
+      a.download = `guesthub-paquete-conservacion-${parsed.reservation.reference || "reserva"}.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {

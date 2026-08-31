@@ -3,8 +3,12 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:
 const ALGORITHM = "aes-256-gcm";
 
 function getKey() {
-  const value = process.env.SYNCXML_ENCRYPTION_KEY || process.env.SYNCXML_FILE_ENCRYPTION_KEY;
-  if (!value) throw new Error("SYNCXML_ENCRYPTION_KEY no configurada");
+  // Dual-read with legacy fallback (rename Anclora SyncXML → Anclora GuestHub, 2026-08).
+  // CRITICAL: without the SYNCXML_* fallback, data encrypted before the rename
+  // would be unreadable.
+  const value = process.env.GUESTHUB_ENCRYPTION_KEY || process.env.SYNCXML_ENCRYPTION_KEY
+    || process.env.GUESTHUB_FILE_ENCRYPTION_KEY || process.env.SYNCXML_FILE_ENCRYPTION_KEY;
+  if (!value) throw new Error("GUESTHUB_ENCRYPTION_KEY no configurada");
   if (/^[A-Za-z0-9+/=]{44}$/.test(value)) return Buffer.from(value, "base64");
   return createHash("sha256").update(value).digest();
 }
