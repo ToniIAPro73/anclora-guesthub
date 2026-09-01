@@ -29,6 +29,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isAdminLoginPage = pathname === "/admin/login";
   const isPilotPage = pathname === "/piloto";
 
+  // Legacy identifiers kept after the Anclora SyncXML → Anclora GuestHub rename
+  // (2026-08): sessionStorage "syncxml-session" and window events "syncxml:*"
+  // are shared with SyncXmlWorkflow/AuthGate/AdminLoginView — renaming them would
+  // break in-progress sessions for no real gain.
   function startNewReservation() {
     sessionStorage.removeItem("syncxml-session");
     if (pathname === "/app") {

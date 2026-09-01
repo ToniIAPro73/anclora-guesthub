@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { pseudonymizeSession } from "@/lib/audit";
 import { getInternalReplyTo } from "@/lib/email/delivery";
 import { getRateLimitKey, sensitiveRateLimiter } from "@/lib/security/rateLimit";
+import { envValue } from "@/lib/security/env";
 
 const DEFAULT_FEEDBACK_TO = "antonio@anclora.com";
 
@@ -44,11 +45,11 @@ function buildFeedbackEmail(input: {
   ];
   const text = rows.map(([label, value]) => `${label}: ${value}`).join("\n");
   const html = [
-    "<h1>Feedback del piloto SyncXML</h1>",
+    "<h1>Feedback del piloto GuestHub</h1>",
     ...rows.map(([label, value]) => `<p><strong>${label}:</strong><br>${String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</p>`),
   ].join("\n");
   return {
-    subject: "Feedback del piloto SyncXML",
+    subject: "Feedback del piloto GuestHub",
     text,
     html,
   };
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL;
-  const feedbackTo = process.env.SYNCXML_FEEDBACK_TO || process.env.PILOT_FEEDBACK_TO || process.env.ADMIN_EMAILS || DEFAULT_FEEDBACK_TO;
+  const feedbackTo = envValue("GUESTHUB_FEEDBACK_TO", "SYNCXML_FEEDBACK_TO") || process.env.PILOT_FEEDBACK_TO || process.env.ADMIN_EMAILS || DEFAULT_FEEDBACK_TO;
   const recipients = splitRecipients(feedbackTo);
   if (!resendApiKey || !resendFrom || recipients.length === 0) {
     return NextResponse.json({ error: "Configuración de feedback no disponible" }, { status: 503 });

@@ -13,17 +13,17 @@ interface PilotAcceptanceEmailProps {
 }
 
 const DISCLAIMERS = {
-  es: `Durante esta fase, el piloto no realiza envíos oficiales ni envíos autónomos al entorno SES.HOSPEDAJES. Cualquier prueba técnica contra preproducción SES, si procede, será ejecutada únicamente por el responsable técnico de Anclora SyncXML con datos sintéticos o anonimizados.`,
-  en: `During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora SyncXML using synthetic or anonymized data.`,
-  de: `In dieser Phase führt der Pilot keine offiziellen oder eigenständigen Übermittlungen an die SES.HOSPEDAJES-Umgebung durch. Technische Tests gegen die SES-Vorproduktionsumgebung werden, falls erforderlich, ausschließlich vom technischen Verantwortlichen von Anclora SyncXML mit synthetischen oder anonymisierten Daten durchgeführt.`,
+  es: `Durante esta fase, el piloto no realiza envíos oficiales ni envíos autónomos al entorno SES.HOSPEDAJES. Cualquier prueba técnica contra preproducción SES, si procede, será ejecutada únicamente por el responsable técnico de Anclora GuestHub con datos sintéticos o anonimizados.`,
+  en: `During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora GuestHub using synthetic or anonymized data.`,
+  de: `In dieser Phase führt der Pilot keine offiziellen oder eigenständigen Übermittlungen an die SES.HOSPEDAJES-Umgebung durch. Technische Tests gegen die SES-Vorproduktionsumgebung werden, falls erforderlich, ausschließlich vom technischen Verantwortlichen von Anclora GuestHub mit synthetischen oder anonymisierten Daten durchgeführt.`,
 };
 
 const EMAIL_CONTENT = {
   es: {
-    subject: "¡Bienvenido al piloto controlado de Anclora SyncXML!",
+    subject: "¡Bienvenido al piloto controlado de Anclora GuestHub!",
     greeting: (name: string) =>
       `¡Hola ${name}! 🎉`,
-    intro: `Tu solicitud de piloto controlado ha sido **aceptada**. Estamos emocionados de que pruebes Anclora SyncXML en esta fase de validación.`,
+    intro: `Tu solicitud de piloto controlado ha sido **aceptada**. Estamos emocionados de que pruebes Anclora GuestHub en esta fase de validación.`,
     whatToTest: `
 ## ¿Qué puedo probar?
 
@@ -75,13 +75,13 @@ Todos los comentarios son valiosos en esta fase.
     legal: DISCLAIMERS.es,
     closing: `¡Gracias por participar en el piloto!
 
-El equipo de Anclora SyncXML`,
+El equipo de Anclora GuestHub`,
   },
   en: {
-    subject: "Welcome to Anclora SyncXML Controlled Pilot!",
+    subject: "Welcome to Anclora GuestHub Controlled Pilot!",
     greeting: (name: string) =>
       `Hi ${name}! 🎉`,
-    intro: `Your controlled pilot request has been **approved**. We're excited for you to test Anclora SyncXML in this validation phase.`,
+    intro: `Your controlled pilot request has been **approved**. We're excited for you to test Anclora GuestHub in this validation phase.`,
     whatToTest: `
 ## What can I test?
 
@@ -133,13 +133,13 @@ All feedback is valuable in this phase.
     legal: DISCLAIMERS.en,
     closing: `Thank you for participating in the pilot!
 
-Anclora SyncXML team`,
+Anclora GuestHub team`,
   },
   de: {
-    subject: "Willkommen beim kontrollierten Pilot von Anclora SyncXML!",
+    subject: "Willkommen beim kontrollierten Pilot von Anclora GuestHub!",
     greeting: (name: string) =>
       `Hallo ${name}! 🎉`,
-    intro: `Ihre Anfrage für den kontrollierten Pilot wurde **genehmigt**. Wir freuen uns, dass Sie Anclora SyncXML in dieser Validierungsphase testen.`,
+    intro: `Ihre Anfrage für den kontrollierten Pilot wurde **genehmigt**. Wir freuen uns, dass Sie Anclora GuestHub in dieser Validierungsphase testen.`,
     whatToTest: `
 ## Was kann ich testen?
 
@@ -191,7 +191,7 @@ Alle Rückmeldungen sind wertvoll in dieser Phase.
     legal: DISCLAIMERS.de,
     closing: `Vielen Dank, dass Sie am Pilot teilnehmen!
 
-Anclora SyncXML Team`,
+Anclora GuestHub Team`,
   },
 };
 
@@ -249,7 +249,7 @@ export function generatePilotAcceptanceEmail(
       <p>${content.closing}</p>
     </div>
     <div class="footer">
-      <p>Anclora SyncXML © 2026 — Fase Pre-MVP / Pre-MVP Phase / Pre-MVP Phase</p>
+      <p>Anclora GuestHub © 2026 — Fase Pre-MVP / Pre-MVP Phase / Pre-MVP Phase</p>
     </div>
   </div>
 </body>
@@ -279,7 +279,7 @@ ${content.legal}
 ${content.closing}
 
 ---
-Anclora SyncXML © 2026
+Anclora GuestHub © 2026
   `.trim();
 
   return {

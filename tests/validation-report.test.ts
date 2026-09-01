@@ -36,6 +36,6 @@ describe("validation report CSV", () => {
 
   it("normalizes validation report filenames", () => {
     expect(buildValidationReportFileName({ reservation: { reference: "R 1/2" } }, new Date(2026, 4, 24, 11, 5, 6)))
-      .toBe("syncxml-validacion-R-1-2-240526110506.csv");
+      .toBe("guesthub-validacion-R-1-2-240526110506.csv");
   });
 });

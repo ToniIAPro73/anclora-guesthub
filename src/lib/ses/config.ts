@@ -1,4 +1,4 @@
-import { envFlag } from "@/lib/security/env";
+import { envValue, envFlagWithLegacy } from "@/lib/security/env";
 
 export type SesEnvironment = "pre" | "prod";
 
@@ -18,20 +18,24 @@ export type SesConfig = {
   allowInsecureTls: boolean;
 };
 
-export function getSesConfig(environment: SesEnvironment = (process.env.SYNCXML_SES_ENV as SesEnvironment) || "pre"): SesConfig {
+// Dual-read: canonical GUESTHUB_SES_* names first, legacy SYNCXML_SES_* as
+// fallback (product rename Anclora SyncXML → Anclora GuestHub, 2026-08).
+export function getSesConfig(environment: SesEnvironment = (envValue("GUESTHUB_SES_ENV", "SYNCXML_SES_ENV") as SesEnvironment) || "pre"): SesConfig {
   const resolvedEnvironment = environment === "prod" ? "prod" : "pre";
-  const endpoint = process.env.SYNCXML_SES_ENDPOINT
+  const endpoint = envValue("GUESTHUB_SES_ENDPOINT", "SYNCXML_SES_ENDPOINT")
     || (resolvedEnvironment === "prod" ? SES_PROD_ENDPOINT : SES_PRE_ENDPOINT);
 
   return {
     environment: resolvedEnvironment,
     endpoint,
-    username: process.env.SYNCXML_SES_USERNAME || "",
-    password: process.env.SYNCXML_SES_PASSWORD || "",
-    landlordCode: process.env.SYNCXML_SES_LANDLORD_CODE || "",
-    applicationName: process.env.SYNCXML_SES_APPLICATION || "Anclora SyncXML",
-    allowProductionSend: envFlag("SYNCXML_SES_ALLOW_PRODUCTION_SEND"),
-    allowInsecureTls: resolvedEnvironment === "pre" && envFlag("SYNCXML_SES_ALLOW_INSECURE_TLS"),
+    username: envValue("GUESTHUB_SES_USERNAME", "SYNCXML_SES_USERNAME") || "",
+    password: envValue("GUESTHUB_SES_PASSWORD", "SYNCXML_SES_PASSWORD") || "",
+    landlordCode: envValue("GUESTHUB_SES_LANDLORD_CODE", "SYNCXML_SES_LANDLORD_CODE") || "",
+    // Registered SES.HOSPEDAJES application name — do NOT rename: it must match
+    // the legal registration for the <aplicacion> XML field.
+    applicationName: envValue("GUESTHUB_SES_APPLICATION", "SYNCXML_SES_APPLICATION") || "Anclora SyncXML",
+    allowProductionSend: envFlagWithLegacy("GUESTHUB_SES_ALLOW_PRODUCTION_SEND", "SYNCXML_SES_ALLOW_PRODUCTION_SEND"),
+    allowInsecureTls: resolvedEnvironment === "pre" && envFlagWithLegacy("GUESTHUB_SES_ALLOW_INSECURE_TLS", "SYNCXML_SES_ALLOW_INSECURE_TLS"),
   };
 }
 
@@ -52,13 +56,13 @@ export function getSesConfigStatus(environment: SesEnvironment = "pre") {
 export function assertSesConfig(config: SesConfig, options: { requireCredentials?: boolean; requireLandlordCode?: boolean } = {}) {
   const missing: string[] = [];
   if (options.requireCredentials !== false) {
-    if (!config.username) missing.push("SYNCXML_SES_USERNAME");
-    if (!config.password) missing.push("SYNCXML_SES_PASSWORD");
+    if (!config.username) missing.push("GUESTHUB_SES_USERNAME");
+    if (!config.password) missing.push("GUESTHUB_SES_PASSWORD");
   }
-  if (options.requireLandlordCode !== false && !config.landlordCode) missing.push("SYNCXML_SES_LANDLORD_CODE");
-  if (!config.applicationName) missing.push("SYNCXML_SES_APPLICATION");
+  if (options.requireLandlordCode !== false && !config.landlordCode) missing.push("GUESTHUB_SES_LANDLORD_CODE");
+  if (!config.applicationName) missing.push("GUESTHUB_SES_APPLICATION");
   if (missing.length) throw new Error(`Missing SES.HOSPEDAJES configuration: ${missing.join(", ")}`);
   if (config.environment === "prod" && !config.allowProductionSend) {
-    throw new Error("SES.HOSPEDAJES production sending is blocked. Set SYNCXML_SES_ALLOW_PRODUCTION_SEND=true only after successful pre-production testing.");
+    throw new Error("SES.HOSPEDAJES production sending is blocked. Set GUESTHUB_SES_ALLOW_PRODUCTION_SEND=true only after successful pre-production testing.");
   }
 }

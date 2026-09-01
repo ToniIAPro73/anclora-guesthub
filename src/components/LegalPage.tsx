@@ -7,11 +7,11 @@ import { LandingLocaleProvider, useLandingI18n } from "@/lib/i18n/landing";
 const content = {
   privacy: {
     es: {
-      title: "Política de privacidad de Anclora SyncXML",
+      title: "Política de privacidad de Anclora GuestHub",
       sections: [
         ["Datos tratados", "La aplicación puede procesar datos de huéspedes, documentos de identidad, fechas de nacimiento, nacionalidad, direcciones, teléfonos, correos, datos de estancia, datos de pago limitados y metadatos contractuales incluidos por el usuario."],
         ["Finalidad", "Los datos se procesan para generar, validar, revisar y exportar XML bajo instrucción del usuario."],
-        ["Modo sin persistencia", "Por defecto, Anclora SyncXML trabaja en modo privado sin almacenamiento permanente. Los datos temporales pueden eliminarse desde la acción de borrado de operación."],
+        ["Modo sin persistencia", "Por defecto, Anclora GuestHub trabaja en modo privado sin almacenamiento permanente. Los datos temporales pueden eliminarse desde la acción de borrado de operación."],
         ["Retención", "No se conserva información personal de forma permanente salvo configuración explícita de almacenamiento persistente por un administrador autorizado."],
         ["Seguridad", "El modelo aplica minimización, control de acceso, no logging de PII y separación entre metadatos técnicos y contenido personal. Si se habilita persistencia, deben aplicarse cifrado y políticas de retención."],
         ["Responsabilidad del usuario", "El usuario debe tener legitimación o autorización para importar los datos y debe revisar el resultado antes de cualquier uso oficial."],
@@ -20,11 +20,11 @@ const content = {
       ],
     },
     en: {
-      title: "Anclora SyncXML Privacy Policy",
+      title: "Anclora GuestHub Privacy Policy",
       sections: [
         ["Data processed", "The application may process guest data, identity documents, birth dates, nationality, addresses, phone numbers, emails, stay data, limited payment data and contractual metadata provided by the user."],
         ["Purpose", "Data is processed to generate, validate, review and export XML under the user's instruction."],
-        ["No-storage mode", "By default, Anclora SyncXML runs in private no-storage mode. Temporary data can be deleted with the operation clear action."],
+        ["No-storage mode", "By default, Anclora GuestHub runs in private no-storage mode. Temporary data can be deleted with the operation clear action."],
         ["Retention", "Personal information is not kept permanently unless persistent storage is explicitly configured by an authorised administrator."],
         ["Security", "The model applies minimisation, access control, no PII logging and separation of technical metadata from personal content. If persistence is enabled, encryption and retention policies must be applied."],
         ["User responsibility", "The user must have a legitimate basis or authorisation to import the data and must review the result before any official use."],
@@ -33,11 +33,11 @@ const content = {
       ],
     },
     ca: {
-      title: "Política de privacitat d'Anclora SyncXML",
+      title: "Política de privacitat d'Anclora GuestHub",
       sections: [
         ["Dades tractades", "L'aplicació pot processar dades d'hostes, documents d'identitat, dates de naixement, nacionalitat, adreces, telèfons, correus, dades d'estada, dades de pagament limitades i metadades contractuals incloses per l'usuari."],
         ["Finalitat", "Les dades es processen per generar, validar, revisar i exportar XML sota instrucció de l'usuari."],
-        ["Mode sense persistència", "Per defecte, Anclora SyncXML treballa en mode privat sense emmagatzematge permanent. Les dades temporals poden eliminar-se des de l'acció d'esborrat d'operació."],
+        ["Mode sense persistència", "Per defecte, Anclora GuestHub treballa en mode privat sense emmagatzematge permanent. Les dades temporals poden eliminar-se des de l'acció d'esborrat d'operació."],
         ["Retenció", "No es conserva informació personal de forma permanent tret de configuració explícita d'emmagatzematge persistent per un administrador autoritzat."],
         ["Seguretat", "El model aplica minimització, control d'accés, no logging de PII i separació entre metadades tècniques i contingut personal. Si s'habilita persistència, han d'aplicar-se xifrat i polítiques de retenció."],
         ["Responsabilitat de l'usuari", "L'usuari ha de tenir legitimació o autorització per importar les dades i ha de revisar el resultat abans de qualsevol ús oficial."],
@@ -46,11 +46,11 @@ const content = {
       ],
     },
     fr: {
-      title: "Politique de confidentialité d'Anclora SyncXML",
+      title: "Politique de confidentialité d'Anclora GuestHub",
       sections: [
         ["Données traitées", "L'application peut traiter des données de clients, des documents d'identité, des dates de naissance, la nationalité, des adresses, des numéros de téléphone, des emails, des données de séjour, des données de paiement limitées et des métadonnées contractuelles fournies par l'utilisateur."],
         ["Finalité", "Les données sont traitées pour générer, valider, réviser et exporter du XML sous instruction de l'utilisateur."],
-        ["Mode sans stockage", "Par défaut, Anclora SyncXML fonctionne en mode privé sans stockage permanent. Les données temporaires peuvent être supprimées via l'action d'effacement de l'opération."],
+        ["Mode sans stockage", "Par défaut, Anclora GuestHub fonctionne en mode privé sans stockage permanent. Les données temporaires peuvent être supprimées via l'action d'effacement de l'opération."],
         ["Conservation", "Les informations personnelles ne sont pas conservées de façon permanente sauf configuration explicite du stockage persistant par un administrateur autorisé."],
         ["Sécurité", "Le modèle applique la minimisation, le contrôle d'accès, l'absence de journalisation des DCP et la séparation des métadonnées techniques du contenu personnel. Si la persistance est activée, le chiffrement et les politiques de conservation doivent être appliqués."],
         ["Responsabilité de l'utilisateur", "L'utilisateur doit disposer d'une base légitime ou d'une autorisation pour importer les données et doit vérifier le résultat avant tout usage officiel."],
@@ -59,11 +59,11 @@ const content = {
       ],
     },
     it: {
-      title: "Informativa sulla privacy di Anclora SyncXML",
+      title: "Informativa sulla privacy di Anclora GuestHub",
       sections: [
         ["Dati trattati", "L'applicazione può trattare dati degli ospiti, documenti d'identità, date di nascita, nazionalità, indirizzi, numeri di telefono, email, dati di soggiorno, dati di pagamento limitati e metadati contrattuali forniti dall'utente."],
         ["Finalità", "I dati vengono trattati per generare, validare, rivedere ed esportare file XML su istruzione dell'utente."],
-        ["Modalità senza archiviazione", "Per impostazione predefinita, Anclora SyncXML funziona in modalità privata senza archiviazione permanente. I dati temporanei possono essere eliminati tramite l'azione di cancellazione dell'operazione."],
+        ["Modalità senza archiviazione", "Per impostazione predefinita, Anclora GuestHub funziona in modalità privata senza archiviazione permanente. I dati temporanei possono essere eliminati tramite l'azione di cancellazione dell'operazione."],
         ["Conservazione", "Le informazioni personali non vengono conservate in modo permanente salvo configurazione esplicita di archiviazione persistente da parte di un amministratore autorizzato."],
         ["Sicurezza", "Il modello applica la minimizzazione, il controllo degli accessi, l'assenza di registrazione di DPI e la separazione dei metadati tecnici dal contenuto personale. Se la persistenza è abilitata, devono essere applicati crittografia e politiche di conservazione."],
         ["Responsabilità dell'utente", "L'utente deve disporre di una base giuridica o di un'autorizzazione per importare i dati e deve verificare il risultato prima di qualsiasi uso ufficiale."],
@@ -72,11 +72,11 @@ const content = {
       ],
     },
     pt: {
-      title: "Política de privacidade do Anclora SyncXML",
+      title: "Política de privacidade do Anclora GuestHub",
       sections: [
         ["Dados tratados", "A aplicação pode tratar dados de hóspedes, documentos de identidade, datas de nascimento, nacionalidade, moradas, números de telefone, emails, dados de estadia, dados de pagamento limitados e metadados contratuais fornecidos pelo utilizador."],
         ["Finalidade", "Os dados são tratados para gerar, validar, rever e exportar ficheiros XML sob instrução do utilizador."],
-        ["Modo sem armazenamento", "Por defeito, Anclora SyncXML funciona em modo privado sem armazenamento permanente. Os dados temporários podem ser eliminados através da acção de limpeza da operação."],
+        ["Modo sem armazenamento", "Por defeito, Anclora GuestHub funciona em modo privado sem armazenamento permanente. Os dados temporários podem ser eliminados através da acção de limpeza da operação."],
         ["Retenção", "As informações pessoais não são conservadas de forma permanente salvo configuração explícita de armazenamento persistente por um administrador autorizado."],
         ["Segurança", "O modelo aplica minimização, controlo de acesso, ausência de registo de DDP e separação entre metadados técnicos e conteúdo pessoal. Se a persistência estiver activada, devem ser aplicados cifração e políticas de retenção."],
         ["Responsabilidade do utilizador", "O utilizador deve ter legitimação ou autorização para importar os dados e deve rever o resultado antes de qualquer utilização oficial."],
@@ -85,11 +85,11 @@ const content = {
       ],
     },
     de: {
-      title: "Datenschutzerklaerung fuer Anclora SyncXML",
+      title: "Datenschutzerklaerung fuer Anclora GuestHub",
       sections: [
         ["Verarbeitete Daten", "Die Anwendung kann Gaestedaten, Ausweisdokumente, Geburtsdaten, Nationalitaet, Adressen, Telefonnummern, E-Mails, Aufenthaltsdaten, begrenzte Zahlungsdaten und Vertragsmetadaten verarbeiten, die der Nutzer bereitstellt."],
         ["Zweck", "Die Daten werden zur Erstellung, Validierung, Pruefung und zum Export von XML nach Anweisung des Nutzers verarbeitet."],
-        ["Modus ohne Speicherung", "Standardmaessig arbeitet Anclora SyncXML im privaten Modus ohne dauerhafte Speicherung. Temporaere Daten koennen ueber die Aktion zum Loeschen des Vorgangs entfernt werden."],
+        ["Modus ohne Speicherung", "Standardmaessig arbeitet Anclora GuestHub im privaten Modus ohne dauerhafte Speicherung. Temporaere Daten koennen ueber die Aktion zum Loeschen des Vorgangs entfernt werden."],
         ["Aufbewahrung", "Personenbezogene Informationen werden nicht dauerhaft aufbewahrt, sofern ein autorisierter Administrator keine persistente Speicherung ausdruecklich konfiguriert."],
         ["Sicherheit", "Das Modell nutzt Minimierung, Zugriffskontrolle, kein Logging von PII und Trennung technischer Metadaten von personenbezogenen Inhalten. Bei aktivierter Persistenz muessen Verschluesselung und Aufbewahrungsregeln angewendet werden."],
         ["Verantwortung des Nutzers", "Der Nutzer muss eine Rechtsgrundlage oder Berechtigung fuer den Import der Daten haben und das Ergebnis vor offizieller Verwendung pruefen."],
@@ -100,9 +100,9 @@ const content = {
   },
   terms: {
     es: {
-      title: "Términos de uso de Anclora SyncXML",
+      title: "Términos de uso de Anclora GuestHub",
       sections: [
-        ["Objeto", "Anclora SyncXML ayuda a preparar, validar, revisar y exportar XML a partir de datos de reservas y huéspedes."],
+        ["Objeto", "Anclora GuestHub ayuda a preparar, validar, revisar y exportar XML a partir de datos de reservas y huéspedes."],
         ["Uso permitido", "Puede usarse para operaciones internas autorizadas, revisión humana y exportación controlada."],
         ["Uso prohibido", "No deben cargarse archivos sin autorización, datos innecesarios, datos excesivos o información de pago sensible no requerida."],
         ["Responsabilidad", "El usuario responde de la legitimidad de los datos importados y de la revisión previa a consolidar o exportar."],
@@ -113,9 +113,9 @@ const content = {
       ],
     },
     en: {
-      title: "Anclora SyncXML Terms of Use",
+      title: "Anclora GuestHub Terms of Use",
       sections: [
-        ["Purpose", "Anclora SyncXML helps prepare, validate, review and export XML from booking and guest data."],
+        ["Purpose", "Anclora GuestHub helps prepare, validate, review and export XML from booking and guest data."],
         ["Permitted use", "It may be used for authorised internal operations, human review and controlled export."],
         ["Prohibited use", "Files must not be uploaded without authorisation, with unnecessary data, excessive data or non-required sensitive payment information."],
         ["Responsibility", "The user is responsible for the legitimacy of imported data and for reviewing it before consolidation or export."],
@@ -126,9 +126,9 @@ const content = {
       ],
     },
     ca: {
-      title: "Termes d'ús d'Anclora SyncXML",
+      title: "Termes d'ús d'Anclora GuestHub",
       sections: [
-        ["Objecte", "Anclora SyncXML ajuda a preparar, validar, revisar i exportar XML a partir de dades de reserves i hostes."],
+        ["Objecte", "Anclora GuestHub ajuda a preparar, validar, revisar i exportar XML a partir de dades de reserves i hostes."],
         ["Ús permès", "Pot usar-se per a operacions internes autoritzades, revisió humana i exportació controlada."],
         ["Ús prohibit", "No han de carregar-se fitxers sense autorització, dades innecessàries, dades excessives o informació de pagament sensible no requerida."],
         ["Responsabilitat", "L'usuari respon de la legitimitat de les dades importades i de la revisió prèvia a consolidar o exportar."],
@@ -139,9 +139,9 @@ const content = {
       ],
     },
     fr: {
-      title: "Conditions d'utilisation d'Anclora SyncXML",
+      title: "Conditions d'utilisation d'Anclora GuestHub",
       sections: [
-        ["Objet", "Anclora SyncXML aide à préparer, valider, réviser et exporter du XML à partir des données de réservations et de clients."],
+        ["Objet", "Anclora GuestHub aide à préparer, valider, réviser et exporter du XML à partir des données de réservations et de clients."],
         ["Usage autorisé", "Il peut être utilisé pour des opérations internes autorisées, la révision humaine et l'export contrôlé."],
         ["Usage interdit", "Les fichiers ne doivent pas être importés sans autorisation, avec des données inutiles, excessives ou des informations de paiement sensibles non requises."],
         ["Responsabilité", "L'utilisateur est responsable de la légitimité des données importées et de leur vérification avant consolidation ou export."],
@@ -152,9 +152,9 @@ const content = {
       ],
     },
     it: {
-      title: "Condizioni d'uso di Anclora SyncXML",
+      title: "Condizioni d'uso di Anclora GuestHub",
       sections: [
-        ["Oggetto", "Anclora SyncXML aiuta a preparare, validare, rivedere ed esportare file XML dai dati di prenotazioni e ospiti."],
+        ["Oggetto", "Anclora GuestHub aiuta a preparare, validare, rivedere ed esportare file XML dai dati di prenotazioni e ospiti."],
         ["Uso consentito", "Può essere utilizzato per operazioni interne autorizzate, revisione umana ed esportazione controllata."],
         ["Uso vietato", "Non devono essere caricati file senza autorizzazione, con dati non necessari, dati eccessivi o informazioni di pagamento sensibili non richieste."],
         ["Responsabilità", "L'utente è responsabile della legittimità dei dati importati e della verifica prima della consolidazione o dell'esportazione."],
@@ -165,9 +165,9 @@ const content = {
       ],
     },
     pt: {
-      title: "Termos de utilização do Anclora SyncXML",
+      title: "Termos de utilização do Anclora GuestHub",
       sections: [
-        ["Objecto", "Anclora SyncXML ajuda a preparar, validar, rever e exportar ficheiros XML a partir de dados de reservas e hóspedes."],
+        ["Objecto", "Anclora GuestHub ajuda a preparar, validar, rever e exportar ficheiros XML a partir de dados de reservas e hóspedes."],
         ["Utilização permitida", "Pode ser utilizado para operações internas autorizadas, revisão humana e exportação controlada."],
         ["Utilização proibida", "Não devem ser carregados ficheiros sem autorização, com dados desnecessários, dados excessivos ou informações de pagamento sensíveis não requeridas."],
         ["Responsabilidade", "O utilizador é responsável pela legitimidade dos dados importados e pela revisão prévia à consolidação ou exportação."],
@@ -178,9 +178,9 @@ const content = {
       ],
     },
     de: {
-      title: "Nutzungsbedingungen fuer Anclora SyncXML",
+      title: "Nutzungsbedingungen fuer Anclora GuestHub",
       sections: [
-        ["Zweck", "Anclora SyncXML unterstuetzt die Vorbereitung, Validierung, Pruefung und den XML-Export aus Buchungs- und Gaestedaten."],
+        ["Zweck", "Anclora GuestHub unterstuetzt die Vorbereitung, Validierung, Pruefung und den XML-Export aus Buchungs- und Gaestedaten."],
         ["Erlaubte Nutzung", "Die Nutzung ist fuer autorisierte interne Vorgange, menschliche Pruefung und kontrollierten Export vorgesehen."],
         ["Verbotene Nutzung", "Dateien duerfen nicht ohne Berechtigung, mit unnoetigen Daten, uebermaessigen Daten oder nicht erforderlichen sensiblen Zahlungsinformationen hochgeladen werden."],
         ["Verantwortung", "Der Nutzer ist fuer die Rechtmaessigkeit der importierten Daten und die Pruefung vor Konsolidierung oder Export verantwortlich."],

@@ -27,4 +27,4 @@
 
 The application may use the documented pre-production endpoint for tests when credentials are configured.
 
-The production endpoint is blocked by default. Production transmission requires explicit configuration with `SYNCXML_SES_ALLOW_PRODUCTION_SEND=true` and must not be enabled until a successful pre-production test has been documented.
+The production endpoint is blocked by default. Production transmission requires explicit configuration with `GUESTHUB_SES_ALLOW_PRODUCTION_SEND=true` and must not be enabled until a successful pre-production test has been documented.

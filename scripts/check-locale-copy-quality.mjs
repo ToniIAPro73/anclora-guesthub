@@ -40,7 +40,7 @@ const reportDir = path.join(repoRoot, "reports", "locale-copy");
 fs.mkdirSync(reportDir, { recursive: true });
 
 const report = [
-  "# SyncXML Locale Copy Quality Report",
+  "# GuestHub Locale Copy Quality Report",
   "",
   `Generated: ${new Date().toISOString()}`,
   "",

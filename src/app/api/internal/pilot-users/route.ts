@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma, hasDatabase } from "@/lib/db/prisma";
 import { generateTemporaryPassword, hashPassword } from "@/lib/password";
-import { getPersistentPilotAuthConfigError } from "@/lib/security/env";
+import { getPersistentPilotAuthConfigError, envValue } from "@/lib/security/env";
 
 const payloadSchema = z.object({
   requestId: z.string().trim().min(1).max(160),
@@ -19,7 +19,9 @@ function getBearerToken(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const expectedSecret = process.env.SYNCXML_INTERNAL_API_SECRET;
+  // Dual-read: canonical GUESTHUB_INTERNAL_API_SECRET first, legacy
+  // SYNCXML_INTERNAL_API_SECRET fallback (rename 2026-08).
+  const expectedSecret = envValue("GUESTHUB_INTERNAL_API_SECRET", "SYNCXML_INTERNAL_API_SECRET");
   const token = getBearerToken(request);
   if (!expectedSecret || token !== expectedSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

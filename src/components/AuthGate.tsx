@@ -54,7 +54,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         setError(
           response.status === 503
             ? process.env.NODE_ENV === "development"
-              ? "Configura SYNCXML_ADMIN_PASSWORD y SESSION_SECRET para probar el login, o usa SYNCXML_LOCAL_DEMO=true para demo local sin datos reales."
+              ? "Configura GUESTHUB_ADMIN_PASSWORD y SESSION_SECRET para probar el login, o usa GUESTHUB_LOCAL_DEMO=true para demo local sin datos reales."
               : "La configuración de acceso no está disponible. Contacta con el administrador."
             : t.accessDenied,
         );

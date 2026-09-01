@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getInternalReplyTo } from "@/lib/email/delivery";
 import { getRateLimitKey, sensitiveRateLimiter } from "@/lib/security/rateLimit";
+import { envValue } from "@/lib/security/env";
 import { Resend } from "resend";
 
 export const maxDuration = 120;
 
-const APP_NAME = "Anclora SyncXML";
+const APP_NAME = "Anclora GuestHub";
 const BRAND_BG = "#070A12";
 const BRAND_SURFACE = "#101827";
 const BRAND_SURFACE_ELEVATED = "#151F32";
@@ -117,7 +118,7 @@ function buildPilotRequestEmail(normalized: {
   acceptsSyntheticOrAnonymizedData: boolean;
 }, data: z.infer<typeof requestSchema>, appUrl: string) {
   const baseUrl = appUrl.replace(/\/$/, "");
-  const logoUrl = `${baseUrl}/brand/anclora-syncxml-email.png`;
+  const logoUrl = `${baseUrl}/brand/anclora-guesthub-email.png`;
   const preview = `Nueva solicitud de piloto controlado recibida en ${APP_NAME}.`;
   const subject = `${APP_NAME} - solicitud de piloto controlado`;
 
@@ -242,7 +243,7 @@ async function forwardPilotRequestToNexus(input: {
 }): Promise<{ ok: boolean; status?: number; error?: string }> {
   const { normalized, nexusWebhookUrl, nexusApiKey, requestId } = input;
   try {
-    console.info("Forwarding SyncXML pilot request to Nexus", {
+    console.info("Forwarding GuestHub pilot request to Nexus", {
       requestId,
       nexusWebhook: safeWebhookLabel(nexusWebhookUrl),
     });
@@ -259,7 +260,7 @@ async function forwardPilotRequestToNexus(input: {
 
     if (!response.ok) {
       const detail = await response.text().catch(() => "");
-      console.warn("Nexus rejected SyncXML pilot request", {
+      console.warn("Nexus rejected GuestHub pilot request", {
         requestId,
         status: response.status,
         nexusWebhook: safeWebhookLabel(nexusWebhookUrl),
@@ -269,7 +270,7 @@ async function forwardPilotRequestToNexus(input: {
     return { ok: true, status: response.status };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error("Failed to forward SyncXML pilot request to Nexus", {
+    console.error("Failed to forward GuestHub pilot request to Nexus", {
       requestId,
       nexusWebhook: safeWebhookLabel(nexusWebhookUrl),
       message,
@@ -306,13 +307,16 @@ export async function POST(request: Request) {
   const rateLimit = sensitiveRateLimiter.check(getRateLimitKey(request));
   if (!rateLimit.allowed) return NextResponse.json({ error: "Demasiadas solicitudes" }, { status: 429 });
 
-  const nexusWebhookUrl = process.env.NEXUS_SYNCXML_WEBHOOK_URL || process.env.NEXUS_WEBHOOK_URL;
-  const nexusApiKey = process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || process.env.NEXUS_INTERNAL_API_KEY;
-  
+  // Nexus contract: canonical NEXUS_GUESTHUB_* names read first, legacy
+  // NEXUS_SYNCXML_* kept as fallback (rename 2026-08; cross-repo contract).
+  const nexusWebhookUrl = process.env.NEXUS_GUESTHUB_WEBHOOK_URL || process.env.NEXUS_SYNCXML_WEBHOOK_URL || process.env.NEXUS_WEBHOOK_URL;
+  const nexusApiKey = process.env.NEXUS_GUESTHUB_WEBHOOK_SECRET || process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || process.env.NEXUS_INTERNAL_API_KEY;
+
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL;
-  const resendTo = process.env.ADMIN_EMAILS || process.env.SYNCXML_PILOT_REQUEST_TO;
-  const appUrl = process.env.SYNCXML_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://anclora-syncxml.vercel.app";
+  const resendTo = process.env.ADMIN_EMAILS || envValue("GUESTHUB_PILOT_REQUEST_TO", "SYNCXML_PILOT_REQUEST_TO");
+  // Legacy endpoint: anclora-syncxml.vercel.app — pending owner domain decision.
+  const appUrl = envValue("GUESTHUB_APP_URL", "SYNCXML_APP_URL") || process.env.NEXT_PUBLIC_APP_URL || "https://anclora-syncxml.vercel.app";
 
   if (!nexusWebhookUrl && !resendApiKey) {
     console.error("Missing Nexus and Resend configuration for pilot request forwarding");
@@ -328,6 +332,8 @@ export async function POST(request: Request) {
   const acceptsSyntheticOrAnonymizedData = Boolean(data.acceptsSyntheticOrAnonymizedData ?? data.muestraSintetica);
   const normalized = {
     // Anclora Intake Contract v1
+    // source/target_product values are part of the live Nexus intake contract —
+    // legacy "syncxml*" values kept intentionally (rename 2026-08).
     schema_version: "anclora-intake-v1" as const,
     intake_domain: "access_request" as const,
     request_type: "pilot_request" as const,

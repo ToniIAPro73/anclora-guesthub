@@ -6,11 +6,11 @@
 - **Flujo de Bloqueo**: Se advierte expresamente en la UI de \`/piloto\` y al importar en \`AuthGate\`. Además, Hermes rechaza el acceso al piloto si el usuario indica intención de subir datos reales.
 
 ## Almacenamiento y Logs
-- **Retención y Borrado**: \`SYNCXML_ENABLE_PERSISTENT_STORAGE=false\` por defecto, no se guardan permanentemente Excels ni XMLs generados en la base de datos de producción.
+- **Retención y Borrado**: \`GUESTHUB_ENABLE_PERSISTENT_STORAGE=false\` por defecto, no se guardan permanentemente Excels ni XMLs generados en la base de datos de producción.
 - **Política de Logs**: Está estrictamente prohibido el logueo de payloads completos, emails, y claves en texto plano. Los errores Pydantic y \`console.log\` fueron anonimizados en la Fase 5.
 
 ## Autenticación
-- **Contraseña Temporal**: Nexus solicita el aprovisionamiento enviando un token seguro a SyncXML. SyncXML genera una contraseña temporal que se devuelve y envía por correo en texto claro por una única vez.
+- **Contraseña Temporal**: Nexus solicita el aprovisionamiento enviando un token seguro a GuestHub. GuestHub genera una contraseña temporal que se devuelve y envía por correo en texto claro por una única vez.
 - **Cambio Obligatorio**: Al realizar el primer inicio de sesión, el \`AuthGate\` obliga a rotar la contraseña temporal. No se permite navegación a otros endpoints de la API ni vistas hasta que este cambio se efectúa.
 
 ## Rate limiting
@@ -31,7 +31,7 @@
   y `npm audit` propone `next@9.3.3` con `--force`, lo que sería un downgrade
   mayor e incompatible con el stack actual. No aplicar ese fix forzado.
 - **Plan `xlsx`**: Evaluar migración incremental a un parser mantenido para el
-  subconjunto usado por SyncXML (`read` buffer + `sheet_to_json`), con fixtures
+  subconjunto usado por GuestHub (`read` buffer + `sheet_to_json`), con fixtures
   existentes antes de retirar SheetJS.
 
 ## Legal y Normativo

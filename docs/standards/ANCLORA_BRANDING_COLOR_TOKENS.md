@@ -521,7 +521,7 @@ Fuente: `src/app/globals.css` real — `#00DC82` confirmado con 625 apariciones,
 
 ---
 
-## Anclora SyncXML (Premium)
+## Anclora GuestHub (Premium)
 
 Accent: Dorado apagado `#BFA46A`
 

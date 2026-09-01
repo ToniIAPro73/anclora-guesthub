@@ -2,7 +2,7 @@
 set -euo pipefail
 
 INPUT="${1:-}"
-PROJECT="${2:-syncxml}"
+PROJECT="${2:-guesthub}"
 BACKEND="${3:-${MINERU_DEFAULT_BACKEND:-pipeline}}"
 
 if [ -z "$INPUT" ]; then

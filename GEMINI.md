@@ -3,6 +3,8 @@
 
 Agente por defecto en este repo: `anclora-syncxml`.
 
+> Nota (rename 2026-08): el producto se ha renombrado **Anclora SyncXML → Anclora GuestHub** (repositorio `anclora-guesthub`), pero la clave de agente Memanto `anclora-syncxml` se conserva intencionadamente para mantener la continuidad de la memoria operativa.
+
 Usa Memanto como memoria operativa persistente. Sirve para recordar decisiones tecnicas, errores resueltos, contexto estable, preferencias del usuario y pendientes reales.
 
 No sustituye documentacion canonica, Git, issues ni contratos de la boveda.

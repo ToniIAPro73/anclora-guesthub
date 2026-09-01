@@ -1,7 +1,7 @@
 # Modelo de acceso — estado actual
 
 Este documento describe **cómo funciona hoy** el control de acceso a Anclora
-SyncXML y qué parte del modelo `PILOT_ACCESS_FEEDBACK_LANDING_MODEL_v0.2`
+GuestHub y qué parte del modelo `PILOT_ACCESS_FEEDBACK_LANDING_MODEL_v0.2`
 todavía es un **proceso manual**, para evitar dar por implementado algo que no
 lo está.
 
@@ -10,7 +10,7 @@ lo está.
 | Aspecto | Estado hoy |
 | --- | --- |
 | Autenticación de `/app` y `/dashboard` | **Cuentas individuales** (AuthGate) |
-| Origen de la contraseña | Variable de entorno `SYNCXML_ADMIN_PASSWORD` |
+| Origen de la contraseña | Variable de entorno `GUESTHUB_ADMIN_PASSWORD` |
 | Cuentas por usuario | **No existen** (no hay registro ni tabla de usuarios) |
 | Estados `pending/approved/invited/rejected` | **Proceso manual**, sin persistencia |
 | Tabla / backend de leads | **No existe** (la solicitud se envía por email transaccional) |
@@ -26,11 +26,11 @@ de Bóveda `ANCLORA_AUTH_LOGIN_SCREEN_CONTRACT` **v1.3.0** como fuente visual:
   `560px`;
 - logo centrado de `50px`, sin contenedor circular;
 - divisor gradiente bajo el logo;
-- nombre `Anclora SyncXML` separado del logo;
+- nombre `Anclora GuestHub` separado del logo;
 - badge de estado de piloto o validación controlada;
 - texto legal con enlaces a `/terms` y `/privacy`.
 
-SyncXML adapta el contrato porque hoy usa **cuentas individuales del piloto**, no
+GuestHub adapta el contrato porque hoy usa **cuentas individuales del piloto**, no
 cuentas personales. Por tanto, el patrón email/password, recuperación de
 contraseña, registro y OAuth del contrato general no se muestra en esta fase.
 Esta excepción está justificada por el modelo actual de pre-MVP / validación
@@ -44,7 +44,7 @@ controlada y debe revisarse si se introducen usuarios individuales.
 2. La solicitud se **revisa manualmente** por correo. No hay aprobación
    automática ni cola persistida.
 3. Si se aprueba, se comparte **fuera de banda** (por correo) la **credenciales de
-   acceso del piloto** (`SYNCXML_ADMIN_PASSWORD`). Es una credenciales **compartida**
+   acceso del piloto** (`GUESTHUB_ADMIN_PASSWORD`). Es una credenciales **compartida**
    del piloto, no una credencial personal.
 4. El participante entra por `/login` (o el AuthGate de `/app`) introduciendo
    esas credenciales. La sesión se gestiona con cookie de sesión firmada.
@@ -88,19 +88,19 @@ Antes de escalar más allá de un piloto controlado pequeño, se recomienda:
 Para una demo local sin datos reales:
 
 ```bash
-SYNCXML_LOCAL_DEMO=true npm run dev
+GUESTHUB_LOCAL_DEMO=true npm run dev
 ```
 
 Para probar el login real por credenciales en local o staging:
 
 ```env
-SYNCXML_ADMIN_PASSWORD="credenciales-del-piloto"
+GUESTHUB_ADMIN_PASSWORD="credenciales-del-piloto"
 SESSION_SECRET="secreto-largo"
-SYNCXML_LOCAL_DEMO="false"
-SYNCXML_DISABLE_AUTH="false"
+GUESTHUB_LOCAL_DEMO="false"
+GUESTHUB_DISABLE_AUTH="false"
 ```
 
-`SYNCXML_DISABLE_AUTH=true` no debe usarse en producción.
+`GUESTHUB_DISABLE_AUTH=true` no debe usarse en producción.
 
 ## Envío de solicitudes con Resend
 
@@ -112,9 +112,9 @@ Variables necesarias:
 
 ```env
 RESEND_API_KEY="re_..."
-RESEND_FROM_EMAIL="Anclora SyncXML <piloto@syncxml.anclora.com>"
-SYNCXML_PILOT_REQUEST_TO="antonio@anclora.com"
-SYNCXML_FEEDBACK_TO="antonio@anclora.com"
+RESEND_FROM_EMAIL="Anclora GuestHub <piloto@syncxml.anclora.com>"
+GUESTHUB_PILOT_REQUEST_TO="antonio@anclora.com"
+GUESTHUB_FEEDBACK_TO="antonio@anclora.com"
 ```
 
 El dominio del `RESEND_FROM_EMAIL` debe estar verificado en Resend. El email

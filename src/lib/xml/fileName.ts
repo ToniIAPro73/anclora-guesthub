@@ -28,5 +28,5 @@ export function buildXmlDownloadFileName(
   date = new Date(),
 ) {
   const reservationNumber = cleanFileNamePart(getXmlDownloadReservationNumber(parsed) ?? "sin-reserva");
-  return `syncxml-${reservationNumber}-${formatXmlDownloadTimestamp(date)}.xml`;
+  return `guesthub-${reservationNumber}-${formatXmlDownloadTimestamp(date)}.xml`;
 }

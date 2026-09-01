@@ -50,7 +50,7 @@ export function HeroSection() {
           <div className="l-card l-card-gold p-5 md:p-6">
             <div className="flex items-center gap-4">
               <img
-                src="/brand/anclora-syncxml.png"
+                src="/brand/anclora-guesthub.png"
                 alt={copy.aria.logoAlt}
                 width={56}
                 height={56}
@@ -58,7 +58,7 @@ export function HeroSection() {
               />
               <div>
                 <p className="font-heading text-lg font-semibold text-white">
-                  Anclora SyncXML
+                  Anclora GuestHub
                 </p>
                 <p className="l-text text-sm">{copy.hero.cardSubtitle}</p>
               </div>

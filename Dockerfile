@@ -1,4 +1,4 @@
-# Dockerfile for Next.js (Anclora SyncXML)
+# Dockerfile for Next.js (Anclora GuestHub)
 FROM node:22-alpine AS base
 
 # Install dependencies only when needed
