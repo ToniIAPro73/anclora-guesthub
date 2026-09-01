@@ -124,8 +124,7 @@ fi
 echo "Vercel is deploying production now."
 echo ""
 echo "Monitor deployment:"
-# Legacy Vercel project slug — pending owner decision on Vercel project rename.
-echo "  https://vercel.com/projects/anclora-syncxml/deployments"
+echo "  https://vercel.com/projects/anclora-guesthub/deployments"
 echo ""
 echo "Next: Monitor logs and production health."
 echo ""
