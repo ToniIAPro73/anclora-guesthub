@@ -1,4 +1,4 @@
-# Quick Start Guide: Anclora SyncXML Controlled Pilot
+# Quick Start Guide: Anclora GuestHub Controlled Pilot
 
 **Version:** 1.0  
 **Language:** English  
@@ -8,7 +8,7 @@
 
 ## What is this?
 
-You are in the **controlled pilot phase** of Anclora SyncXML. In this phase, you test core functionality with 100% synthetic data, with no connection to live SES.HOSPEDAJES systems.
+You are in the **controlled pilot phase** of Anclora GuestHub. In this phase, you test core functionality with 100% synthetic data, with no connection to live SES.HOSPEDAJES systems.
 
 ---
 
@@ -96,12 +96,12 @@ For the provided synthetic file, you should see no critical errors.
 
 ### ⚠️ Legal disclaimer
 
-**During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora SyncXML using synthetic or anonymized data.**
+**During this phase, the pilot does not perform official submissions or autonomous submissions to the SES.HOSPEDAJES environment. Any technical test against SES pre-production, if applicable, will be executed only by the technical owner of Anclora GuestHub using synthetic or anonymized data.**
 
 - No legal guarantee of compliance
 - Not validated against hospitality regulations
 - Generated XML is **for structure review only**, not official submission
-- Anclora SyncXML is in **pre-MVP phase**
+- Anclora GuestHub is in **pre-MVP phase**
 
 ### Do not use real data
 
@@ -163,5 +163,6 @@ Thank you for participating in the pilot!
 
 ---
 
-*Anclora SyncXML — Controlled Pilot*  
+*Anclora GuestHub — Controlled Pilot*
+
 *v1.0 — 2026-06-05*

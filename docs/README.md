@@ -24,8 +24,8 @@ material kept for traceability.
 - `env-syncxml-pilot.md`
 - `security-privacy-notes.md`
 - `smoke-tests.md`
-- `syncxml-pilot-flow.md`
-- `syncxml-xml-states.md`
+- `guesthub-pilot-flow.md`
+- `guesthub-xml-states.md`
 
 ## Community docs
 

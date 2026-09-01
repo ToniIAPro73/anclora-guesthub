@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-SyncXML no usa MinerU para el flujo principal de Excel a XML. Lo usa como capacidad auxiliar para:
+GuestHub no usa MinerU para el flujo principal de Excel a XML. Lo usa como capacidad auxiliar para:
 
 - manuales y PDFs operativos
 - normativa o instrucciones SES.HOSPEDAJES
@@ -17,13 +17,13 @@ SyncXML no usa MinerU para el flujo principal de Excel a XML. Lo usa como capaci
 ## Wrapper local
 
 ```bash
-npm run ingest:doc -- ./docs/manual/manual-usuario.md syncxml pipeline
+npm run ingest:doc -- ./docs/manual/manual-usuario.md guesthub pipeline
 ```
 
 Tambien puedes llamar al wrapper central directamente:
 
 ```bash
-~/projects/agent-tooling/mineru/bin/mineru-agent-ingest.sh <documento> syncxml pipeline
+~/projects/agent-tooling/mineru/bin/mineru-agent-ingest.sh <documento> guesthub pipeline
 ```
 
 ## Variables de entorno

@@ -64,5 +64,5 @@ export function buildValidationReportCsv(parsed: ParsedExcel) {
 
 export function buildValidationReportFileName(parsed: Pick<ParsedExcel, "reservation">, date = new Date()) {
   const reference = (parsed.reservation.reference ?? "sin-reserva").replace(/[^a-zA-Z0-9._-]+/g, "-");
-  return `syncxml-validacion-${reference}-${formatXmlDownloadTimestamp(date)}.csv`;
+  return `guesthub-validacion-${reference}-${formatXmlDownloadTimestamp(date)}.csv`;
 }

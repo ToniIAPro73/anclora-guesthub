@@ -88,7 +88,7 @@ Justificación: DM Sans aporta un carácter más redondo y accesible que Inter, 
 | `anclora-talent` | Sin fuente custom *(pausado, fuera de alcance activo)* | Añadir DM Sans (si se reactiva) |
 | `anclora-synergi` | Cardo (display) + Inter (body) | Eliminar Cardo (reservada para ultra premium). Migrar a DM Sans. |
 | `anclora-command-center` | Sin fuente custom | Añadir DM Sans |
-| `anclora-syncxml` *(añadido 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir DM Sans |
+| `anclora-guesthub` *(añadido 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir DM Sans |
 
 ---
 
@@ -150,7 +150,7 @@ Justificación: Contraste serif (display) + sans-serif (body) clásico de marcas
 | `anclora-talent` | Premium *(pausado)* | DM Sans | — |
 | `anclora-synergi` | Premium | DM Sans | Cardo, Inter |
 | `anclora-command-center` | Premium | DM Sans | — |
-| `anclora-syncxml` | Premium | DM Sans *(pendiente de verificar estado real)* | Pendiente de auditoría |
+| `anclora-guesthub` | Premium | DM Sans *(pendiente de verificar estado real)* | Pendiente de auditoría |
 | `anclora-private-estates` | Ultra Premium | — | Cormorant Garamond |
 | `anclora-private-estates-landing-page` | Ultra Premium | Cardo, Fraunces | — |
 

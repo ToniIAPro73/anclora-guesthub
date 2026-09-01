@@ -10,7 +10,7 @@ export async function generateLocalPackageZip(parsed: ParsedExcel, generated: Ge
   // 1. Manifest
   const manifest = {
     generatedAt: timestamp,
-    tool: "Anclora SyncXML",
+    tool: "Anclora GuestHub",
     version: "v0.1-mvp",
     mode: "temporary-local-package",
     reservationReference: reference,
@@ -59,16 +59,16 @@ export async function generateLocalPackageZip(parsed: ParsedExcel, generated: Ge
   zip.file("informe-validacion.csv", buildValidationReportCsv(parsed));
 
   // 6. README
-  const readme = `ANCLORA SYNCXML - PAQUETE LOCAL DE CONSERVACIÓN
+  const readme = `ANCLORA GUESTHUB - PAQUETE LOCAL DE CONSERVACIÓN
 ----------------------------------------------
 Referencia: ${reference}
 Generado el: ${timestamp}
 
 AVISO LEGAL Y DE PRIVACIDAD:
-1. Este paquete ha sido generado bajo demanda y no se conserva permanentemente en los servidores de Anclora SyncXML por defecto.
+1. Este paquete ha sido generado bajo demanda y no se conserva permanentemente en los servidores de Anclora GuestHub por defecto.
 2. La responsabilidad legal de conservación de la documentación de viajeros corresponde al sujeto obligado (titular del establecimiento).
 3. El archivo 'xml-revisable.xml' es una propuesta técnica orientada al flujo de SES.HOSPEDAJES y DEBE SER REVISADO por una persona antes de cualquier uso oficial.
-4. Anclora SyncXML no garantiza la aceptación oficial del XML por parte de las autoridades ni ofrece asesoramiento legal.
+4. Anclora GuestHub no garantiza la aceptación oficial del XML por parte de las autoridades ni ofrece asesoramiento legal.
 5. Se recomienda conservar este paquete en un lugar seguro y bajo el control del titular del establecimiento.
 
 Archivos incluidos:

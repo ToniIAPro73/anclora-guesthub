@@ -1,13 +1,13 @@
 # Checklist Operativo: Primer Piloto Asistido (Propuesta)
 
-Este checklist es una propuesta para estructurar la primera prueba real de Anclora SyncXML con usuarios invitados. No implica cambios técnicos actuales.
+Este checklist es una propuesta para estructurar la primera prueba real de Anclora GuestHub con usuarios invitados. No implica cambios técnicos actuales.
 
 ## 1. Configuración de Entorno (Vercel/Render)
-*   [ ] `SYNCXML_PILOT_AUTO_APPROVE=false` (Asegurado).
-*   [ ] `SYNCXML_ENABLE_PERSISTENT_STORAGE=false` (Asegurado, para garantizar modo memoria).
+*   [ ] `GUESTHUB_PILOT_AUTO_APPROVE=false` (Asegurado).
+*   [ ] `GUESTHUB_ENABLE_PERSISTENT_STORAGE=false` (Asegurado, para garantizar modo memoria).
 *   [ ] Secretos cruzados validados (Webhook, Internal API).
 *   [ ] `RESEND_API_KEY` y `RESEND_FROM_EMAIL` configurados para dominio oficial.
-*   [ ] `SYNCXML_PILOT_REQUEST_TO` configurado con la cuenta del administrador que revisará.
+*   [ ] `GUESTHUB_PILOT_REQUEST_TO` configurado con la cuenta del administrador que revisará.
 
 ## 2. Definición del Piloto
 *   [ ] **Perfil del Usuario:** "Friends & Family" o Partner de confianza con volumen bajo de reservas.
@@ -46,7 +46,7 @@ Antes de invitar a un usuario externo:
 *   [ ] Generar y descargar XML.
 *   [ ] Confirmar que el XML está bien formado.
 *   [ ] Revocar o desactivar el usuario piloto interno.
-*   [ ] Confirmar que no hay datos persistidos si `SYNCXML_ENABLE_PERSISTENT_STORAGE=false`.
+*   [ ] Confirmar que no hay datos persistidos si `GUESTHUB_ENABLE_PERSISTENT_STORAGE=false`.
 *   [ ] Confirmar que no hay PII en logs ni capturas.
 
 ## 4. Criterios de Éxito

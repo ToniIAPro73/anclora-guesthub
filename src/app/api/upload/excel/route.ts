@@ -9,7 +9,7 @@ import { prismaMunicipioRepository } from "@/lib/db/municipios";
 import type { GuestRecord } from "@/lib/domain";
 
 // ── H-04: Hermes XML Pre-flight ─────────────────────────────────────────────
-// Convert SyncXML internal ISO dates (yyyy-mm-dd) to the dd/mm/yyyy format the
+// Convert GuestHub internal ISO dates (yyyy-mm-dd) to the dd/mm/yyyy format the
 // Hermes pre-flight endpoint expects. Returns "" when absent so that the worker
 // (not this route) decides how to treat the missing value.
 function toDdMmYyyy(iso?: string): string {

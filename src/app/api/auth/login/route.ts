@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { setSessionCookie } from "@/lib/auth";
 import { prisma, hasDatabase } from "@/lib/db/prisma";
 import { verifyPassword } from "@/lib/password";
-import { canUsePasswordAuth, getRuntimeConfigError, isExplicitLocalDemoMode } from "@/lib/security/env";
+import { canUsePasswordAuth, envValue, getRuntimeConfigError, isExplicitLocalDemoMode } from "@/lib/security/env";
 import { authRateLimiter, getRateLimitKey } from "@/lib/security/rateLimit";
 
 export async function POST(request: Request) {
@@ -52,12 +52,14 @@ export async function POST(request: Request) {
       });
     }
   }
+  // Dual-read: canonical GUESTHUB_* first, legacy SYNCXML_* fallback (rename 2026-08).
+  const adminPassword = envValue("GUESTHUB_ADMIN_PASSWORD", "SYNCXML_ADMIN_PASSWORD");
+  const adminEmail = envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "antonio@anclora.com";
   if (
-    process.env.SYNCXML_ADMIN_PASSWORD &&
-    password === process.env.SYNCXML_ADMIN_PASSWORD &&
-    (!normalizedEmail || normalizedEmail === (process.env.SYNCXML_ADMIN_EMAIL || "antonio@anclora.com").toLowerCase())
+    adminPassword &&
+    password === adminPassword &&
+    (!normalizedEmail || normalizedEmail === adminEmail.toLowerCase())
   ) {
-    const adminEmail = process.env.SYNCXML_ADMIN_EMAIL || "antonio@anclora.com";
     return setSessionCookie(NextResponse.json({ ok: true, role: "admin", email: adminEmail }), {
       id: "admin",
       email: adminEmail,

@@ -5,9 +5,9 @@
  * Defaults to --lang es when no argument is provided.
  *
  * Outputs:
- *   public/manuals/anclora-syncxml-manual-usuario-es.pdf
- *   public/manuals/anclora-syncxml-user-manual-en.pdf
- *   public/manuals/anclora-syncxml-benutzerhandbuch-de.pdf
+ *   public/manuals/anclora-guesthub-manual-usuario-es.pdf
+ *   public/manuals/anclora-guesthub-user-manual-en.pdf
+ *   public/manuals/anclora-guesthub-benutzerhandbuch-de.pdf
  *
  * Requires: Chrome/Chromium + poppler (pdfinfo, pdftotext) + pdf-lib.
  */
@@ -32,7 +32,7 @@ if (!SUPPORTED_LANGS.includes(langArg)) {
 const LANG_CONFIG = {
   es: {
     inputFile: 'manual-usuario.md',
-    outputFile: 'anclora-syncxml-manual-usuario-es.pdf',
+    outputFile: 'anclora-guesthub-manual-usuario-es.pdf',
     htmlLang: 'es',
     tocHeading: '## Indice',
     kicker: 'Manual de Usuario',
@@ -41,7 +41,7 @@ const LANG_CONFIG = {
   },
   en: {
     inputFile: 'manual-usuario.en.md',
-    outputFile: 'anclora-syncxml-user-manual-en.pdf',
+    outputFile: 'anclora-guesthub-user-manual-en.pdf',
     htmlLang: 'en',
     tocHeading: '## Table of contents',
     kicker: 'User Manual',
@@ -50,7 +50,7 @@ const LANG_CONFIG = {
   },
   de: {
     inputFile: 'manual-usuario.de.md',
-    outputFile: 'anclora-syncxml-benutzerhandbuch-de.pdf',
+    outputFile: 'anclora-guesthub-benutzerhandbuch-de.pdf',
     htmlLang: 'de',
     tocHeading: '## Inhaltsverzeichnis',
     kicker: 'Benutzerhandbuch',
@@ -185,7 +185,7 @@ async function stampPageNumbers(input, output) {
     if (index === 0) return;
     const { width } = page.getSize();
     const label = `${index + 1}`;
-    page.drawText('Anclora SyncXML', {
+    page.drawText('Anclora GuestHub', {
       x: 54,
       y: 20,
       size: 7.5,
@@ -232,7 +232,7 @@ function buildHtml(sectionPages) {
 <head>
 <meta charset="utf-8" />
 <base href="file://${manualDir}/" />
-<title>Anclora SyncXML - ${escapeHtml(config.tocH1)}</title>
+<title>Anclora GuestHub - ${escapeHtml(config.tocH1)}</title>
 <style>
 ${styles()}
 </style>

@@ -62,6 +62,9 @@ export function createRateLimiter({ limit, windowMs }: RateLimitOptions) {
   };
 }
 
+// In-memory globalThis keys kept as legacy "syncXml*" after the Anclora
+// SyncXML → Anclora GuestHub rename (2026-08) — no persistence, rename is
+// aesthetic risk only.
 const globalLimiters = globalThis as unknown as {
   syncXmlAuthLimiter?: ReturnType<typeof createRateLimiter>;
   syncXmlPasswordRecoveryLimiter?: ReturnType<typeof createRateLimiter>;

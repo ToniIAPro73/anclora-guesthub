@@ -18,11 +18,11 @@ export function AncloraAuthCard({
   footer,
 }: AncloraAuthCardProps) {
   return (
-    <section className={`auth-card auth-card-${mode}`} aria-label={title ?? "Acceso a Anclora SyncXML"}>
+    <section className={`auth-card auth-card-${mode}`} aria-label={title ?? "Acceso a Anclora GuestHub"}>
       <header className="auth-card-header">
         <AppLogo size={50} showName={false} variant="mark" />
         <div className="auth-card-divider" aria-hidden="true" />
-        <p className="auth-card-app-name">Anclora SyncXML</p>
+        <p className="auth-card-app-name">Anclora GuestHub</p>
         {badge ? <p className="auth-card-badge">{badge}</p> : null}
       </header>
 

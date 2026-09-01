@@ -1,9 +1,9 @@
 services:
-  syncxml:
+  guesthub:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: syncxml_app
+    container_name: guesthub_app
     restart: always
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
@@ -19,7 +19,7 @@ services:
 
   db:
     image: postgres:16-alpine
-    container_name: syncxml_db
+    container_name: guesthub_db
     restart: always
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -35,7 +35,7 @@ services:
 
   caddy:
     image: caddy:2-alpine
-    container_name: syncxml_proxy
+    container_name: guesthub_proxy
     restart: always
     ports:
       - "80:80"
@@ -45,7 +45,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - syncxml
+      - guesthub
 
 volumes:
   postgres_data:

@@ -19,6 +19,9 @@ export type CookieConsent = {
   decidedAt?: string;
 };
 
+// RGPD: storage key kept as the legacy "anclora-syncxml-cookie-consent" after the
+// Anclora SyncXML → Anclora GuestHub rename (2026-08) — renaming it would wipe
+// previously recorded cookie consents. Do NOT rename.
 export const CONSENT_STORAGE_KEY = "anclora-syncxml-cookie-consent";
 export const CONSENT_REOPEN_EVENT = "anclora:cookie-preferences";
 

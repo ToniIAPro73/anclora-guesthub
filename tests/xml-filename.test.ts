@@ -11,7 +11,7 @@ describe("buildXmlDownloadFileName", () => {
       new Date(2026, 4, 23, 15, 7, 9),
     );
 
-    expect(fileName).toBe("syncxml-5992657522-230526150709.xml");
+    expect(fileName).toBe("guesthub-5992657522-230526150709.xml");
   });
 
   it("falls back to the Excel CODIGO when reference is missing", () => {
@@ -23,6 +23,6 @@ describe("buildXmlDownloadFileName", () => {
       new Date(2026, 4, 23, 15, 7, 9),
     );
 
-    expect(fileName).toBe("syncxml-0000044116-230526150709.xml");
+    expect(fileName).toBe("guesthub-0000044116-230526150709.xml");
   });
 });

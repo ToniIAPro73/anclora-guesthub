@@ -1,4 +1,4 @@
-# Contributing to Anclora SyncXML
+# Contributing to Anclora GuestHub
 
 ## Project status
 

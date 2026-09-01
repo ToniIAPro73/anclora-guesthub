@@ -1,10 +1,10 @@
-# Guion de Demostración del Piloto — Anclora SyncXML
+# Guion de Demostración del Piloto — Anclora GuestHub
 
 ## Escenario: Revisión Privacy-First de Reserva con Excel
 
 ### 1. Introducción y Posicionamiento
 *   Muestra la **Landing Page**.
-*   Explica que SyncXML es una *capa ligera de revisión*, no un PMS.
+*   Explica que GuestHub es una *capa ligera de revisión*, no un PMS.
 *   Enfatiza la **Privacidad por Defecto**: *"Tus datos se procesan en memoria y no se guardan permanentemente"*.
 
 ### 2. Acceso y Seguridad
