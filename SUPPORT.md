@@ -2,7 +2,7 @@
 
 ## Project status
 
-Anclora SyncXML is in pre-MVP / controlled validation.
+Anclora GuestHub is in pre-MVP / controlled validation.
 
 Support should reflect that reality: maintainers may prioritize correctness,
 privacy and security over speed or feature breadth.

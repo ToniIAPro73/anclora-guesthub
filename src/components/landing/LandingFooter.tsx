@@ -19,14 +19,14 @@ export function LandingFooter() {
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
               <img
-                src="/brand/anclora-syncxml.png"
+                src="/brand/anclora-guesthub.png"
                 alt={copy.aria.logoAlt}
                 width={34}
                 height={34}
                 className="h-8 w-8 rounded-full"
               />
               <span className="font-heading text-base font-semibold text-white">
-                Anclora SyncXML
+                Anclora GuestHub
               </span>
             </div>
             <p className="l-text mt-4 text-sm">

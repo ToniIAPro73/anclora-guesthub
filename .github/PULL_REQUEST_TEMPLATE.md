@@ -49,4 +49,4 @@ Todo PR debe cumplir con el flujo Git obligatorio:
 
 ---
 
-**Nota**: Este PR debe cumplir con el flujo Git obligatorio de Anclora SyncXML. Ver `AGENTS.md` para detalles.
+**Nota**: Este PR debe cumplir con el flujo Git obligatorio de Anclora GuestHub. Ver `AGENTS.md` para detalles.

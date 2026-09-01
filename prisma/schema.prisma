@@ -215,6 +215,8 @@ model SesSubmission {
 
   landlordCode      String
   establishmentCode String?
+  // Registered SES.HOSPEDAJES application name — do NOT rename (legal
+  // registration compatibility; product renamed to Anclora GuestHub 2026-08).
   applicationName   String  @default("Anclora SyncXML")
 
   operationType     String  @default("A")

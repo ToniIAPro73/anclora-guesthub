@@ -2,13 +2,13 @@
 
 <div align="center">
 
-<img src="./public/brand/anclora-syncxml.png" alt="Anclora SyncXML" width="132" />
+<img src="./public/brand/anclora-guesthub.png" alt="Anclora GuestHub" width="132" />
 
-# Anclora SyncXML
+# Anclora GuestHub
 
-### Secure conversion from Excel bookings to per-reservation XML
+### Guest management, check-in and vacation rental operations
 
-Pre-MVP premium product that transforms hospitality booking spreadsheets into normalized, per-reservation XML files ready for required reporting systems.
+Pre-MVP premium product for guest management and vacation rental operations: it transforms hospitality booking spreadsheets into normalized, per-reservation XML files ready for required reporting systems (SES.HOSPEDAJES).
 
 [Español](./README.md) · **English** · [Deutsch](./README.de.md)
 
@@ -27,7 +27,7 @@ Pre-MVP premium product that transforms hospitality booking spreadsheets into no
 
 ## What it is
 
-Anclora SyncXML converts hospitality booking Excel sheets into individual per-reservation XML files, with data validation and a controlled download flow. It is designed to simplify accommodation reporting compliance from common industry data sources.
+Anclora GuestHub (formerly Anclora SyncXML) manages guests, check-in and vacation rental operations: it converts hospitality booking Excel sheets into individual per-reservation XML files, with data validation and a controlled download flow. It is designed to simplify accommodation reporting compliance (SES.HOSPEDAJES) from common industry data sources.
 
 ## Category in the ecosystem
 
@@ -37,7 +37,7 @@ Anclora SyncXML converts hospitality booking Excel sheets into individual per-re
 | Status | Pre-MVP |
 | Brand accent | `#BFA46A` |
 | Typography | DM Sans |
-| Canonical repository | `anclora-syncxml` |
+| Canonical repository | `anclora-guesthub` |
 
 ## Key features
 
@@ -71,6 +71,10 @@ npm run dev
 - Español (default)
 - English
 - Deutsch
+
+## Rename 2026-08
+
+This product was renamed: **Anclora SyncXML → Anclora GuestHub** (repository `anclora-syncxml` → `anclora-guesthub`). Legacy technical identifiers (session/storage keys, Nexus contract values, SES registered application name, blob storage prefix) are intentionally retained for compatibility — see the Spanish README section "Legacy identifiers" and [`docs/ENVIRONMENT_VARIABLES.md`](./docs/ENVIRONMENT_VARIABLES.md).
 
 ## Documentation and governance
 

@@ -1,7 +1,10 @@
 import crypto from "crypto";
 
-const webhookUrl = process.env.NEXUS_SYNCXML_WEBHOOK_URL || "http://localhost:8000/api/internal/webhooks/syncxml-pilot";
-const webhookSecret = process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || "secret-webhook";
+// Nexus contract: X-SyncXML-Signature header, source "syncxml_landing" and the
+// webhook path are legacy contract values kept intentionally (rename 2026-08).
+// Dual-read: canonical NEXUS_GUESTHUB_* first, legacy NEXUS_SYNCXML_* fallback.
+const webhookUrl = process.env.NEXUS_GUESTHUB_WEBHOOK_URL || process.env.NEXUS_SYNCXML_WEBHOOK_URL || "http://localhost:8000/api/internal/webhooks/syncxml-pilot";
+const webhookSecret = process.env.NEXUS_GUESTHUB_WEBHOOK_SECRET || process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || "secret-webhook";
 
 async function sendSmokeRequest(name, email, usesRealGuestData, needsSesAutomaticSubmission, message) {
   const payload = {

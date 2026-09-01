@@ -1,8 +1,8 @@
 <div class="cover-page">
 
-<div class="cover-logo"><img src="screenshots/logo-anclora-syncxml.png" alt="Anclora SyncXML" /></div>
+<div class="cover-logo"><img src="screenshots/logo-anclora-guesthub.png" alt="Anclora GuestHub" /></div>
 
-<div class="cover-brand">Anclora SyncXML</div>
+<div class="cover-brand">Anclora GuestHub</div>
 
 <div class="cover-title">User Manual</div>
 
@@ -13,7 +13,7 @@
   <div class="cover-date">20 July 2026</div>
 </div>
 
-<div class="cover-disclaimer">SyncXML prepares, validates and exports structured data for the SES.HOSPEDAJES workflow. It does not replace human review, the official portal, pre-production evidence or the controller's legal judgement.</div>
+<div class="cover-disclaimer">GuestHub prepares, validates and exports structured data for the SES.HOSPEDAJES workflow. It does not replace human review, the official portal, pre-production evidence or the controller's legal judgement.</div>
 
 </div>
 
@@ -40,15 +40,15 @@
 
 ## 1. Product scope
 
-![Import screen](screenshots/syncxml-en-import.png)
+![Import screen](screenshots/guesthub-en-import.png)
 
-**Anclora SyncXML** transforms a booking Excel file into reviewable data and XML prepared for the SES.HOSPEDAJES workflow. The application is designed for controlled validation, operational error reduction and sensitive-data work under minimisation.
+**Anclora GuestHub** transforms a booking Excel file into reviewable data and XML prepared for the SES.HOSPEDAJES workflow. The application is designed for controlled validation, operational error reduction and sensitive-data work under minimisation.
 
 The current version is used in a **controlled pilot**. Access is granted after manual review and does not imply automatic approval, legal guarantee or production SES submission.
 
 ### What it supports
 
-| Need | How SyncXML helps |
+| Need | How GuestHub helps |
 | --- | --- |
 | Import bookings | Reads `.xlsx` files and detects booking, property, payment and travellers. |
 | Validate data | Marks errors and warnings before XML generation. |
@@ -123,7 +123,7 @@ Before uploading a file, confirm that the case fits the pilot.
 
 ## 4. Document import
 
-![Import workflow in English](screenshots/syncxml-en-import.png)
+![Import workflow in English](screenshots/guesthub-en-import.png)
 
 Import starts the operational workflow and applies controls before reading the file.
 
@@ -150,7 +150,7 @@ If the file is invalid, empty or unreadable, the application shows an error with
 
 ## 5. Guided review
 
-![Imported data review](screenshots/syncxml-en-review.png)
+![Imported data review](screenshots/guesthub-en-review.png)
 
 Guided review lets you correct data before generating XML.
 
@@ -186,7 +186,7 @@ Guided review lets you correct data before generating XML.
 
 ## 6. XML and download
 
-![Generated XML visual view](screenshots/syncxml-en-xml.png)
+![Generated XML visual view](screenshots/guesthub-en-xml.png)
 
 When critical errors are fixed, click **Generate XML**. The application creates a visual view and a technical view.
 
@@ -204,7 +204,7 @@ When critical errors are fixed, click **Generate XML**. The application creates 
 
 The downloaded filename uses this format:
 
-`syncxml-bookingNumber-DDMMYYHH24MISS.xml`
+`guesthub-bookingNumber-DDMMYYHH24MISS.xml`
 
 Download is blocked while critical issues remain. If only warnings remain, review them and keep internal evidence of the decision.
 
@@ -212,9 +212,9 @@ Download is blocked while critical issues remain. If only warnings remain, revie
 
 ## 7. SES and pre-check-in
 
-![SES and test pre-check-in panel](screenshots/syncxml-en-precheckin-panel.png)
+![SES and test pre-check-in panel](screenshots/guesthub-en-precheckin-panel.png)
 
-SyncXML includes assisted SES actions. Availability depends on credentials, environment and role.
+GuestHub includes assisted SES actions. Availability depends on credentials, environment and role.
 
 | Action | Control |
 | --- | --- |
@@ -229,7 +229,7 @@ Pilot users must not submit to SES. Submission routes apply role control and fai
 
 ### Test pre-check-in
 
-![Public pre-check-in form](screenshots/syncxml-en-precheckin-form.png)
+![Public pre-check-in form](screenshots/guesthub-en-precheckin-form.png)
 
 The pre-check-in panel generates temporary links to complete traveller data before review.
 
@@ -246,7 +246,7 @@ Current-mode controls:
 
 ## 8. Operational dashboard
 
-![Dashboard with consolidated booking](screenshots/syncxml-en-dashboard-detail.png)
+![Dashboard with consolidated booking](screenshots/guesthub-en-dashboard-detail.png)
 
 The dashboard lets you search bookings, review status and download XML when the configured storage mode allows it.
 
@@ -291,7 +291,7 @@ Feedback is sent to the configured Anclora team channel and does not replace for
 
 ## 10. Security and privacy
 
-SyncXML handles personal information. Use these daily controls:
+GuestHub handles personal information. Use these daily controls:
 
 | Control | Reason |
 | --- | --- |
@@ -304,7 +304,7 @@ SyncXML handles personal information. Use these daily controls:
 | Control access | Only approved users should open bookings with PII. |
 | Avoid sensitive logs | Do not copy PII into incidents, chats or tickets. |
 
-> SyncXML does not provide legal advice. The controller must approve privacy, DPA, retention and operating procedure.
+> GuestHub does not provide legal advice. The controller must approve privacy, DPA, retention and operating procedure.
 
 ---
 
@@ -337,4 +337,4 @@ SyncXML handles personal information. Use these daily controls:
 | PII | Personally identifiable information. |
 | INE | Spanish National Statistics Institute; source for municipality codes. |
 
-<div class="footer-brand">Anclora SyncXML · User Manual · Version 1.1 · 20 July 2026</div>
+<div class="footer-brand">Anclora GuestHub · User Manual · Version 1.1 · 20 July 2026</div>

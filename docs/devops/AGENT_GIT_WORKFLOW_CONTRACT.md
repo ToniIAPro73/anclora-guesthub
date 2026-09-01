@@ -9,7 +9,7 @@
 
 ## ⚠️ LECTURA OBLIGATORIA
 
-Todo agente debe leer este archivo antes de modificar el repositorio `anclora-syncxml`.
+Todo agente debe leer este archivo antes de modificar el repositorio `anclora-guesthub`.
 
 ---
 
@@ -217,7 +217,8 @@ Si encuentras un error o necesitas una excepción, comunica directamente.
 
 ---
 
-**Firmado:** Anclora SyncXML Governance  
+**Firmado:** Anclora GuestHub Governance
+
 **Vigencia:** A perpetuidad en este repositorio  
 **Última actualización:** 2026-06-06
 

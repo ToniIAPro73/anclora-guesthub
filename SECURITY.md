@@ -2,7 +2,7 @@
 
 ## Supported status
 
-Anclora SyncXML is in pre-MVP / controlled validation.
+Anclora GuestHub is in pre-MVP / controlled validation.
 
 ## Reporting a vulnerability
 

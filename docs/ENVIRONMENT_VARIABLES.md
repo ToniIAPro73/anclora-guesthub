@@ -4,6 +4,18 @@
 
 ---
 
+## Rename 2026-08 — Anclora SyncXML → Anclora GuestHub
+
+Los nombres canónicos de las variables son ahora `GUESTHUB_*` (y `NEXUS_GUESTHUB_*` para el webhook de Nexus). **La aplicación sigue leyendo como fallback los nombres legacy `SYNCXML_*` / `NEXUS_SYNCXML_*`**, por lo que los despliegues existentes no requieren cambio inmediato. Fallback crítico: `GUESTHUB_ENCRYPTION_KEY` / `GUESTHUB_FILE_ENCRYPTION_KEY` — sin el fallback legacy, los datos cifrados antes del rename serían ilegibles.
+
+Excepciones que NO se renombran:
+
+- Valor por defecto de `GUESTHUB_SES_APPLICATION` = `"Anclora SyncXML"` — nombre de aplicación registrado ante SES.HOSPEDAJES (compatibilidad legal, no renombrar).
+- Dominios `anclora-syncxml.vercel.app` y `syncxml.anclora.com` — endpoints legacy pendientes de decisión del propietario.
+- Nombres de base de datos `anclora_syncxml_dev` — decisión de despliegue, no de código.
+
+---
+
 ## Visión general
 
 | Categoría | Development | Preview | Production |
@@ -36,28 +48,28 @@ AUTH_TRUST_HOST="true"
 # Session
 SESSION_SECRET="dev-secret-openssl-rand-base64-32"
 
-# SyncXML
-SYNCXML_APP_URL="http://localhost:3000"
-SYNCXML_LOGIN_URL="http://localhost:3000/login"
-SYNCXML_ADMIN_EMAIL="antonio@anclora.com"
+# GuestHub
+GUESTHUB_APP_URL="http://localhost:3000"
+GUESTHUB_LOGIN_URL="http://localhost:3000/login"
+GUESTHUB_ADMIN_EMAIL="antonio@anclora.com"
 
 # Admin Access (for testing)
-SYNCXML_ADMIN_ACCESS_ENABLED="true"
-SYNCXML_ADMIN_ACCESS_TOKEN="dev-token"
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV="development,preview"
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
+GUESTHUB_ADMIN_ACCESS_ENABLED="true"
+GUESTHUB_ADMIN_ACCESS_TOKEN="dev-token"
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV="development,preview"
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
 ```
 
 ### Opcionales (por feature)
 
 ```env
 # Encryption (si implementado)
-SYNCXML_ENCRYPTION_KEY=""
-SYNCXML_FILE_ENCRYPTION_KEY=""
+GUESTHUB_ENCRYPTION_KEY=""
+GUESTHUB_FILE_ENCRYPTION_KEY=""
 
 # Email (si feature de pilot requests)
 RESEND_API_KEY="re_test_xxxxx"
-SYNCXML_PILOT_REQUEST_TO="antonio@anclora.com"
+GUESTHUB_PILOT_REQUEST_TO="antonio@anclora.com"
 
 # Document Ingestion (si habilitado)
 ENABLE_MINERU_PARSER="false"
@@ -71,12 +83,12 @@ BLOB_READ_WRITE_TOKEN=""
 ### Shared (same values)
 
 ```env
-SYNCXML_DISABLE_AUTH="false"
-SYNCXML_LOCAL_DEMO="false"
-SYNCXML_SES_ENV="pre"
-SYNCXML_SES_APPLICATION="Anclora SyncXML"
-SYNCXML_SES_ALLOW_PRODUCTION_SEND="false"
-SYNCXML_SES_ALLOW_INSECURE_TLS="false"
+GUESTHUB_DISABLE_AUTH="false"
+GUESTHUB_LOCAL_DEMO="false"
+GUESTHUB_SES_ENV="pre"
+GUESTHUB_SES_APPLICATION="Anclora SyncXML"
+GUESTHUB_SES_ALLOW_PRODUCTION_SEND="false"
+GUESTHUB_SES_ALLOW_INSECURE_TLS="false"
 NODE_OPTIONS="--use-system-ca"
 AUTH_TRUST_HOST="true"
 ```
@@ -84,9 +96,9 @@ AUTH_TRUST_HOST="true"
 ### Que NO incluyas en Development
 
 - ❌ `DATABASE_URL` de producción
-- ❌ `SYNCXML_SES_ENDPOINT` (dejar vacío)
-- ❌ `SYNCXML_SES_USERNAME` (dejar vacío)
-- ❌ `SYNCXML_SES_PASSWORD` (dejar vacío)
+- ❌ `GUESTHUB_SES_ENDPOINT` (dejar vacío)
+- ❌ `GUESTHUB_SES_USERNAME` (dejar vacío)
+- ❌ `GUESTHUB_SES_PASSWORD` (dejar vacío)
 - ❌ Credenciales de APIs reales (a menos que necesites)
 
 ---
@@ -99,7 +111,7 @@ AUTH_TRUST_HOST="true"
 
 ```env
 SESSION_SECRET=<GENERAR-NUEVO-VALOR>
-SYNCXML_ADMIN_ACCESS_TOKEN=<GENERAR-NUEVO-VALOR>
+GUESTHUB_ADMIN_ACCESS_TOKEN=<GENERAR-NUEVO-VALOR>
 ```
 
 ### Requeridas (URLs Preview)
@@ -107,16 +119,16 @@ SYNCXML_ADMIN_ACCESS_TOKEN=<GENERAR-NUEVO-VALOR>
 ```env
 NEXT_PUBLIC_APP_URL=https://<branch-name>-anclora-syncxml.vercel.app
 AUTH_URL=https://<branch-name>-anclora-syncxml.vercel.app
-SYNCXML_APP_URL=https://<branch-name>-anclora-syncxml.vercel.app
-SYNCXML_LOGIN_URL=https://<branch-name>-anclora-syncxml.vercel.app/login
+GUESTHUB_APP_URL=https://<branch-name>-anclora-syncxml.vercel.app
+GUESTHUB_LOGIN_URL=https://<branch-name>-anclora-syncxml.vercel.app/login
 ```
 
 ### Admin Access Preview
 
 ```env
-SYNCXML_ADMIN_ACCESS_ENABLED="true"
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV="preview,development"
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
+GUESTHUB_ADMIN_ACCESS_ENABLED="true"
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV="preview,development"
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
 ```
 
 ### Database Preview
@@ -129,22 +141,22 @@ DIRECT_URL=<PREVIEW-DB-URL>
 ### SES (VACÍO - NO COPIAR credenciales)
 
 ```env
-SYNCXML_SES_ENDPOINT=""
-SYNCXML_SES_USERNAME=""
-SYNCXML_SES_PASSWORD=""
-SYNCXML_SES_LANDLORD_CODE=""
+GUESTHUB_SES_ENDPOINT=""
+GUESTHUB_SES_USERNAME=""
+GUESTHUB_SES_PASSWORD=""
+GUESTHUB_SES_LANDLORD_CODE=""
 ```
 
 ### Shared (same as development)
 
 ```env
 AUTH_TRUST_HOST="true"
-SYNCXML_ADMIN_EMAIL="antonio@anclora.com"
-SYNCXML_ADMIN_ACCESS_REDIRECT="/app"
-SYNCXML_SES_ENV="pre"
-SYNCXML_SES_APPLICATION="Anclora SyncXML"
-SYNCXML_SES_ALLOW_PRODUCTION_SEND="false"
-SYNCXML_SES_ALLOW_INSECURE_TLS="false"
+GUESTHUB_ADMIN_EMAIL="antonio@anclora.com"
+GUESTHUB_ADMIN_ACCESS_REDIRECT="/app"
+GUESTHUB_SES_ENV="pre"
+GUESTHUB_SES_APPLICATION="Anclora SyncXML"
+GUESTHUB_SES_ALLOW_PRODUCTION_SEND="false"
+GUESTHUB_SES_ALLOW_INSECURE_TLS="false"
 NODE_OPTIONS="--use-system-ca"
 ```
 
@@ -158,9 +170,9 @@ ENABLE_MINERU_PARSER="false"
 
 ### Que NO incluyas en Preview
 
-- ❌ `SYNCXML_SES_ENDPOINT` (prodre)
-- ❌ `SYNCXML_SES_USERNAME` (prodre)
-- ❌ `SYNCXML_SES_PASSWORD` (prodre)
+- ❌ `GUESTHUB_SES_ENDPOINT` (prodre)
+- ❌ `GUESTHUB_SES_USERNAME` (prodre)
+- ❌ `GUESTHUB_SES_PASSWORD` (prodre)
 - ❌ `DATABASE_URL` de production
 - ❌ Credenciales SES reales
 
@@ -181,16 +193,16 @@ SESSION_SECRET=<GENERAR-NUEVO-VALOR-DISTINTO-A-PREVIEW>
 ```env
 NEXT_PUBLIC_APP_URL="https://anclora-syncxml.vercel.app"
 AUTH_URL="https://anclora-syncxml.vercel.app"
-SYNCXML_APP_URL="https://anclora-syncxml.vercel.app"
-SYNCXML_LOGIN_URL="https://anclora-syncxml.vercel.app/login"
+GUESTHUB_APP_URL="https://anclora-syncxml.vercel.app"
+GUESTHUB_LOGIN_URL="https://anclora-syncxml.vercel.app/login"
 ```
 
 ### Admin Access Production (STRICT)
 
 ```env
-SYNCXML_ADMIN_ACCESS_ENABLED="false"
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV="development"
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
+GUESTHUB_ADMIN_ACCESS_ENABLED="false"
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV="development"
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="false"
 ```
 
 ### Database Production
@@ -203,10 +215,10 @@ DIRECT_URL=<PRODUCTION-DB-URL>
 ### SES Production (SOLO si necesitas)
 
 ```env
-SYNCXML_SES_ENDPOINT="https://ses-api-preprod-url.com"
-SYNCXML_SES_USERNAME="<preprod-username>"
-SYNCXML_SES_PASSWORD="<preprod-password>"
-SYNCXML_SES_LANDLORD_CODE="<code>"
+GUESTHUB_SES_ENDPOINT="https://ses-api-preprod-url.com"
+GUESTHUB_SES_USERNAME="<preprod-username>"
+GUESTHUB_SES_PASSWORD="<preprod-password>"
+GUESTHUB_SES_LANDLORD_CODE="<code>"
 ```
 
 **⚠️ CRÍTICO:** SES debe apuntar a **preproducción**, NUNCA a producción real sin autorización explícita.
@@ -215,19 +227,19 @@ SYNCXML_SES_LANDLORD_CODE="<code>"
 
 ```env
 AUTH_TRUST_HOST="true"
-SYNCXML_ADMIN_EMAIL="antonio@anclora.com"
-SYNCXML_ADMIN_ACCESS_REDIRECT="/app"
-SYNCXML_SES_ENV="pre"
-SYNCXML_SES_APPLICATION="Anclora SyncXML"
-SYNCXML_SES_ALLOW_PRODUCTION_SEND="false"
-SYNCXML_SES_ALLOW_INSECURE_TLS="false"
+GUESTHUB_ADMIN_EMAIL="antonio@anclora.com"
+GUESTHUB_ADMIN_ACCESS_REDIRECT="/app"
+GUESTHUB_SES_ENV="pre"
+GUESTHUB_SES_APPLICATION="Anclora SyncXML"
+GUESTHUB_SES_ALLOW_PRODUCTION_SEND="false"
+GUESTHUB_SES_ALLOW_INSECURE_TLS="false"
 NODE_OPTIONS="--use-system-ca"
 ```
 
 ### Que NO incluyas en Production
 
-- ❌ `SYNCXML_ADMIN_ACCESS_ENABLED="true"` (must be false)
-- ❌ `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="true"` (must be false)
+- ❌ `GUESTHUB_ADMIN_ACCESS_ENABLED="true"` (must be false)
+- ❌ `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION="true"` (must be false)
 - ❌ Credenciales SES de **producción real** (usar preprod)
 - ❌ Credenciales de desarrollo
 
@@ -268,8 +280,8 @@ NODE_OPTIONS="--use-system-ca"
 | -------- | ----------- | ------- | ---------- |
 | `SESSION_SECRET` | dev-value | Generated | Generated (different) |
 | `DATABASE_URL` | Local | Preview DB | Production DB |
-| `SYNCXML_ADMIN_ACCESS_TOKEN` | dev-token | Generated | N/A (disabled) |
-| `SYNCXML_SES_*` | Vacío | Vacío | Preprod (if needed) |
+| `GUESTHUB_ADMIN_ACCESS_TOKEN` | dev-token | Generated | N/A (disabled) |
+| `GUESTHUB_SES_*` | Vacío | Vacío | Preprod (if needed) |
 | `RESEND_API_KEY` | Test key | Real (if used) | Real (if used) |
 | `BLOB_READ_WRITE_TOKEN` | Empty | Real (if used) | Real (if used) |
 
@@ -303,9 +315,9 @@ NODE_OPTIONS="--use-system-ca"
 **De Development a Preview:**
 
 ```text
-✅ SYNCXML_ADMIN_EMAIL
-✅ SYNCXML_SES_ENV
-✅ SYNCXML_SES_APPLICATION
+✅ GUESTHUB_ADMIN_EMAIL
+✅ GUESTHUB_SES_ENV
+✅ GUESTHUB_SES_APPLICATION
 ✅ NODE_OPTIONS
 ❌ SESSION_SECRET (generar nuevo)
 ❌ DATABASE_URL (usar preview DB)
@@ -315,16 +327,17 @@ NODE_OPTIONS="--use-system-ca"
 **De Preview a Production:**
 
 ```text
-✅ SYNCXML_ADMIN_EMAIL
-✅ SYNCXML_SES_APPLICATION
+✅ GUESTHUB_ADMIN_EMAIL
+✅ GUESTHUB_SES_APPLICATION
 ✅ NODE_OPTIONS
 ❌ SESSION_SECRET (generar nuevo)
 ❌ DATABASE_URL (usar prod DB)
 ❌ NEXT_PUBLIC_APP_URL (usar prod URL)
-❌ SYNCXML_ADMIN_ACCESS_ENABLED (poner false)
+❌ GUESTHUB_ADMIN_ACCESS_ENABLED (poner false)
 ```
 
 ---
 
-*Anclora SyncXML — Environment Variables Reference*  
-*v1.0 — 2026-06-05*
+*Anclora GuestHub — Environment Variables Reference*
+
+*v1.1 — 2026-08-31 (rename Anclora SyncXML → Anclora GuestHub; nombres legacy SYNCXML_* soportados como fallback)*

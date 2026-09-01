@@ -1,4 +1,4 @@
-# Branching Model — Anclora SyncXML
+# Branching Model — Anclora GuestHub
 
 **Versión:** 1.0  
 **Fecha:** 2026-06-06  
@@ -357,5 +357,6 @@ CONFIRM_PRODUCTION_PROMOTION=yes bash scripts/git-flow/promote-staging-to-produc
 
 ---
 
-*Anclora SyncXML — Branching Model v1.0*  
+*Anclora GuestHub — Branching Model v1.0*
+
 *Última actualización: 2026-06-06*

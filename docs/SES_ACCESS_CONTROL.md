@@ -24,10 +24,10 @@ Durante la fase de piloto controlado:
 ✅ **Permitido SOLO para responsable técnico (admin):**
 - Enviar a preproducción SES (`environment: "pre"`)
 - Pruebas técnicas con datos sintéticos
-- Solo si `SYNCXML_ADMIN_ACCESS_ENABLED=true`
+- Solo si `GUESTHUB_ADMIN_ACCESS_ENABLED=true`
 
 ❌ **NUNCA permitido (incluso para admin):**
-- Enviar a producción SES sin `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true`
+- Enviar a producción SES sin `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true`
 - Usar credenciales SES de producción en Preview
 - Enviar datos reales
 
@@ -39,17 +39,17 @@ Durante la fase de piloto controlado:
 
 ```env
 # Control de admin access
-SYNCXML_ADMIN_ACCESS_ENABLED=true|false
-SYNCXML_ADMIN_ACCESS_TOKEN=<token-largo-seguro>
-SYNCXML_ADMIN_ACCESS_ALLOWED_ENV=development,preview
-SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
+GUESTHUB_ADMIN_ACCESS_ENABLED=true|false
+GUESTHUB_ADMIN_ACCESS_TOKEN=<token-largo-seguro>
+GUESTHUB_ADMIN_ACCESS_ALLOWED_ENV=development,preview
+GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false
 
 # NO copiar a Preview sin confirmación:
-SYNCXML_SES_ENDPOINT=https://...
-SYNCXML_SES_USERNAME=...
-SYNCXML_SES_PASSWORD=...
-SYNCXML_SES_LANDLORD_CODE=...
-SYNCXML_SES_ALLOW_PRODUCTION_SEND=false
+GUESTHUB_SES_ENDPOINT=https://...
+GUESTHUB_SES_USERNAME=...
+GUESTHUB_SES_PASSWORD=...
+GUESTHUB_SES_LANDLORD_CODE=...
+GUESTHUB_SES_ALLOW_PRODUCTION_SEND=false
 ```
 
 ### 2. Estructura de rutas SES
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
   // Check: ¿Production y no permitida?
   if (process.env.NODE_ENV === "production" && 
-      process.env.SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION !== "true") {
+      process.env.GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION !== "true") {
     return NextResponse.json(
       { error: "Production SES access disabled" },
       { status: 403 }
@@ -162,8 +162,8 @@ function SESSubmitButton() {
 
 ta submit buttons para pilotos
 - [ ] Variables de entorno documentadas en `.env.example`
-- [ ] Production: `SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false` por defecto
-- [ ] Preview: `SYNCXML_ADMIN_ACCESS_ENABLED=true` (opcional)
+- [ ] Production: `GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=false` por defecto
+- [ ] Preview: `GUESTHUB_ADMIN_ACCESS_ENABLED=true` (opcional)
 
 ---
 
@@ -185,7 +185,7 @@ ta submit buttons para pilotos
 ```json
 {
   "error": "SES submission denied",
-  "message": "Production SES access disabled. Set SYNCXML_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true to enable.",
+  "message": "Production SES access disabled. Set GUESTHUB_ALLOW_ADMIN_ACCESS_IN_PRODUCTION=true to enable.",
   "phase": "controlled-pilot",
   "status": 403
 }
@@ -230,7 +230,7 @@ curl -X POST http://localhost:3000/api/ses/envio \
 ```bash
 curl -X POST https://preview-url.vercel.app/api/ses/envio \
   -H "Authorization: Bearer <admin-token>" \
-  -H "x-admin-token: <SYNCXML_ADMIN_ACCESS_TOKEN>" \
+  -H "x-admin-token: <GUESTHUB_ADMIN_ACCESS_TOKEN>" \
   -d '{ "batch_code": "...", "environment": "pre" }'
 
 # Esperado: 200 OK (si credenciales preproducción configuradas)
@@ -248,5 +248,6 @@ curl -X POST https://preview-url.vercel.app/api/ses/envio \
 
 ---
 
-*Anclora SyncXML — Control de Acceso SES*  
+*Anclora GuestHub — Control de Acceso SES*
+
 *v1.0 — 2026-06-05*

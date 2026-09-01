@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export const LANDING_LOCALES = ["es", "en", "de"] as const;
 export const DEFAULT_LANDING_LOCALE = "es";
+// Legacy storage key kept after the Anclora SyncXML → Anclora GuestHub rename
+// (2026-08): renaming it would reset the saved locale for returning visitors.
 export const LANDING_LOCALE_STORAGE_KEY = "anclora-syncxml-landing-locale";
 
 export type LandingLocale = (typeof LANDING_LOCALES)[number];
@@ -181,12 +183,12 @@ export type LandingCopy = {
 const dictionaries: Record<LandingLocale, LandingCopy> = {
   es: {
     meta: {
-      title: "Anclora SyncXML — Revisión de huéspedes desde Excel a XML revisable",
+      title: "Anclora GuestHub — Revisión de huéspedes desde Excel a XML revisable",
       description: "Herramienta ligera para revisar datos de huéspedes desde Excel/XLSX y generar XML revisable orientado al flujo SES.HOSPEDAJES, con privacidad por defecto y validación controlada.",
     },
     aria: {
-      home: "Anclora SyncXML — inicio",
-      logoAlt: "Logotipo de Anclora SyncXML",
+      home: "Anclora GuestHub — inicio",
+      logoAlt: "Logotipo de Anclora GuestHub",
       sections: "Secciones",
       mobileMenu: "Abrir menú de navegación",
       languageTrigger: "Cambiar idioma",
@@ -249,7 +251,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     solution: {
       eyebrow: "La solución",
       title: "Una capa ligera entre tu Excel y un XML revisable",
-      intro: "Anclora SyncXML no sustituye tus herramientas: se sitúa entre tu hoja de cálculo y el XML, ayudando a revisar y preparar los datos.",
+      intro: "Anclora GuestHub no sustituye tus herramientas: se sitúa entre tu hoja de cálculo y el XML, ayudando a revisar y preparar los datos.",
       fitLabel: "Cómo encaja",
       fitCopy: "Una capa especializada de revisión, preparación y generación de XML revisable orientada al flujo SES.HOSPEDAJES, con revisión humana antes de cualquier uso oficial.",
       clearLabel: "Para que quede claro",
@@ -304,7 +306,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     access: {
       eyebrow: "Acceso piloto",
       title: "Acceso mediante piloto controlado",
-      intro: "Anclora SyncXML todavía no se ofrece como plan SaaS cerrado. En esta fase trabajamos caso a caso para validar el encaje del producto, el flujo Excel/XLSX y la disposición de pago.",
+      intro: "Anclora GuestHub todavía no se ofrece como plan SaaS cerrado. En esta fase trabajamos caso a caso para validar el encaje del producto, el flujo Excel/XLSX y la disposición de pago.",
       recommended: "Recomendado",
       tiers: [
         { id: "piloto", title: "Piloto controlado", text: "Probamos el flujo Excel/XLSX → revisión → detección de errores → XML revisable con datos sintéticos, anonimizados o muestras controladas.", itemsLabel: "Incluye", items: ["Importación de XLSX.", "Revisión de datos de reserva y huéspedes.", "Detección de incidencias.", "Generación de XML revisable de prueba.", "Sesión de cierre.", "Informe de límites y siguientes pasos."], ctaLabel: "Solicitar piloto controlado", featured: true },
@@ -336,14 +338,14 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     },
     noPromise: {
       eyebrow: "Límites del piloto",
-      title: "Qué no promete Anclora SyncXML",
+      title: "Qué no promete Anclora GuestHub",
       intro: "La validación controlada exige ser precisos: el producto ayuda a revisar y preparar, pero no sustituye obligaciones legales ni procesos propios.",
       items: ["No garantiza cumplimiento legal.", "No evita sanciones.", "No acredita aceptación automática por SES.HOSPEDAJES.", "No es integración oficial automática.", "No sustituye PMS, gestoría ni asesoría legal.", "No debe usarse con datos reales sin cerrar seguridad, privacidad, RGPD, retención y validación técnica."],
     },
     finalCta: {
       eyebrow: "Piloto controlado",
       title: "¿Tu alojamiento trabaja con Excel y necesitas revisar mejor los datos de huéspedes?",
-      intro: "Podemos preparar una demo o piloto controlado con datos sintéticos o anonimizados para comprobar si Anclora SyncXML encaja en tu flujo actual.",
+      intro: "Podemos preparar una demo o piloto controlado con datos sintéticos o anonimizados para comprobar si Anclora GuestHub encaja en tu flujo actual.",
       note: "El piloto se plantea siempre con datos sintéticos o anonimizados. No debe usarse con datos reales sin cerrar seguridad, privacidad, RGPD, retención y validación técnica.",
     },
     footer: {
@@ -351,8 +353,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       productLabel: "Producto",
       legalLabel: "Legal",
       languageNote: "La landing está disponible en español, inglés y alemán. La aplicación puede ofrecer idiomas adicionales dentro del piloto según configuración.",
-      disclaimer: "Anclora SyncXML está en fase pre-MVP / validación controlada. Ayuda a revisar datos y preparar XML revisable, pero no constituye asesoramiento legal, no garantiza cumplimiento normativo y no acredita integración oficial con SES.HOSPEDAJES. El uso con datos reales requiere cerrar previamente seguridad, RGPD, DPA, retención y validación técnica.",
-      copyright: "© 2026 Anclora Group — Todos los derechos reservados. Anclora SyncXML forma parte del ecosistema operativo de Anclora Group.",
+      disclaimer: "Anclora GuestHub está en fase pre-MVP / validación controlada. Ayuda a revisar datos y preparar XML revisable, pero no constituye asesoramiento legal, no garantiza cumplimiento normativo y no acredita integración oficial con SES.HOSPEDAJES. El uso con datos reales requiere cerrar previamente seguridad, RGPD, DPA, retención y validación técnica.",
+      copyright: "© 2026 Anclora Group — Todos los derechos reservados. Anclora GuestHub forma parte del ecosistema operativo de Anclora Group.",
     },
     cookies: {
       bannerLabel: "Aviso de cookies",
@@ -374,7 +376,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
         eyebrow: "Cookies",
         title: "Preferencias de cookies",
         intro: "Actualmente usamos cookies técnicas necesarias para seguridad, sesión y funcionamiento del piloto. Si incorporamos analítica, preferencias persistentes o marketing, solicitaremos consentimiento previo desde el panel de preferencias.",
-        back: "Volver a Anclora SyncXML",
+        back: "Volver a Anclora GuestHub",
         sections: [["Panel de preferencias", "Puedes reabrir las preferencias en cualquier momento desde el botón flotante o desde el enlace Cookies del footer."]],
       },
     },
@@ -421,8 +423,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       modelOptions: ["Pago único", "Cuota mensual", "Setup + mensual", "Por reserva", "Servicio a medida"],
     },
     login: {
-      metaTitle: "Iniciar sesión — Anclora SyncXML",
-      metaDescription: "Acceso autorizado a Anclora SyncXML en validación controlada. La participación en el piloto se concede tras revisión manual de la solicitud.",
+      metaTitle: "Iniciar sesión — Anclora GuestHub",
+      metaDescription: "Acceso autorizado a Anclora GuestHub en validación controlada. La participación en el piloto se concede tras revisión manual de la solicitud.",
       backAria: "Volver a la landing",
       title: "Iniciar sesión",
       badge: "PILOTO CONTROLADO",
@@ -436,7 +438,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       email: "Email autorizado",
       password: "Contraseña temporal",
       credentialHelp: "Recibirás credenciales individuales por correo si tu solicitud queda aprobada para el piloto controlado.",
-      configErrorDev: "Configura SYNCXML_ADMIN_PASSWORD y SESSION_SECRET para probar el login, o usa SYNCXML_LOCAL_DEMO=true para demo local sin datos reales.",
+      configErrorDev: "Configura GUESTHUB_ADMIN_PASSWORD y SESSION_SECRET para probar el login, o usa GUESTHUB_LOCAL_DEMO=true para demo local sin datos reales.",
       configError: "La configuración de acceso no está disponible. Contacta con el administrador.",
       invalid: "Acceso no aprobado o credenciales no válidas.",
       actionError: "No se pudo completar la acción. Inténtalo de nuevo.",
@@ -452,23 +454,23 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     legal: {
       privacy: {
         eyebrow: "Privacidad",
-        title: "Política de privacidad de Anclora SyncXML",
+        title: "Política de privacidad de Anclora GuestHub",
         intro: "Resumen prudente para la fase de validación controlada. No sustituye una revisión legal antes de producción.",
-        back: "Volver a Anclora SyncXML",
+        back: "Volver a Anclora GuestHub",
         sections: [
           ["Datos tratados", "La aplicación puede procesar datos de huéspedes, documentos de identidad, fechas de nacimiento, nacionalidad, direcciones, teléfonos, correos, datos de estancia, datos de pago limitados y metadatos contractuales incluidos por el usuario."],
           ["Finalidad", "Los datos se procesan para generar, validar, revisar y exportar XML bajo instrucción del usuario."],
-          ["Modo sin persistencia", "Por defecto, Anclora SyncXML trabaja en modo privado sin almacenamiento permanente. Los datos temporales pueden eliminarse desde la acción de borrado de operación."],
+          ["Modo sin persistencia", "Por defecto, Anclora GuestHub trabaja en modo privado sin almacenamiento permanente. Los datos temporales pueden eliminarse desde la acción de borrado de operación."],
           ["Limitación", "La herramienta no presta asesoramiento legal ni garantiza por sí sola el cumplimiento normativo."],
         ],
       },
       terms: {
         eyebrow: "Términos",
-        title: "Términos de uso de Anclora SyncXML",
+        title: "Términos de uso de Anclora GuestHub",
         intro: "Condiciones de uso para una herramienta en piloto controlado y con revisión humana.",
-        back: "Volver a Anclora SyncXML",
+        back: "Volver a Anclora GuestHub",
         sections: [
-          ["Objeto", "Anclora SyncXML ayuda a preparar, validar, revisar y exportar XML a partir de datos de reservas y huéspedes."],
+          ["Objeto", "Anclora GuestHub ayuda a preparar, validar, revisar y exportar XML a partir de datos de reservas y huéspedes."],
           ["Uso permitido", "Puede usarse para operaciones internas autorizadas, revisión humana y exportación controlada."],
           ["Responsabilidad", "El usuario responde de la legitimidad de los datos importados y de la revisión previa a consolidar o exportar."],
           ["Revisión humana", "Toda consolidación y XML exportado debe revisarse por una persona antes de uso oficial o comunicación a terceros."],
@@ -478,12 +480,12 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
   },
   en: {
     meta: {
-      title: "Anclora SyncXML — Review guest data from Excel to reviewable XML",
+      title: "Anclora GuestHub — Review guest data from Excel to reviewable XML",
       description: "A lightweight tool to review guest data from Excel/XLSX and prepare reviewable XML for the SES.HOSPEDAJES workflow, with privacy by default and controlled validation.",
     },
     aria: {
-      home: "Anclora SyncXML — home",
-      logoAlt: "Anclora SyncXML logo",
+      home: "Anclora GuestHub — home",
+      logoAlt: "Anclora GuestHub logo",
       sections: "Sections",
       mobileMenu: "Open navigation menu",
       languageTrigger: "Change language",
@@ -546,7 +548,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     solution: {
       eyebrow: "The solution",
       title: "A lightweight layer between your Excel and a reviewable XML",
-      intro: "Anclora SyncXML does not replace your tools: it sits between your spreadsheet and the XML, helping you review and prepare the data.",
+      intro: "Anclora GuestHub does not replace your tools: it sits between your spreadsheet and the XML, helping you review and prepare the data.",
       fitLabel: "How it fits",
       fitCopy: "A specialized layer for review, preparation and generation of reviewable XML for the SES.HOSPEDAJES workflow, with human review before any official use.",
       clearLabel: "To be clear",
@@ -601,7 +603,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     access: {
       eyebrow: "Pilot access",
       title: "Access through a controlled pilot",
-      intro: "Anclora SyncXML is not offered as a finished SaaS plan yet. At this stage we work case by case to validate product fit, the Excel/XLSX flow and willingness to pay.",
+      intro: "Anclora GuestHub is not offered as a finished SaaS plan yet. At this stage we work case by case to validate product fit, the Excel/XLSX flow and willingness to pay.",
       recommended: "Recommended",
       tiers: [
         { id: "piloto", title: "Controlled pilot", text: "We test the Excel/XLSX → review → issue detection → reviewable XML flow with synthetic, anonymized or controlled samples.", itemsLabel: "Includes", items: ["XLSX import.", "Booking and guest data review.", "Issue detection.", "Test reviewable XML generation.", "Closing session.", "Limits and next-steps report."], ctaLabel: "Request controlled pilot", featured: true },
@@ -633,14 +635,14 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     },
     noPromise: {
       eyebrow: "Pilot limits",
-      title: "What Anclora SyncXML does not promise",
+      title: "What Anclora GuestHub does not promise",
       intro: "Controlled validation requires precision: the product helps review and prepare, but it does not replace legal obligations or your own processes.",
       items: ["It does not guarantee legal compliance.", "It does not prevent penalties.", "It does not certify automatic acceptance by SES.HOSPEDAJES.", "It is not an official automatic integration.", "It does not replace a PMS, agency service or legal advisor.", "It must not be used with real data before security, privacy, GDPR, retention and technical validation are closed."],
     },
     finalCta: {
       eyebrow: "Controlled pilot",
       title: "Does your accommodation business work with Excel and need better guest-data review?",
-      intro: "We can prepare a demo or controlled pilot with synthetic or anonymized data to check whether Anclora SyncXML fits your current workflow.",
+      intro: "We can prepare a demo or controlled pilot with synthetic or anonymized data to check whether Anclora GuestHub fits your current workflow.",
       note: "The pilot is always based on synthetic or anonymized data. It must not be used with real data before security, privacy, GDPR, retention and technical validation are closed.",
     },
     footer: {
@@ -648,8 +650,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       productLabel: "Product",
       legalLabel: "Legal",
       languageNote: "This landing page is available in Spanish, English and German. The application may offer additional languages within the controlled pilot depending on configuration.",
-      disclaimer: "Anclora SyncXML is in pre-MVP / controlled validation. It helps review data and prepare reviewable XML, but it is not legal advice, does not guarantee regulatory compliance and does not certify official integration with SES.HOSPEDAJES. Use with real data requires prior closure of security, GDPR, DPA, retention and technical validation.",
-      copyright: "© 2026 Anclora Group — All rights reserved. Anclora SyncXML is part of the Anclora Group operating ecosystem.",
+      disclaimer: "Anclora GuestHub is in pre-MVP / controlled validation. It helps review data and prepare reviewable XML, but it is not legal advice, does not guarantee regulatory compliance and does not certify official integration with SES.HOSPEDAJES. Use with real data requires prior closure of security, GDPR, DPA, retention and technical validation.",
+      copyright: "© 2026 Anclora Group — All rights reserved. Anclora GuestHub is part of the Anclora Group operating ecosystem.",
     },
     cookies: {
       bannerLabel: "Cookie notice",
@@ -671,7 +673,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
         eyebrow: "Cookies",
         title: "Cookie preferences",
         intro: "We currently use technical cookies required for security, session and pilot operation. If we add analytics, persistent preferences or marketing, we will request consent through the preferences panel.",
-        back: "Back to Anclora SyncXML",
+        back: "Back to Anclora GuestHub",
         sections: [["Preferences panel", "You can reopen preferences at any time from the floating button or the Cookies link in the footer."]],
       },
     },
@@ -718,8 +720,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       modelOptions: ["One-off payment", "Monthly fee", "Setup + monthly", "Per booking", "Tailored service"],
     },
     login: {
-      metaTitle: "Sign in — Anclora SyncXML",
-      metaDescription: "Authorized access to Anclora SyncXML in controlled validation. Pilot participation is granted after manual review of the request.",
+      metaTitle: "Sign in — Anclora GuestHub",
+      metaDescription: "Authorized access to Anclora GuestHub in controlled validation. Pilot participation is granted after manual review of the request.",
       backAria: "Back to landing",
       title: "Sign in",
       badge: "CONTROLLED PILOT",
@@ -733,7 +735,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       email: "Authorized email",
       password: "Temporary password",
       credentialHelp: "You will receive individual credentials by email if your request is approved for the controlled pilot.",
-      configErrorDev: "Set SYNCXML_ADMIN_PASSWORD and SESSION_SECRET to test login, or use SYNCXML_LOCAL_DEMO=true for a local demo without real data.",
+      configErrorDev: "Set GUESTHUB_ADMIN_PASSWORD and SESSION_SECRET to test login, or use GUESTHUB_LOCAL_DEMO=true for a local demo without real data.",
       configError: "Access configuration is not available. Contact the administrator.",
       invalid: "Access not approved or credentials are invalid.",
       actionError: "The action could not be completed. Try again.",
@@ -749,23 +751,23 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     legal: {
       privacy: {
         eyebrow: "Privacy",
-        title: "Anclora SyncXML Privacy Policy",
+        title: "Anclora GuestHub Privacy Policy",
         intro: "Prudent summary for the controlled validation phase. It does not replace legal review before production.",
-        back: "Back to Anclora SyncXML",
+        back: "Back to Anclora GuestHub",
         sections: [
           ["Data processed", "The application may process guest data, identity documents, birth dates, nationality, addresses, phone numbers, emails, stay data, limited payment data and contractual metadata provided by the user."],
           ["Purpose", "Data is processed to generate, validate, review and export XML under the user's instruction."],
-          ["No-storage mode", "By default, Anclora SyncXML runs in private no-storage mode. Temporary data can be deleted with the operation clear action."],
+          ["No-storage mode", "By default, Anclora GuestHub runs in private no-storage mode. Temporary data can be deleted with the operation clear action."],
           ["Limitation", "The tool does not provide legal advice and does not by itself guarantee regulatory compliance."],
         ],
       },
       terms: {
         eyebrow: "Terms",
-        title: "Anclora SyncXML Terms of Use",
+        title: "Anclora GuestHub Terms of Use",
         intro: "Terms for a controlled-pilot tool with human review.",
-        back: "Back to Anclora SyncXML",
+        back: "Back to Anclora GuestHub",
         sections: [
-          ["Purpose", "Anclora SyncXML helps prepare, validate, review and export XML from booking and guest data."],
+          ["Purpose", "Anclora GuestHub helps prepare, validate, review and export XML from booking and guest data."],
           ["Permitted use", "It may be used for authorized internal operations, human review and controlled export."],
           ["Responsibility", "The user is responsible for the legitimacy of imported data and for reviewing it before consolidation or export."],
           ["Human review", "Every consolidation and exported XML must be reviewed by a person before official use or third-party submission."],
@@ -775,12 +777,12 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
   },
   de: {
     meta: {
-      title: "Anclora SyncXML — Gästedaten aus Excel zu prüfbarem XML",
+      title: "Anclora GuestHub — Gästedaten aus Excel zu prüfbarem XML",
       description: "Ein schlankes Werkzeug zur Prüfung von Gästedaten aus Excel/XLSX und zur Vorbereitung prüfbarer XML-Dateien für den SES.HOSPEDAJES-Ablauf, mit Datenschutz als Standard und kontrollierter Validierung.",
     },
     aria: {
-      home: "Anclora SyncXML — Startseite",
-      logoAlt: "Logo von Anclora SyncXML",
+      home: "Anclora GuestHub — Startseite",
+      logoAlt: "Logo von Anclora GuestHub",
       sections: "Abschnitte",
       mobileMenu: "Navigationsmenü öffnen",
       languageTrigger: "Sprache ändern",
@@ -843,7 +845,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     solution: {
       eyebrow: "Die Lösung",
       title: "Eine schlanke Schicht zwischen Excel und prüfbarem XML",
-      intro: "Anclora SyncXML ersetzt deine Werkzeuge nicht: Es sitzt zwischen Tabelle und XML und hilft, Daten zu prüfen und vorzubereiten.",
+      intro: "Anclora GuestHub ersetzt deine Werkzeuge nicht: Es sitzt zwischen Tabelle und XML und hilft, Daten zu prüfen und vorzubereiten.",
       fitLabel: "So passt es",
       fitCopy: "Eine spezialisierte Schicht für Prüfung, Vorbereitung und Erstellung prüfbarer XML-Dateien für den SES.HOSPEDAJES-Ablauf, mit menschlicher Prüfung vor jeder offiziellen Nutzung.",
       clearLabel: "Zur Klarstellung",
@@ -898,7 +900,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     access: {
       eyebrow: "Pilotzugang",
       title: "Zugang über kontrollierten Pilotbetrieb",
-      intro: "Anclora SyncXML wird noch nicht als fertiger SaaS-Plan angeboten. In dieser Phase arbeiten wir fallweise, um Produktpassung, Excel/XLSX-Ablauf und Zahlungsbereitschaft zu validieren.",
+      intro: "Anclora GuestHub wird noch nicht als fertiger SaaS-Plan angeboten. In dieser Phase arbeiten wir fallweise, um Produktpassung, Excel/XLSX-Ablauf und Zahlungsbereitschaft zu validieren.",
       recommended: "Empfohlen",
       tiers: [
         { id: "piloto", title: "Kontrollierter Pilot", text: "Wir testen den Ablauf Excel/XLSX → Prüfung → Fehlererkennung → prüfbares XML mit synthetischen, anonymisierten oder kontrollierten Beispielen.", itemsLabel: "Enthält", items: ["XLSX-Import.", "Prüfung von Buchungs- und Gästedaten.", "Erkennung von Auffälligkeiten.", "Erstellung eines prüfbaren Test-XML.", "Abschlusssitzung.", "Bericht zu Grenzen und nächsten Schritten."], ctaLabel: "Kontrollierten Pilot anfragen", featured: true },
@@ -930,14 +932,14 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     },
     noPromise: {
       eyebrow: "Grenzen des Piloten",
-      title: "Was Anclora SyncXML nicht verspricht",
+      title: "Was Anclora GuestHub nicht verspricht",
       intro: "Kontrollierte Validierung verlangt Präzision: Das Produkt hilft bei Prüfung und Vorbereitung, ersetzt aber keine rechtlichen Pflichten oder eigenen Prozesse.",
       items: ["Es garantiert keine rechtliche Konformität.", "Es verhindert keine Sanktionen.", "Es bestätigt keine automatische Annahme durch SES.HOSPEDAJES.", "Es ist keine offizielle automatische Integration.", "Es ersetzt weder PMS noch Verwaltung noch Rechtsberatung.", "Es darf nicht mit echten Daten genutzt werden, bevor Sicherheit, Datenschutz, DSGVO, Aufbewahrung und technische Validierung geklärt sind."],
     },
     finalCta: {
       eyebrow: "Kontrollierter Pilotbetrieb",
       title: "Arbeitet dein Unterkunftsbetrieb mit Excel und braucht bessere Prüfung von Gästedaten?",
-      intro: "Wir können eine Demo oder einen kontrollierten Pilotbetrieb mit synthetischen oder anonymisierten Daten vorbereiten, um zu prüfen, ob Anclora SyncXML zu deinem aktuellen Ablauf passt.",
+      intro: "Wir können eine Demo oder einen kontrollierten Pilotbetrieb mit synthetischen oder anonymisierten Daten vorbereiten, um zu prüfen, ob Anclora GuestHub zu deinem aktuellen Ablauf passt.",
       note: "Der Pilotbetrieb basiert immer auf synthetischen oder anonymisierten Daten. Er darf nicht mit echten Daten genutzt werden, bevor Sicherheit, Datenschutz, DSGVO, Aufbewahrung und technische Validierung geklärt sind.",
     },
     footer: {
@@ -945,8 +947,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       productLabel: "Produkt",
       legalLabel: "Rechtliches",
       languageNote: "Diese Landingpage ist auf Spanisch, Englisch und Deutsch verfügbar. Die Anwendung kann im kontrollierten Pilotbetrieb je nach Konfiguration weitere Sprachen anbieten.",
-      disclaimer: "Anclora SyncXML befindet sich in der Pre-MVP-Phase / kontrollierten Validierung. Es hilft bei der Prüfung von Daten und der Vorbereitung prüfbarer XML-Dateien, stellt aber keine Rechtsberatung dar, garantiert keine regulatorische Konformität und bestätigt keine offizielle Integration mit SES.HOSPEDAJES. Die Nutzung mit echten Daten erfordert zuvor geklärte Sicherheit, DSGVO, DPA, Aufbewahrung und technische Validierung.",
-      copyright: "© 2026 Anclora Group — Alle Rechte vorbehalten. Anclora SyncXML ist Teil des operativen Ökosystems der Anclora Group.",
+      disclaimer: "Anclora GuestHub befindet sich in der Pre-MVP-Phase / kontrollierten Validierung. Es hilft bei der Prüfung von Daten und der Vorbereitung prüfbarer XML-Dateien, stellt aber keine Rechtsberatung dar, garantiert keine regulatorische Konformität und bestätigt keine offizielle Integration mit SES.HOSPEDAJES. Die Nutzung mit echten Daten erfordert zuvor geklärte Sicherheit, DSGVO, DPA, Aufbewahrung und technische Validierung.",
+      copyright: "© 2026 Anclora Group — Alle Rechte vorbehalten. Anclora GuestHub ist Teil des operativen Ökosystems der Anclora Group.",
     },
     cookies: {
       bannerLabel: "Cookie-Hinweis",
@@ -968,7 +970,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
         eyebrow: "Cookies",
         title: "Cookie-Einstellungen",
         intro: "Derzeit verwenden wir technische Cookies, die für Sicherheit, Sitzung und Pilotbetrieb erforderlich sind. Wenn wir Analyse, persistente Präferenzen oder Marketing hinzufügen, holen wir die Zustimmung über das Präferenzpanel ein.",
-        back: "Zurück zu Anclora SyncXML",
+        back: "Zurück zu Anclora GuestHub",
         sections: [["Präferenzpanel", "Du kannst die Einstellungen jederzeit über den schwebenden Button oder den Cookies-Link im Footer erneut öffnen."]],
       },
     },
@@ -1015,8 +1017,8 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       modelOptions: ["Einmalzahlung", "Monatliche Gebühr", "Setup + monatlich", "Pro Buchung", "Individueller Service"],
     },
     login: {
-      metaTitle: "Anmelden — Anclora SyncXML",
-      metaDescription: "Autorisierter Zugang zu Anclora SyncXML in kontrollierter Validierung. Die Teilnahme am Pilotbetrieb wird nach manueller Prüfung der Anfrage gewährt.",
+      metaTitle: "Anmelden — Anclora GuestHub",
+      metaDescription: "Autorisierter Zugang zu Anclora GuestHub in kontrollierter Validierung. Die Teilnahme am Pilotbetrieb wird nach manueller Prüfung der Anfrage gewährt.",
       backAria: "Zurück zur Landingpage",
       title: "Anmelden",
       badge: "KONTROLLIERTER PILOT",
@@ -1030,7 +1032,7 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
       email: "Autorisierte E-Mail",
       password: "Temporäres Passwort",
       credentialHelp: "Du erhältst individuelle Zugangsdaten per E-Mail, wenn deine Anfrage für den kontrollierten Pilotbetrieb genehmigt wird.",
-      configErrorDev: "Konfiguriere SYNCXML_ADMIN_PASSWORD und SESSION_SECRET zum Testen des Logins oder nutze SYNCXML_LOCAL_DEMO=true für eine lokale Demo ohne echte Daten.",
+      configErrorDev: "Konfiguriere GUESTHUB_ADMIN_PASSWORD und SESSION_SECRET zum Testen des Logins oder nutze GUESTHUB_LOCAL_DEMO=true für eine lokale Demo ohne echte Daten.",
       configError: "Die Zugangskonfiguration ist nicht verfügbar. Kontaktiere den Administrator.",
       invalid: "Zugang nicht genehmigt oder Zugangsdaten ungültig.",
       actionError: "Die Aktion konnte nicht abgeschlossen werden. Versuche es erneut.",
@@ -1046,23 +1048,23 @@ const dictionaries: Record<LandingLocale, LandingCopy> = {
     legal: {
       privacy: {
         eyebrow: "Datenschutz",
-        title: "Datenschutzerklärung für Anclora SyncXML",
+        title: "Datenschutzerklärung für Anclora GuestHub",
         intro: "Vorsichtige Zusammenfassung für die Phase der kontrollierten Validierung. Sie ersetzt keine rechtliche Prüfung vor Produktion.",
-        back: "Zurück zu Anclora SyncXML",
+        back: "Zurück zu Anclora GuestHub",
         sections: [
           ["Verarbeitete Daten", "Die Anwendung kann Gästedaten, Ausweisdokumente, Geburtsdaten, Nationalität, Adressen, Telefonnummern, E-Mails, Aufenthaltsdaten, begrenzte Zahlungsdaten und Vertragsmetadaten verarbeiten, die der Nutzer bereitstellt."],
           ["Zweck", "Die Daten werden zur Erstellung, Validierung, Prüfung und zum Export von XML nach Anweisung des Nutzers verarbeitet."],
-          ["Modus ohne Speicherung", "Standardmäßig arbeitet Anclora SyncXML im privaten Modus ohne dauerhafte Speicherung. Temporäre Daten können über die Aktion zum Löschen des Vorgangs entfernt werden."],
+          ["Modus ohne Speicherung", "Standardmäßig arbeitet Anclora GuestHub im privaten Modus ohne dauerhafte Speicherung. Temporäre Daten können über die Aktion zum Löschen des Vorgangs entfernt werden."],
           ["Begrenzung", "Das Tool bietet keine Rechtsberatung und garantiert für sich allein keine regulatorische Konformität."],
         ],
       },
       terms: {
         eyebrow: "Bedingungen",
-        title: "Nutzungsbedingungen für Anclora SyncXML",
+        title: "Nutzungsbedingungen für Anclora GuestHub",
         intro: "Bedingungen für ein Werkzeug im kontrollierten Pilotbetrieb mit menschlicher Prüfung.",
-        back: "Zurück zu Anclora SyncXML",
+        back: "Zurück zu Anclora GuestHub",
         sections: [
-          ["Zweck", "Anclora SyncXML unterstützt die Vorbereitung, Validierung, Prüfung und den XML-Export aus Buchungs- und Gästedaten."],
+          ["Zweck", "Anclora GuestHub unterstützt die Vorbereitung, Validierung, Prüfung und den XML-Export aus Buchungs- und Gästedaten."],
           ["Erlaubte Nutzung", "Die Nutzung ist für autorisierte interne Vorgänge, menschliche Prüfung und kontrollierten Export vorgesehen."],
           ["Verantwortung", "Der Nutzer ist für die Rechtmäßigkeit der importierten Daten und die Prüfung vor Konsolidierung oder Export verantwortlich."],
           ["Menschliche Prüfung", "Jede Konsolidierung und exportierte XML-Datei muss vor offizieller Nutzung oder Übermittlung an Dritte von einer Person geprüft werden."],

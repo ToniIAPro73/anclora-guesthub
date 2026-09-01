@@ -69,7 +69,7 @@ Aplicaciones premium:
 - `anclora-data-lab`
 - `anclora-energyscan`
 - `anclora-talent` *(estado: pausado, fuera de alcance activo desde 2026-08 — ver `docs/governance/ecosystem-repos.json`)*
-- `anclora-syncxml` *(añadida 2026-08, verificada contra código real, estado `pre-mvp`)*
+- `anclora-guesthub` *(añadida 2026-08, verificada contra código real, estado `pre-mvp`)*
 - `anclora-groundsync` *(añadida 2026-08-03, verificada contra código real — app interna de uso operativo pero gobernada como producto independiente, comparable a `anclora-impulso`; decisión explícita del cliente)*
 
 Aplicaciones ultra premium:
@@ -155,7 +155,7 @@ Documentos de apoyo no normativos:
 - `anclora-synergi`
 - `anclora-data-lab`
 - `anclora-energyscan`
-- `anclora-syncxml`
+- `anclora-guesthub`
 - `anclora-groundsync`
 - `anclora-talent` *(pausado — ver nota de estado arriba)*
 - `anclora-private-estates`
@@ -245,13 +245,13 @@ Al crear una app nueva:
 | `anclora-fiscal` | Interna | Pendiente de auditoría de locales | `dark` confirmado (navy `#070C13` + dorado `#D7A957`), `light` no verificado | Base + interno |
 | `anclora-visionflow` | Interna | Pendiente de auditoría de locales | `dark/light` confirmado — ambos modos definidos en el repo real (`.dark { --avf-accent }` y `:root` claro) | Base + interno |
 | `anclora-linguo-cam` | Interna | Pendiente de auditoría de locales | `dark/light` confirmado — ambos modos definidos en `index.css` real; acento lima `#59B635` asignado 2026-08-02 al incorporarla (resuelve colisión exacta con `advisor-ai`, ver `ANCLORA_BRANDING_MASTER_CONTRACT.md`) | Base + interno |
-| `anclora-syncxml` | Premium | Pendiente de auditoría de locales | `dark` confirmado (navy `#070A12` + dorado apagado `#BFA46A`), `light` no verificado en esta sesión | Base + premium |
+| `anclora-guesthub` | Premium | Pendiente de auditoría de locales | `dark` confirmado (navy `#070A12` + dorado apagado `#BFA46A`), `light` no verificado en esta sesión | Base + premium |
 | `anclora-groundsync` | Premium | Pendiente de auditoría de locales | `dark/light` confirmado — ambos modos definidos en `src/index.css` real (`:root` dark + `:root[data-theme='light']`); accent `#afd2fa`/`#2f6fd9` | Base + premium |
 | `anclora-portfolio` | Portfolio / showcase | `es`, `en` | tema editorial único o dual diseñado | Base + portfolio |
 | `anclora-azure-bay-landing-page` | Portfolio / showcase | `es`, `en` | tema editorial único — nombre de repo corregido 2026-08, icono comparte lockup de Private Estates (navbar corporativo), acento se queda en portfolio genérico (pieza de demo, no producto) | Base + portfolio |
 | `anclora-portfolio-showcase` | Portfolio / showcase | `es`, `en` | tema editorial único, hereda de `anclora-portfolio` | Base + portfolio |
 | `anclora-energyscan-showcase` | Portfolio / showcase (excepción) | `es`, `en`, `de` | hereda tema completo de `anclora-energyscan` (verde `#00DC82`), NO el editorial genérico — es el producto real en MVP mostrándose | Base + portfolio |
-| `anclora-syncxml-showcase` | Portfolio / showcase (excepción) | Pendiente de auditoría | hereda tema completo de `anclora-syncxml` (dorado `#BFA46A`), mismo criterio que energyscan-showcase | Base + portfolio |
+| `anclora-syncxml-showcase` | Portfolio / showcase (excepción) | Pendiente de auditoría | hereda tema completo de `anclora-guesthub` (dorado `#BFA46A`), mismo criterio que energyscan-showcase | Base + portfolio |
 | `anclora-fiscal-showcase` | Portfolio / showcase | Pendiente de auditoría | tema editorial único genérico | Base + portfolio |
 | `anclora-group-landing` | Portfolio / showcase (excepción) | Pendiente de auditoría de locales | identidad brand-book completa propia (navy `#0A1F3D`, signal-blue `#5FA8FF`, command-purple `#6C63FF`) — NO el editorial genérico, verificado 2026-08 contra `src/styles/tokens.css` real | Base + portfolio |
 | `anclora-playa-viva-uniestate` | Portfolio / showcase | `es`, `en` | tema editorial único | Base + portfolio |

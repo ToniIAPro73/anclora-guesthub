@@ -1,10 +1,10 @@
-# Criterios de Éxito del Piloto — Anclora SyncXML
+# Criterios de Éxito del Piloto — Anclora GuestHub
 
 Para considerar que el piloto con un participante ha sido exitoso, se deben cumplir los siguientes hitos:
 
 ## 1. Éxito Operativo
 *   **Importación Exitosa**: El usuario ha podido subir su propio Excel/CSV (ajustado a la plantilla o manual) sin errores de sistema.
-*   **Detección de Valor**: El usuario ha identificado al menos un error real en sus datos sintéticos gracias a las reglas de validación de SyncXML.
+*   **Detección de Valor**: El usuario ha identificado al menos un error real en sus datos sintéticos gracias a las reglas de validación de GuestHub.
 *   **Paquete Local**: El usuario ha descargado y comprendido el contenido del paquete de conservación.
 
 ## 2. Éxito de Privacidad
