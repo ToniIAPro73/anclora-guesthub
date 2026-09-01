@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync, rmSync } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -9,12 +9,27 @@ const outDir = path.join(root, "docs", "manual", "screenshots");
 // Dual-read: canonical GUESTHUB_CAPTURE_URL first, legacy SYNCXML_CAPTURE_URL
 // fallback (rename 2026-08). Storage keys/cookies below stay legacy intentionally.
 const baseUrl = process.env.GUESTHUB_CAPTURE_URL ?? process.env.SYNCXML_CAPTURE_URL ?? "http://127.0.0.1:3021";
+function findPlaywrightChromium() {
+  const cacheDir = path.join(process.env.HOME ?? "", ".cache", "ms-playwright");
+  if (!existsSync(cacheDir)) return undefined;
+  const entries = readdirSync(cacheDir)
+    .filter((name) => name.startsWith("chromium-"))
+    .sort()
+    .reverse();
+  for (const entry of entries) {
+    const candidate = path.join(cacheDir, entry, "chrome-linux64", "chrome");
+    if (existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
+
 const chrome = [
   "/usr/bin/google-chrome",
   "/usr/bin/google-chrome-stable",
   "/usr/bin/chromium",
   "/usr/bin/chromium-browser",
-].find((candidate) => existsSync(candidate));
+  findPlaywrightChromium(),
+].find((candidate) => candidate && existsSync(candidate));
 
 if (!chrome) throw new Error("No Chrome/Chromium binary found.");
 mkdirSync(outDir, { recursive: true });

@@ -18,6 +18,6 @@ This folder is the canonical publication folder for the latest user manuals.
 
 `tmp/manual-pdf/` is not a publication folder. It may contain local or legacy rendering artifacts and must not be treated as the latest version.
 
-## Pending regeneration (rename 2026-08)
+## Rename regeneration (2026-09-01)
 
-After the Anclora SyncXML → Anclora GuestHub rename, the published files must be regenerated with the command above (requires Chrome/Chromium for PDF rendering). Until then, the previous `anclora-syncxml-*.{pdf,html}` artifacts remain in this folder as legacy outputs and should be replaced (`git rm`) once the regenerated `anclora-guesthub-*` files exist.
+Regenerated post-rename (Anclora SyncXML → Anclora GuestHub). Legacy `anclora-syncxml-*.{pdf,html}` artifacts have been removed from this folder.

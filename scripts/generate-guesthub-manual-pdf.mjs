@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,12 +34,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const manualDir = path.join(root, "docs", "manual");
 const outputDir = path.join(root, "public", "manuals");
+function findPlaywrightChromium() {
+  const cacheDir = path.join(process.env.HOME ?? "", ".cache", "ms-playwright");
+  if (!existsSync(cacheDir)) return undefined;
+  const entries = readdirSync(cacheDir)
+    .filter((name) => name.startsWith("chromium-"))
+    .sort()
+    .reverse();
+  for (const entry of entries) {
+    const candidate = path.join(cacheDir, entry, "chrome-linux64", "chrome");
+    if (existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
+
 const chrome = [
   "/usr/bin/google-chrome",
   "/usr/bin/google-chrome-stable",
   "/usr/bin/chromium",
   "/usr/bin/chromium-browser",
-].find((candidate) => existsSync(candidate));
+  findPlaywrightChromium(),
+].find((candidate) => candidate && existsSync(candidate));
 
 if (!chrome) throw new Error("No Chrome/Chromium binary found for PDF rendering.");
 mkdirSync(outputDir, { recursive: true });
