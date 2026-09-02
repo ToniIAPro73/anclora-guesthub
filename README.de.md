@@ -6,9 +6,9 @@
 
 # Anclora GuestHub
 
-### Gaestemanagement, Check-in und Betrieb von Ferienunterkuenften
+### Gästemanagement, Check-in und Betrieb von Ferienunterkünften
 
-Premium-Produkt in der Pre-MVP-Phase fuer Gaestemanagement und Ferienvermietung: es wandelt Excel-Tabellen mit Unterkunftsbuchungen in normalisierte XML-Dateien pro Reservierung um, bereit fuer die erforderlichen Meldesysteme (SES.HOSPEDAJES).
+Premium-Produkt in der Pre-MVP-Phase für Gästemanagement und Ferienvermietung: es wandelt Excel-Tabellen mit Unterkunftsbuchungen in normalisierte XML-Dateien pro Reservierung um, bereit für die erforderlichen Meldesysteme (SES.HOSPEDAJES).
 
 [Español](./README.md) · [English](./README.en.md) · **Deutsch**
 
@@ -27,7 +27,7 @@ Premium-Produkt in der Pre-MVP-Phase fuer Gaestemanagement und Ferienvermietung:
 
 ## Was es ist
 
-Anclora GuestHub (vormals Anclora SyncXML) verwaltet Gaeste, Check-in und den Betrieb von Ferienunterkuenften: es wandelt Excel-Tabellen mit Unterkunftsbuchungen in einzelne XML-Dateien pro Reservierung um, mit Datenvalidierung und kontrolliertem Download-Ablauf. Es soll die Meldepflicht (SES.HOSPEDAJES) fuer Beherbergungsbetriebe anhand gaengiger Branchendatenquellen vereinfachen.
+Anclora GuestHub (vormals Anclora SyncXML) verwaltet Gäste, Check-in und den Betrieb von Ferienunterkünften: es wandelt Excel-Tabellen mit Unterkunftsbuchungen in einzelne XML-Dateien pro Reservierung um, mit Datenvalidierung und kontrolliertem Download-Ablauf. Es soll die Meldepflicht (SES.HOSPEDAJES) für Beherbergungsbetriebe anhand gängiger Branchendatenquellen vereinfachen.
 
 ## Kategorie im Ökosystem
 
@@ -74,7 +74,7 @@ npm run dev
 
 ## Umbenennung 2026-08
 
-Dieses Produkt wurde umbenannt: **Anclora SyncXML → Anclora GuestHub** (Repository `anclora-syncxml` → `anclora-guesthub`). Legacy-Identifikatoren (Session-/Storage-Schluessel, Nexus-Vertragswerte, registrierter SES-Anwendungsname, Blob-Storage-Praefix) bleiben aus Kompatibilitaetsgruenden erhalten — siehe Abschnitt "Legacy identifiers" im spanischen README und [`docs/ENVIRONMENT_VARIABLES.md`](./docs/ENVIRONMENT_VARIABLES.md).
+Dieses Produkt wurde umbenannt: **Anclora SyncXML → Anclora GuestHub** (Repository `anclora-syncxml` → `anclora-guesthub`). Legacy-Identifikatoren (Session-/Storage-Schlüssel, Nexus-Vertragswerte, registrierter SES-Anwendungsname, Blob-Storage-Präfix) bleiben aus Kompatibilitätsgründen erhalten — siehe Abschnitt "Legacy identifiers" im spanischen README und [`docs/ENVIRONMENT_VARIABLES.md`](./docs/ENVIRONMENT_VARIABLES.md).
 
 ## Dokumentation und Governance
 
