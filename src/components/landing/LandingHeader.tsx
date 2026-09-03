@@ -86,13 +86,13 @@ export function LandingHeader() {
           </span>
         </Link>
 
-        <nav aria-label={copy.aria.sections} className="hidden items-center gap-2 lg:flex">
+        <nav aria-label={copy.aria.sections} className="hidden items-center gap-2 xl:flex">
           {NAV_GROUPS.map((group) => (
             <NavDropdown key={group.key} group={group} menu={menu} />
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 xl:flex">
           <LanguageToggle />
           <Link href={LOGIN_HREF} className="l-btn l-btn-ghost">
             {copy.navMenu.items.login}
@@ -106,7 +106,7 @@ export function LandingHeader() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
           <LanguageToggle />
           {/* Compact, no-JS mobile menu */}
           <details className="group relative">
