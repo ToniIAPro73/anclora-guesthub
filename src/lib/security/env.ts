@@ -9,7 +9,7 @@ export function envFlag(name: string) {
  * fallback so existing deployments (and encrypted data keys) keep working.
  */
 export function envValue(primary: string, legacy?: string) {
-  return process.env[primary] ?? (legacy ? process.env[legacy] : undefined);
+  return process.env[primary] || (legacy ? process.env[legacy] : undefined);
 }
 
 export function envFlagWithLegacy(primary: string, legacy: string) {
