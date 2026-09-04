@@ -156,6 +156,8 @@ describe("pilot auth routes", () => {
   it("logs in an admin through the admin-only endpoint", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SESSION_SECRET", "stable-session-secret");
+    vi.stubEnv("GUESTHUB_ADMIN_EMAIL", "antonio@anclora.com");
+    vi.stubEnv("GUESTHUB_ADMIN_PASSWORD", "admin-password");
     vi.stubEnv("SYNCXML_ADMIN_EMAIL", "antonio@anclora.com");
     vi.stubEnv("SYNCXML_ADMIN_PASSWORD", "admin-password");
 
