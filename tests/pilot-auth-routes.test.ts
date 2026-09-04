@@ -171,6 +171,26 @@ describe("pilot auth routes", () => {
     expect(body.role).toBe("admin");
   });
 
+  it("falls back to legacy admin credentials when canonical values are empty", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SESSION_SECRET", "stable-session-secret");
+    vi.stubEnv("GUESTHUB_ADMIN_EMAIL", "");
+    vi.stubEnv("GUESTHUB_ADMIN_PASSWORD", "");
+    vi.stubEnv("SYNCXML_ADMIN_EMAIL", "antonio@anclora.com");
+    vi.stubEnv("SYNCXML_ADMIN_PASSWORD", "admin-password");
+
+    const { POST } = await import("@/app/api/auth/admin-login/route");
+    const response = await POST(jsonRequest({
+      email: "antonio@anclora.com",
+      password: "admin-password",
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.role).toBe("admin");
+  });
+
   it("does not accept pilot credentials on the admin-only endpoint", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SESSION_SECRET", "stable-session-secret");
