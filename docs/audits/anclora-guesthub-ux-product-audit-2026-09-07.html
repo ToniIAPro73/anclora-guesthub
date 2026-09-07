@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Anclora GuestHub — Auditoría UX/UI de Producto — 2026-09-07</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#ffffff; --ink:#1c1a17; --ink-soft:#5b564d;
+    --accent:#8a7245; --accent-dark:#6a5636; --line:#e4ddce;
+    --crit:#b3261e; --high:#b25b17; --med:#a4841b; --low:#4c7a3d; --opp:#2f6f7a;
+    --measured:#2f6f4f; --code:#3a5a8c; --contract:#7a4fa0; --docs:#8a7245; --inferred:#8a5a2f; --unknown:#7a746a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15130f; --panel:#1e1b16; --ink:#f1ede4; --ink-soft:#b9b1a1; --line:#332e24;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15130f; --panel:#1e1b16; --ink:#f1ede4; --ink-soft:#b9b1a1; --line:#332e24;
+  }
+  body{background:var(--bg); color:var(--ink); font-family:"DM Sans", "Segoe UI", system-ui, sans-serif; line-height:1.55;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px 120px;}
+  .cover{padding:96px 28px 64px; text-align:center; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(138,114,69,.08), transparent);}
+  .cover .kicker{letter-spacing:.18em; text-transform:uppercase; font-size:12px; color:var(--accent-dark); font-weight:700;}
+  .cover h1{font-size:40px; margin:14px 0 8px; letter-spacing:-.01em;}
+  .cover .sub{color:var(--ink-soft); font-size:17px; max-width:640px; margin:0 auto 28px;}
+  .meta-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; max-width:820px; margin:0 auto; text-align:left;}
+  .meta-card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .meta-card .k{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft);}
+  .meta-card .v{font-size:14px; font-weight:600; margin-top:2px; word-break:break-word;}
+  nav.toc{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 26px; margin:36px 0;}
+  nav.toc h2{font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-dark); margin:0 0 12px;}
+  nav.toc ol{columns:2; gap:24px; padding-left:20px; margin:0; font-size:13.5px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--accent-dark); text-decoration:underline;}
+  section{padding:44px 0; border-bottom:1px solid var(--line);}
+  section > h2{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-dark); font-weight:800; margin:0 0 4px;}
+  section > h3.title{font-size:26px; margin:0 0 18px; letter-spacing:-.01em;}
+  h4{font-size:16px; margin:26px 0 8px;}
+  p{color:var(--ink); margin:8px 0;}
+  .lead{font-size:16px; color:var(--ink-soft);}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+  th{background:rgba(138,114,69,.09); font-size:11px; text-transform:uppercase; letter-spacing:.04em;}
+  .table-scroll{overflow-x:auto; border-radius:8px;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.02em; color:#fff;}
+  .sev-CRITICAL{background:var(--crit);} .sev-HIGH{background:var(--high);} .sev-MEDIUM{background:var(--med); color:#2a2110;} .sev-LOW{background:var(--low);} .sev-OPPORTUNITY{background:var(--opp);}
+  .ev{display:inline-block; padding:2px 8px; border-radius:6px; font-size:10.5px; font-weight:700; color:#fff;}
+  .ev-MEASURED_BROWSER{background:var(--measured);} .ev-MEASURED_CODE{background:var(--code);} .ev-DECLARED_CONTRACT{background:var(--contract);} .ev-DECLARED_DOCS{background:var(--docs);} .ev-INFERRED{background:var(--inferred);} .ev-UNKNOWN{background:var(--unknown);}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin:16px 0;}
+  .finding{background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--high); border-radius:10px; padding:20px 22px; margin:20px 0;}
+  .finding.CRITICAL{border-left-color:var(--crit);}
+  .finding.MEDIUM{border-left-color:var(--med);}
+  .finding.LOW{border-left-color:var(--low);}
+  .finding.OPPORTUNITY{border-left-color:var(--opp);}
+  .finding h4{margin:0 0 4px; font-size:17px;}
+  .finding .tags{margin:6px 0 12px; display:flex; flex-wrap:wrap; gap:6px;}
+  .finding dl{display:grid; grid-template-columns:180px 1fr; gap:6px 14px; font-size:13.5px; margin:10px 0;}
+  .finding dt{color:var(--ink-soft); font-weight:600;}
+  .finding dd{margin:0;}
+  .kv{display:grid; grid-template-columns:220px 1fr; gap:6px 14px; font-size:14px;}
+  .kv dt{color:var(--ink-soft);}
+  .kv dd{margin:0;}
+  .score-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px;}
+  .score{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;}
+  .score .name{font-size:13.5px;}
+  .grade{font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; color:#fff;}
+  .g-EXCELLENT{background:#2f6f4f;} .g-GOOD{background:#4c7a3d;} .g-FAIR{background:#a4841b; color:#2a2110;} .g-POOR{background:#b25b17;} .g-CRITICAL{background:#b3261e;} .g-UNKNOWN{background:#7a746a;}
+  .dnb{background:#fbf4e6; border:1px solid #e8d9b3; border-radius:10px; padding:14px 18px; margin-top:10px;}
+  :root[data-theme="dark"] .dnb, @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dnb{background:#26200f; border-color:#4a3d1e;} }
+  .ac{background:rgba(47,111,79,.08); border:1px solid rgba(47,111,79,.35); border-radius:10px; padding:12px 16px; font-size:13.5px; margin-top:10px;}
+  .ac b{color:var(--measured);}
+  .figure{border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:var(--panel); margin:14px 0; font-size:13px; color:var(--ink-soft);}
+  .figure code{background:rgba(138,114,69,.12); padding:1px 6px; border-radius:4px; color:var(--ink);}
+  .status-badge{display:inline-block; font-weight:800; padding:6px 16px; border-radius:999px; color:#fff; font-size:13px; letter-spacing:.04em;}
+  .status-PASS_WITH_GAPS{background:var(--med); color:#2a2110;}
+  .status-PASS{background:var(--measured);}
+  .status-FAIL{background:var(--crit);}
+  .status-BLOCKED{background:var(--unknown);}
+  ul.tight li{margin:4px 0;}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:720px){ .two-col{grid-template-columns:1fr;} nav.toc ol{columns:1;} .finding dl, .kv{grid-template-columns:1fr;} }
+  @media print{
+    section{break-inside:avoid; border-bottom:none;}
+    .finding{break-inside:avoid;}
+    nav.toc{break-after:page;}
+    a{color:inherit; text-decoration:none;}
+  }
+  footer.doc{padding:40px 28px; text-align:center; color:var(--ink-soft); font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Auditoría UX / UI de producto · ux-product-experience-review</div>
+  <h1>Anclora GuestHub</h1>
+  <p class="sub">De hojas Excel de reservas a ficheros XML revisados y listos para SES.HOSPEDAJES — auditoría de experiencia end-to-end en fase pre-MVP, con evidencia real de navegador y correlación de código.</p>
+  <div class="meta-grid">
+    <div class="meta-card"><div class="k">Modo</div><div class="v">AUDIT_WITH_REPO_CONTEXT</div></div>
+    <div class="meta-card"><div class="k">Skill / versión</div><div class="v">ux-product-experience-review (v2, canónica anclora-infrastructure)</div></div>
+    <div class="meta-card"><div class="k">Fecha</div><div class="v">2026-09-07</div></div>
+    <div class="meta-card"><div class="k">Rama auditada</div><div class="v">development @ 6a198dc</div></div>
+    <div class="meta-card"><div class="k">Entorno navegado</div><div class="v">localhost:3000 (GUESTHUB_LOCAL_DEMO=true)</div></div>
+    <div class="meta-card"><div class="k">CANONICAL_FRONTEND_URL</div><div class="v">anclora-syncxml.vercel.app (producción verificada)</div></div>
+    <div class="meta-card"><div class="k">Cuenta de prueba</div><div class="v">demo@anclora.local (sesión demo local, sin secretos)</div></div>
+    <div class="meta-card"><div class="k">Findings</div><div class="v">6 (1 crítico, 2 altos, 2 medios, 1 bajo) + 3 fortalezas</div></div>
+    <div class="meta-card"><div class="k">Estado</div><div class="v"><span class="status-badge status-PASS_WITH_GAPS">PASS_WITH_GAPS</span></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<nav class="toc">
+  <h2>Índice</h2>
+  <ol>
+    <li><a href="#s01">Resumen ejecutivo</a></li>
+    <li><a href="#s02">Modelo de producto</a></li>
+    <li><a href="#s03">Promesa vs. experiencia</a></li>
+    <li><a href="#s04">User types / user states</a></li>
+    <li><a href="#s05">Task inventory</a></li>
+    <li><a href="#s06">Journeys críticos</a></li>
+    <li><a href="#s07">Screen map</a></li>
+    <li><a href="#s08">Experience map</a></li>
+    <li><a href="#s09">UX scorecard</a></li>
+    <li><a href="#s10">UI scorecard</a></li>
+    <li><a href="#s11">Premium product surface</a></li>
+    <li><a href="#s12">Application shell</a></li>
+    <li><a href="#s13">Viewport economy</a></li>
+    <li><a href="#s14">Visual density map</a></li>
+    <li><a href="#s15">Import workflow</a></li>
+    <li><a href="#s16">Data mapping / normalización</a></li>
+    <li><a href="#s17">Reservation management</a></li>
+    <li><a href="#s18">Guest data UX</a></li>
+    <li><a href="#s19">Check-in UX</a></li>
+    <li><a href="#s20">Validation UX</a></li>
+    <li><a href="#s21">XML generation confidence</a></li>
+    <li><a href="#s22">Compliance confidence</a></li>
+    <li><a href="#s23">Privacy / PII UX</a></li>
+    <li><a href="#s24">Download / ZIP UX</a></li>
+    <li><a href="#s25">Auth &amp; recovery</a></li>
+    <li><a href="#s26">Information architecture</a></li>
+    <li><a href="#s27">System state audit</a></li>
+    <li><a href="#s28">I18N assessment</a></li>
+    <li><a href="#s29">Legacy / rename regression</a></li>
+    <li><a href="#s30">What works well</a></li>
+    <li><a href="#s31">Findings</a></li>
+    <li><a href="#s32">Quick wins</a></li>
+    <li><a href="#s33">Structural redesign opportunities</a></li>
+    <li><a href="#s34">Roadmap recomendado</a></li>
+    <li><a href="#s35">Do not break</a></li>
+    <li><a href="#s36">Evidence coverage</a></li>
+    <li><a href="#s37">Limitaciones y huecos</a></li>
+  </ol>
+</nav>
+
+<section id="s01">
+  <h2>01 — Resumen ejecutivo</h2>
+  <h3 class="title">La operativa central funciona; la confianza de cumplimiento tiene una grieta de vocabulario</h3>
+  <p class="lead">Anclora GuestHub cumple su promesa central: un operador puede importar un Excel de reservas, verlo transformado en una tabla de huéspedes enmascarada, corregir errores y llegar a un XML listo para descarga, con un flujo de consentimiento informado ejemplar antes de tocar ningún dato. El problema no es que falte funcionalidad — es pre-MVP y se comporta como tal honestamente — sino que dos señales del propio producto pueden generar <strong>falsa confianza</strong> justo en el punto donde el negocio es más sensible: la fila de huéspedes marca "OK" antes de que el operador haya pulsado "Validate data", incluso cuando esa fila contiene una fecha de nacimiento imposible (32/13/1995) o duplica exactamente a otra reserva. Nada en la interfaz distingue "formato aceptado automáticamente" de "contenido verificado". Es la clase de fricción que la auditoría debe detectar en pre-MVP, no después.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_USER_FRICTION</h4>
+      <p>El estado "OK" en la columna de avisos aparece antes de ejecutar validación explícita, incluso con una fecha de nacimiento inválida o un huésped duplicado en la fila. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_COMPLIANCE_CONFIDENCE_OPPORTUNITY</h4>
+      <p>Diferenciar visualmente "auto-corregido / sin validar" de "validado" resolvería de un solo cambio el mayor riesgo de cumplimiento detectado. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_SIMPLIFICATION_OPPORTUNITY</h4>
+      <p>No se detectó ningún aviso de "reserva/huésped duplicado" pese a que la landing promete "Detect errors or duplicates" y el propio fixture de demo incluye un huésped repetido letra por letra. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> + <span class="ev ev-DECLARED_DOCS">DECLARED_DOCS</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_QUICK_WIN</h4>
+      <p>El &lt;title&gt; del navegador queda fijo en español aunque el usuario cambie el idioma de la interfaz a inglés — una línea de código, cero riesgo. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_COGNITIVE_LOAD_OPPORTUNITY</h4>
+      <p>Mezcla de idiomas dentro de una misma pantalla en inglés (etiquetas de tabla, explicaciones de validación y mensajes de error de API en español) obliga al operador a alternar de idioma mentalmente en la tarea más crítica del producto. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> + <span class="ev ev-MEASURED_CODE">MEASURED_CODE</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_STRUCTURAL_OPPORTUNITY</h4>
+      <p>El control de tema (dark/light/system) ocupa tres botones persistentes en la barra superior del workspace operativo; consolidarlo en un único control liberaría densidad de chrome sin perder la función. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_PREMIUM_UI_OPPORTUNITY</h4>
+      <p>El bloqueo de "Generar XML" hasta que las confirmaciones de revisión estén marcadas es exactamente el tipo de disciplina operativa que hace sentir premium al producto — extender ese mismo estándar de claridad de estado al resto del flujo (ver hallazgo F1) reforzaría la percepción de precisión y control.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">BIGGEST_VIEWPORT_ECONOMY_OPPORTUNITY</h4>
+      <p>A 390×844 el árbol de accesibilidad de <code>/app</code> es idéntico al de escritorio: no se observó una adaptación de navegación específica para móvil en la pantalla de revisión de datos, la más densa del producto. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></p>
+    </div>
+  </div>
+
+  <h4>OVERALL_PRODUCT_EXPERIENCE_ASSESSMENT</h4>
+  <p>Producto coherente y con una arquitectura de consentimiento y enmascarado de PII notablemente madura para su fase. El riesgo real no está en la ausencia de funciones sino en la <strong>semántica de los estados de validación</strong> y en un <strong>i18n incompleto en las superficies de mayor responsabilidad legal</strong> (validaciones, errores de API, tabla de correcciones). Corregir esos dos ejes antes de ampliar el piloto tiene más impacto que cualquier rediseño visual.</p>
+</section>
+
+<section id="s02">
+  <h2>02 — Modelo de producto</h2>
+  <h3 class="title">Qué es GuestHub hoy, verificado en código y navegador</h3>
+  <div class="kv">
+    <dt>Propósito</dt><dd>Convertir hojas Excel de reservas de alojamiento en ficheros XML individuales por reserva, validados, para reporte a SES.HOSPEDAJES.</dd>
+    <dt>Categoría</dt><dd>Premium, Pre-MVP (declarado en README y landing).</dd>
+    <dt>Superficies verificadas</dt><dd>Landing pública (<code>/</code>), solicitud de piloto (<code>/piloto</code>), login (<code>/login</code>), workspace operativo (<code>/app</code>), dashboard (<code>/dashboard</code>), pre-check-in de huésped (<code>/precheckin/[token]</code>), legal/privacidad/cookies/términos.</dd>
+    <dt>Superficies solo por código</dt><dd>Endpoints SES (<code>/api/ses/*</code>: catálogo, comunicación, lote, anulación, estado, envío), generación XML (<code>/api/generate/xml</code>), descarga XML (<code>/api/reservations/[id]/download/xml</code>), acceso admin controlado (<code>/api/internal/admin-access</code>), sincronización de municipios INE.</dd>
+    <dt>Persistencia</dt><dd>Prisma, con modo "temporal / sin almacenamiento" activo por defecto en la demo observada (<code>GUESTHUB_ENABLE_PERSISTENT_STORAGE=false</code>).</dd>
+    <dt>Almacenamiento de ficheros</dt><dd>Vercel Blob (prefijo <code>syncxml/</code> retenido por compatibilidad, <span class="ev ev-DECLARED_DOCS">DECLARED_DOCS</span>).</dd>
+    <dt>Email</dt><dd>Resend, usado en solicitud de piloto, feedback y notificaciones — no se disparó ningún envío real durante esta auditoría.</dd>
+    <dt>Idiomas declarados</dt><dd>ES / EN / DE, con selector visible en landing y persistencia de preferencia.</dd>
+    <dt>Tema</dt><dd>Claro / oscuro / sistema, con tres controles independientes en el workspace.</dd>
+  </div>
+</section>
+
+<section id="s03">
+  <h2>03 — Product promise vs. experience</h2>
+  <h3 class="title">La landing promete más detección automática de la que el flujo demuestra</h3>
+  <div class="table-scroll"><table>
+    <tr><th>Promesa (landing, ES/EN)</th><th>Experiencia observada</th><th>Evidencia</th></tr>
+    <tr><td>"Detect errors or duplicates"</td><td>Errores de campo (documento, fecha, parentesco) sí se detectan tras "Validate data"; duplicado exacto de huésped en el fixture de demo <strong>no</strong> generó ningún aviso de duplicado.</td><td><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></td></tr>
+    <tr><td>"Masked sensitive data"</td><td>Confirmado: NIF, email y teléfono se muestran enmascarados por defecto en la tabla de revisión.</td><td><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></td></tr>
+    <tr><td>"Private mode by default" / modo sin almacenamiento</td><td>Confirmado: banner "Modo Temporal Activo" visible y opción de borrar datos de la operación.</td><td><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></td></tr>
+    <tr><td>"From Excel to reviewable XML, without friction"</td><td>El flujo feliz (import → revisar → validar → generar) es short y guiado; la fricción real está en la fiabilidad del estado "OK", no en el número de pasos.</td><td><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></td></tr>
+    <tr><td>Disponible en ES/EN/DE</td><td>Interfaz conmuta correctamente en landing; dentro del workspace persisten cadenas fijas en español independientemente del idioma elegido (ver sección 28).</td><td><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> + <span class="ev ev-MEASURED_CODE">MEASURED_CODE</span></td></tr>
+  </table></div>
+</section>
+
+<section id="s04">
+  <h2>04 — User types / user states</h2>
+  <h3 class="title">Estados realmente alcanzables en este pre-MVP</h3>
+  <div class="table-scroll"><table>
+    <tr><th>Estado</th><th>Goal primario</th><th>Navegación visible</th><th>CTA primaria</th><th>Bloqueos observados</th></tr>
+    <tr><td>VISITOR</td><td>Entender el producto y decidir si solicitar piloto</td><td>Landing con anclas Product/Process/Pilot/Trust/Resources</td><td>"Request controlled pilot"</td><td>Ninguno</td></tr>
+    <tr><td>NEW_USER (solicitante)</td><td>Pedir acceso al piloto</td><td>Formulario <code>/piloto</code></td><td>Enviar solicitud</td><td>Aprobación manual fuera de banda (<span class="ev ev-DECLARED_DOCS">DECLARED_DOCS</span>, ACCESS_MODEL.md)</td></tr>
+    <tr><td>AUTHENTICATED_USER_WITHOUT_IMPORTS</td><td>Iniciar la primera importación</td><td>Barra de workspace + stepper de 4 pasos</td><td>"Select Excel" / "View demo with synthetic data"</td><td>Checklist de consentimiento debe completarse antes de habilitar el selector de fichero</td></tr>
+    <tr><td>USER_WITH_INVALID_IMPORT</td><td>Entender y corregir errores antes de generar XML</td><td>Igual + tabla de validaciones</td><td>Corregir campos señalados</td><td>"Generate XML" permanece deshabilitado — correcto</td></tr>
+    <tr><td>USER_READY_TO_GENERATE_XML</td><td>Generar y descargar el XML</td><td>Igual</td><td>"Generate XML" habilitado tras checkboxes de revisión</td><td>No verificado en esta corrida (ver limitaciones, fase de generación no ejecutada por prudencia con endpoints SES)</td></tr>
+    <tr><td>RETURNING_OPERATOR</td><td>Continuar una reserva en curso o revisar historial</td><td>Dashboard con "Continuar con la reserva en curso" y buscador</td><td>Buscar por referencia/huésped/documento/email</td><td>Dashboard visualmente muy vacío en esta demo (pre-MVP)</td></tr>
+    <tr><td>GUEST (pre-check-in)</td><td>Completar sus datos antes de la llegada</td><td><code>/precheckin/[token]</code></td><td>N/D — no verificable con token sintético en este entorno</td><td><span class="ev ev-UNKNOWN">UNKNOWN</span>: entorno demo muestra pantalla "Test pre-check-in", no el formulario real de huésped</td></tr>
+    <tr><td>ADMIN</td><td>Acceso operativo controlado sin credenciales de piloto</td><td><code>/api/internal/admin-access</code> con token fuerte</td><td>N/D</td><td>No probado — requiere secreto de producción, correctamente fail-closed</td></tr>
+  </table></div>
+</section>
+
+<section id="s05">
+  <h2>05 — Task inventory</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Tarea</th><th>Criticidad</th><th>Frecuencia</th><th>Verificado</th></tr>
+    <tr><td>Importar Excel de reservas</td><td>CORE</td><td>FRECUENTE</td><td>Sí, con datos de demo sintéticos</td></tr>
+    <tr><td>Revisar y corregir datos de huésped</td><td>CORE</td><td>FRECUENTE</td><td>Sí</td></tr>
+    <tr><td>Ejecutar validación explícita</td><td>CORE</td><td>FRECUENTE</td><td>Sí</td></tr>
+    <tr><td>Generar XML</td><td>CORE</td><td>FRECUENTE</td><td>Parcial — botón y guardas verificados, generación real no ejecutada</td></tr>
+    <tr><td>Descargar XML / ZIP</td><td>CORE</td><td>FRECUENTE</td><td>No ejecutado — analizado por código</td></tr>
+    <tr><td>Consultar dashboard / buscar reserva</td><td>FRECUENTE</td><td>RECURRENTE</td><td>Sí</td></tr>
+    <tr><td>Solicitar acceso al piloto</td><td>OCCASIONAL</td><td>RARA</td><td>Sí (formulario, sin envío real)</td></tr>
+    <tr><td>Pre-check-in del huésped</td><td>CORE (para el huésped)</td><td>FRECUENTE</td><td><span class="ev ev-UNKNOWN">UNKNOWN</span></td></tr>
+    <tr><td>Reportar a SES.HOSPEDAJES</td><td>ADMIN/CORE</td><td>FRECUENTE</td><td>No ejecutado — SAFETY_BLOCKED (sin credenciales SES, sin datos reales)</td></tr>
+  </table></div>
+</section>
+
+<section id="s06">
+  <h2>06 — Journeys críticos</h2>
+  <h4>PRIMARY_JOURNEY — Import → Review → Validate → Generate (FIRST_TIME_JOURNEY)</h4>
+  <p>Entrada: <code>/app</code>. Precondición: sesión autenticada (demo local). Pasos observados: (1) checklist de consentimiento de 5 casillas → (2) selector de Excel se habilita → (3) botón "View demo with synthetic data" carga un fixture con 4 huéspedes → (4) tabla de revisión con estado "OK/ERR" y datos enmascarados → (5) panel expandible de auto-correcciones (4 cambios aplicados silenciosamente antes de mostrar la tabla) → (6) botón "Validate data" ejecuta validación semántica y reclasifica todas las filas a "ERR" con explicaciones → (7) "Generate XML" permanece deshabilitado hasta marcar dos confirmaciones adicionales. Salida: usuario con lista de errores accionables por fila y campo. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+  <h4>RECOVERY_JOURNEY — Corrección de errores de validación</h4>
+  <p>La tabla de "Validations" ofrece severidad, fila, campo, explicación y acción recomendada en columnas separadas — buen patrón de recuperación. La debilidad no está en esta tabla sino en el estado previo a ella (ver sección 20).</p>
+  <h4>RETURNING_USER_JOURNEY — Dashboard</h4>
+  <p>Acceso directo con buscador por referencia/huésped/documento/email y acceso directo "Continuar con la reserva en curso". Contenido del dashboard limitado, coherente con fase pre-MVP.</p>
+</section>
+
+<section id="s07">
+  <h2>07 — Screen map</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Pantalla</th><th>Propósito</th><th>Acción primaria</th><th>Acciones secundarias</th><th>Issues observados</th></tr>
+    <tr><td>/ (landing)</td><td>Explicar producto, generar solicitudes de piloto</td><td>Request controlled pilot</td><td>Join waitlist, cambio de idioma, secciones ancla</td><td>Ninguno material</td></tr>
+    <tr><td>/piloto</td><td>Captar solicitud estructurada</td><td>Enviar formulario</td><td>Volver a landing</td><td>Formulario largo pero justificado por naturaleza de piloto controlado</td></tr>
+    <tr><td>/login</td><td>Entrada autenticada</td><td>Continue to the application</td><td>Sign out, enlaces legales</td><td>En modo demo local no se ejerce el formulario real de contraseña compartida</td></tr>
+    <tr><td>/app</td><td>Workspace operativo: import, revisión, validación, XML</td><td>Import / Validate / Generate XML</td><td>New booking, Dashboard, tema, preferencias globales, cuenta</td><td>F1 (estado OK prematuro), F3 (mezcla de idioma), F5 (chrome de tema)</td></tr>
+    <tr><td>/dashboard</td><td>Panel de reservas y búsqueda</td><td>Buscar</td><td>Continuar reserva en curso</td><td>F3 (enlace en español)</td></tr>
+    <tr><td>/precheckin/[token]</td><td>Autocompletado de datos por el huésped</td><td>N/D</td><td>N/D</td><td>No verificable con token sintético (UNKNOWN)</td></tr>
+  </table></div>
+</section>
+
+<section id="s08">
+  <h2>08 — Experience map</h2>
+  <div class="figure">
+  ENTRY: /app, sesión demo activa<br/>
+  → USER_GOAL: convertir el Excel de reservas en un XML listo para reportar<br/>
+  → ACTION: marca las 5 confirmaciones, pulsa "View demo with synthetic data"<br/>
+  → SYSTEM_RESPONSE: tabla de 4 huéspedes con estados "OK", panel de auto-correcciones colapsado<br/>
+  → FRICTION: el usuario puede razonablemente asumir que "OK" significa "válido"; una fila tiene fecha de nacimiento imposible y otra es un duplicado exacto<br/>
+  → ACTION: pulsa "Validate data"<br/>
+  → SYSTEM_RESPONSE: todas las filas pasan a "ERR" con explicaciones y acciones recomendadas en español<br/>
+  → RESULT: el usuario obtiene la lista correcta de problemas, pero solo si supo que debía pulsar ese botón<br/>
+  → RECOVERY: cada fila señala el campo y la corrección sugerida; "Generate XML" queda bloqueado hasta resolver
+  </div>
+</section>
+
+<section id="s09">
+  <h2>09 — UX Scorecard</h2>
+  <div class="score-grid">
+    <div class="score"><span class="name">Clarity</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Efficiency</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Consistency</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Feedback</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Error Recovery</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Cognitive Load</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Navigation</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Onboarding</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Accessibility</span><span class="grade g-UNKNOWN">UNKNOWN</span></div>
+    <div class="score"><span class="name">Responsive Task Completion</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Visual Hierarchy</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Application Shell</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Viewport Economy</span><span class="grade g-FAIR">FAIR</span></div>
+  </div>
+  <p style="margin-top:14px; font-size:13px; color:var(--ink-soft)">Accessibility se marca UNKNOWN porque <code>accessibility-audit</code> no pudo componerse en esta corrida (ver sección 36). Ninguna calificación EXCELLENT o CRITICAL se asignó sin evidencia MEASURED_BROWSER o MEASURED_CODE directa.</p>
+</section>
+
+<section id="s10">
+  <h2>10 — UI Scorecard</h2>
+  <div class="score-grid">
+    <div class="score"><span class="name">Action Hierarchy</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Component Coherence</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Content Legibility</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">State Clarity</span><span class="grade g-POOR">POOR</span></div>
+    <div class="score"><span class="name">Theme Coherence</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Data Density</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Modal Ergonomics</span><span class="grade g-UNKNOWN">UNKNOWN</span></div>
+    <div class="score"><span class="name">Form Ergonomics</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Spatial Hierarchy</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Premium Visual Quality</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Modernity &amp; Product Polish</span><span class="grade g-GOOD">GOOD</span></div>
+  </div>
+  <h4>Subscores específicos GuestHub</h4>
+  <div class="score-grid">
+    <div class="score"><span class="name">Import UX</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Validation UX</span><span class="grade g-POOR">POOR</span></div>
+    <div class="score"><span class="name">Reservation Management</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Guest Data UX</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Error Prevention</span><span class="grade g-GOOD">GOOD</span></div>
+    <div class="score"><span class="name">Compliance Confidence</span><span class="grade g-POOR">POOR</span></div>
+    <div class="score"><span class="name">XML Generation Confidence</span><span class="grade g-FAIR">FAIR</span></div>
+    <div class="score"><span class="name">Download Confidence</span><span class="grade g-UNKNOWN">UNKNOWN</span></div>
+    <div class="score"><span class="name">PII Handling UX</span><span class="grade g-GOOD">GOOD</span></div>
+  </div>
+  <p style="margin-top:14px; font-size:13px; color:var(--ink-soft)">"State Clarity" y "Compliance Confidence" reciben POOR específicamente por F1: la señal "OK" no es fiable antes de validar. Es el único par de POOR de todo el informe y concentra la prioridad P1.</p>
+</section>
+
+<section id="s11">
+  <h2>11 — Premium Product Surface Assessment</h2>
+  <h3 class="title">Composición disciplinada, con una concesión de densidad en el tema</h3>
+  <p><strong>Composición:</strong> jerarquía tipográfica clara entre encabezados de paso, cabeceras de tabla y contenido; espaciado generoso en el checklist de consentimiento. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.<br/>
+  <strong>Superficies:</strong> uso moderado de tarjetas, sin anidamiento excesivo observado en el stepper ni en la tabla de revisión.<br/>
+  <strong>Controles:</strong> el selector de tema como tres botones ("dark"/"light"/"system") en vez de un único control con estado, es la única concesión de disciplina de control detectada; añade tres elementos persistentes de baja frecuencia de uso al chrome global.<br/>
+  <strong>Marca:</strong> logotipo y acento de marca (<code>#BFA46A</code>) presentes sin sobreexposición; no se detectó repetición excesiva del logo.<br/>
+  <strong>Enmascarado como lenguaje visual:</strong> el patrón de PII enmascarada (NIF ****0000T, email a***@example.com) comunica visualmente "esto es sensible, se te muestra lo mínimo" — es, en sí mismo, una señal de producto premium y operativamente serio, coherente con el posicionamiento del producto.</p>
+  <p>Conclusión: la superficie visual no parece un conversor genérico ni una plantilla de admin; se siente como una herramienta operativa. La brecha de percepción "premium" no viene de la estética sino de la fiabilidad de los estados (sección 20), que es precisamente la dimensión que este estándar define como núcleo de "premium" para Anclora.</p>
+</section>
+
+<section id="s12">
+  <h2>12 — Application Shell Assessment</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Control</th><th>Clasificación</th><th>Observación</th></tr>
+    <tr><td>"Anclora GuestHub" (botón marca)</td><td>GLOBAL_NAVIGATION</td><td>Punto de anclaje esperado</td></tr>
+    <tr><td>"New booking"</td><td>PRIMARY_CONTENT_ACTION</td><td>Correctamente en la barra superior, alta frecuencia</td></tr>
+    <tr><td>"Dashboard"</td><td>GLOBAL_NAVIGATION</td><td>Un único enlace, apropiado para el alcance actual</td></tr>
+    <tr><td>dark / light / system</td><td>GLOBAL_PREFERENCE</td><td>Tres botones persistentes para una preferencia de baja frecuencia — candidato a consolidar</td></tr>
+    <tr><td>"Global preferences"</td><td>GLOBAL_PREFERENCE</td><td>Menú desplegable, patrón correcto</td></tr>
+    <tr><td>"demo@anclora.local"</td><td>ACCOUNT_ACTION</td><td>Menú de cuenta, patrón correcto</td></tr>
+    <tr><td>Stepper "1 Import · 2 Review · 3 Generate XML · 4 Consolidate"</td><td>SCREEN_NAVIGATION</td><td>Excelente: comunica progreso y criticidad de tarea en una sola fila</td></tr>
+  </table></div>
+  <p>La barra global es compacta (una fila) salvo por la triplicación del control de tema. No se observó duplicación de la misma acción en header + contenido. El shell escala razonablemente: añadir una quinta etapa al stepper no rompería el patrón.</p>
+</section>
+
+<section id="s13">
+  <h2>13 — Viewport Economy</h2>
+  <p>Medido de forma cualitativa sobre snapshot de accesibilidad y captura completa (full-page) en <code>/app</code>, paso "Review data":</p>
+  <div class="kv">
+    <dt>PERSISTENT_CONTROL_ROWS</dt><dd>1 fila de chrome global + 1 fila de stepper = 2 filas antes del workspace</dd>
+    <dt>PERSISTENT_ACTION_COUNT</dt><dd>New booking, Dashboard, 3× tema, Global preferences, cuenta = 7 controles persistentes</dd>
+    <dt>PRIMARY_WORKSPACE</dt><dd>Tabla de huéspedes + panel de resumen de reserva/propiedad/contrato</dd>
+    <dt>1366×768 / 1440×900</dt><dd>El workspace principal (tabla + panel lateral) permanece visible sin scroll excesivo tras el chrome; no se detectó relegación severa del área de trabajo.</dd>
+  </div>
+  <p>No se instrumentó medición en píxeles exacta de <code>PRIMARY_WORKSPACE_START_Y</code> (requeriría acceso a <code>getBoundingClientRect</code> en vivo, fuera de alcance de esta pasada); la evaluación es cualitativa sobre capturas de pantalla completas. Se declara como <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> cualitativo, no cuantitativo exacto.</p>
+</section>
+
+<section id="s14">
+  <h2>14 — Visual Density Map</h2>
+  <p>La pantalla de revisión de datos es, por diseño, la más densa del producto (tabla de 8 columnas + panel de resumen + validaciones). La densidad está estructurada: cada columna tiene un propósito claro (estado, identidad, documento, datos, contacto, dirección, avisos) y el enmascarado reduce longitud visual de las celdas sensibles. No se detectó densidad no estructurada (contenedores duplicados, tarjetas dentro de tarjetas). El único elemento de densidad no funcional es la fila de tres botones de tema descrita en la sección 12.</p>
+</section>
+
+<section id="s15">
+  <h2>15 — Import Workflow Assessment</h2>
+  <h3 class="title">El bloqueo de consentimiento antes del selector de fichero es el mejor patrón del producto</h3>
+  <p>Antes de que el botón "Select Excel" se habilite, el operador debe marcar cinco confirmaciones explícitas: autorización para tratar los datos, aviso de que la herramienta no ofrece asesoría legal ni garantiza cumplimiento por sí sola, compromiso de revisión antes de exportar, declaración de no excesividad de datos, y aceptación del modo privado sin almacenamiento por defecto. Esto es <strong>error prevention</strong> de manual: convierte una obligación de cumplimiento en una puerta de interacción imposible de saltarse por accidente. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+  <p>El botón "View demo with synthetic data" permite ejercer todo el flujo sin arriesgar datos reales — decisión de producto que también facilitó esta propia auditoría. Tras la carga, un panel colapsado "Auto-corrections applied (4)" documenta cada cambio automático con valor original y corregido antes de que el usuario vea la tabla de estado — buena trazabilidad, aunque colapsado por defecto puede hacer que se pase por alto (ver F1).</p>
+  <p><strong>Pregunta del framework:</strong> ¿puede un operador no técnico importar una hoja real sin entender el parser? Sí para el camino feliz; el panel de auto-correcciones usa lenguaje de negocio ("Tipo de pago", "IBAN") y no expone estructura interna del Excel ni nombres de columnas técnicos.</p>
+</section>
+
+<section id="s16">
+  <h2>16 — Data Mapping / Normalización</h2>
+  <p>El mapeo columna-origen → campo-destino no se expone como paso interactivo separado; ocurre de forma automática y se documenta después como "auto-corrections" (formato de IBAN, tipo de pago normalizado a catálogo, fechas reformateadas a ISO). El usuario ve el resultado, no el proceso de mapeo. Esto es coherente con "no debe parecer una herramienta técnica para desarrolladores", pero significa que la <em>validez semántica</em> de una auto-corrección (por ejemplo, reformatear "32/13/1995" a "1995-13-32" sin verificar que sea una fecha real) queda oculta detrás de una etiqueta que suena a éxito ("corrected value"). Este es el origen técnico de F1.</p>
+</section>
+
+<section id="s17">
+  <h2>17 — Reservation Management</h2>
+  <p>El dashboard ofrece búsqueda por referencia, huésped, documento o email — cobertura de campos adecuada para localizar una reserva concreta. En esta demo el contenido del dashboard es mínimo (pre-MVP, sin reservas persistidas), por lo que no se pudo evaluar la experiencia de escaneo a volumen (10/50/100/500 reservas) prevista en la fase 11 del protocolo. Se declara <span class="ev ev-UNKNOWN">UNKNOWN</span> para escalabilidad de listado bajo volumen.</p>
+</section>
+
+<section id="s18">
+  <h2>18 — Guest Data UX</h2>
+  <p>Campos observados en la tabla de revisión: estado, nombre completo, tipo y número de documento (enmascarado), fecha de nacimiento, país, contacto (email/teléfono enmascarados), dirección, avisos. El panel de "Guided review" agrupa por huésped con campos editables específicos (por ejemplo "DOCUMENT SUPPORT", "RELATIONSHIP") solo cuando la validación los marca como pendientes — buen ejemplo de <em>progressive disclosure</em>: no se piden todos los campos por adelantado, solo los que fallan. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+</section>
+
+<section id="s19">
+  <h2>19 — Check-in UX</h2>
+  <p>No se identificó una pantalla de check-in operativo independiente (llegada/salida/estado) dentro de <code>/app</code> en esta build; el concepto más cercano es el pre-check-in del huésped en <code>/precheckin/[token]</code>, que en el entorno demo mostró una pantalla de prueba ("Test pre-check-in") en vez del formulario real de huésped. Se marca <span class="ev ev-UNKNOWN">UNKNOWN</span> para la experiencia real de check-in — no se debe asumir que no existe, solo que no fue observable con los medios de esta auditoría.</p>
+</section>
+
+<section id="s20">
+  <h2>20 — Validation UX</h2>
+  <h3 class="title">El hallazgo central del informe vive aquí</h3>
+  <p>Secuencia verificada con el fixture de demo (4 huéspedes):</p>
+  <ol class="tight">
+    <li>Inmediatamente tras la importación, la columna "WARNINGS" muestra <strong>"OK" en las cuatro filas</strong>, incluida una con fecha de nacimiento <code>1995-13-32</code> (mes 13, día 32 — imposible en cualquier calendario) y otra que es un duplicado exacto, campo por campo, de otra fila de la misma reserva.</li>
+    <li>Solo al pulsar el botón "Validate data" las cuatro filas cambian a "ERR" con explicaciones correctas (formato de fecha incorrecto, documento de soporte requerido, parentesco no válido según catálogo ministerial, número de personas no coincide).</li>
+    <li>El botón "Generate XML" permanece deshabilitado en todo momento de esta secuencia porque los checkboxes "I have reviewed the preview" y "Mapping reviewed" seguían sin marcar — no se pudo determinar en esta corrida si esos checkboxes se pueden marcar <em>sin</em> haber pulsado antes "Validate data" (ver limitaciones).</li>
+  </ol>
+  <p>El riesgo no depende de esa incógnita: aunque el gate final sea robusto, mostrar "OK" para datos objetivamente inválidos es una señal de estado falsa en sí misma, y un operador que confía en el color/etiqueta de la primera vista antes de decidir revisar en detalle recibe información incorrecta en el momento de mayor responsabilidad legal del producto.</p>
+</section>
+
+<section id="s21">
+  <h2>21 — XML Generation Confidence</h2>
+  <p>Verificado por código (<code>src/app/api/generate/xml/route.ts</code> existe como endpoint dedicado) y por UI: el botón "Generate XML" está deshabilitado hasta que (a) no queden filas en estado "ERR" tras validar y (b) ambas confirmaciones de revisión estén marcadas. No se ejecutó la generación real en esta auditoría para evitar invocar rutas de persistencia/Blob con datos de prueba fuera del flujo previsto por el equipo. <span class="ev ev-MEASURED_CODE">MEASURED_CODE</span> + <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> (estado deshabilitado).</p>
+</section>
+
+<section id="s22">
+  <h2>22 — Compliance Confidence Assessment</h2>
+  <table>
+    <tr><th>Señal</th><th>Estado</th></tr>
+    <tr><td>¿Distingue la interfaz "generado" de "validado/listo"?</td><td>Parcialmente — el stepper distingue "Generate XML" como paso propio, pero la tabla de huéspedes no distingue "formato aceptado" de "contenido verificado" (F1).</td></tr>
+    <tr><td>FALSE_CONFIDENCE</td><td>Presente — ver F1.</td></tr>
+    <tr><td>AMBIGUOUS_READY_STATE</td><td>Presente — mismo vocabulario "OK" para dos garantías distintas.</td></tr>
+    <tr><td>Disclaimers</td><td>Excelente — el checklist de import declara explícitamente que la herramienta no ofrece asesoría legal ni garantiza cumplimiento por sí sola.</td></tr>
+    <tr><td>Trazabilidad</td><td>Buena — panel de auto-correcciones documenta valor original vs. corregido con fila y campo.</td></tr>
+  </table>
+</section>
+
+<section id="s23">
+  <h2>23 — Privacy / PII UX</h2>
+  <p>Fortaleza clara del producto: documento, email y teléfono se muestran enmascarados por defecto en la tabla de revisión sin acción del usuario. El checklist de import obliga a declarar minimización de datos antes de importar. No se detectó PII sin enmascarar en ninguna de las capturas tomadas; todas las capturas de esta auditoría usan el fixture sintético incluido en el repositorio (<code>test-data/fixtures/registro_huespedes_synthetic.xlsx</code>), nunca datos reales. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+</section>
+
+<section id="s24">
+  <h2>24 — Download / ZIP UX</h2>
+  <p>Por código, <code>buildXmlDownloadFileName</code> construye el nombre de fichero a partir de la referencia de reserva y el código de establecimiento — patrón razonable para que el operador pueda emparejar descarga con reserva. La descarga individual devuelve <code>content-disposition: attachment</code> con tipo <code>application/xml</code>. No se localizó código de empaquetado ZIP para descarga múltiple en las rutas API inspeccionadas (<code>src/app/api/reservations/[id]/download/xml/route.ts</code> es individual); JSZip figura como dependencia declarada en <code>package.json</code> pero su punto de uso no fue confirmado en esta pasada. Se declara <span class="ev ev-UNKNOWN">UNKNOWN</span> para el flujo de descarga por lotes/ZIP — no ejecutado ni localizado con certeza en el tiempo disponible.</p>
+  <p>Errores de la ruta de descarga individual están en español ("Reserva no encontrada", "Sesión no válida para reservas", "Persistencia de reservas no disponible") de forma incondicional, independientemente del idioma de interfaz seleccionado por el usuario — mismo patrón que F3. <span class="ev ev-MEASURED_CODE">MEASURED_CODE</span>.</p>
+</section>
+
+<section id="s25">
+  <h2>25 — Auth &amp; Recovery</h2>
+  <p>En modo demo local, <code>/login</code> no presenta el formulario de credenciales compartidas del piloto: renderiza directamente "Continue to the application" y "Sign out", porque la sesión demo ya está autenticada. El formulario real de contraseña compartida (según <code>ACCESS_MODEL.md</code>, contrato visual <code>ANCLORA_AUTH_LOGIN_SCREEN_CONTRACT v1.3.0</code>) no fue ejercido con evidencia de navegador en esta corrida — se declara <span class="ev ev-DECLARED_DOCS">DECLARED_DOCS</span> para su existencia y contrato visual, no <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+  <p>Logout (<code>POST /api/auth/logout</code>) está documentado como no destructivo para datos de operación — solo elimina la cookie de sesión.</p>
+</section>
+
+<section id="s26">
+  <h2>26 — Information Architecture Findings</h2>
+  <ul class="tight">
+    <li>La navegación global es mínima y coherente: marca, New booking, Dashboard. No se detectaron rutas duplicadas ni destinos ambiguos.</li>
+    <li>El enlace "Continuar con la reserva en curso" del dashboard queda en español sin traducir bajo interfaz en inglés — mismo patrón sistémico que F3, tratado allí como hallazgo único de cobertura i18n.</li>
+    <li>La separación landing pública / workspace autenticado es clara; el enlace "Web pública" dentro de <code>/app</code> permite volver sin perder el contexto de sesión.</li>
+  </ul>
+</section>
+
+<section id="s27">
+  <h2>27 — System State Audit</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Estado</th><th>¿Distinguible?</th><th>¿Usuario entiende qué pasó?</th><th>¿Siguiente acción clara?</th><th>Notas</th></tr>
+    <tr><td>FIRST_USE (import)</td><td>Sí</td><td>Sí</td><td>Sí</td><td>Checklist + selector deshabilitado hasta cumplir requisitos</td></tr>
+    <tr><td>Post-import, pre-validate ("OK" falso)</td><td>No</td><td>No</td><td>Ambigua</td><td>F1 — núcleo del informe</td></tr>
+    <tr><td>Post-validate (ERR)</td><td>Sí</td><td>Sí</td><td>Sí</td><td>Explicación + acción recomendada por fila</td></tr>
+    <tr><td>DISABLED (Generate XML)</td><td>Sí</td><td>Parcial</td><td>Parcial</td><td>El botón no explica en tooltip por qué está deshabilitado (no verificado si tiene título/aria-describedby)</td></tr>
+    <tr><td>Modo temporal / sin almacenamiento</td><td>Sí</td><td>Sí</td><td>Sí</td><td>Banner explícito con opción de borrar datos</td></tr>
+  </table></div>
+</section>
+
+<section id="s28">
+  <h2>28 — I18N Assessment</h2>
+  <h3 class="title">La landing cumple; el workspace operativo no</h3>
+  <p>Con interfaz seleccionada en inglés, se observaron directamente en pantalla las siguientes cadenas fijas en español dentro de <code>/app</code>:</p>
+  <ul class="tight">
+    <li>"Modo Temporal Activo", "¿Qué ocurre con tus datos?", "Borrar datos de esta operación"</li>
+    <li>Cabeceras de la tabla de auto-correcciones: "Pago", "Huésped", "Tipo de pago", "Fecha de nacimiento", "Número de documento"</li>
+    <li>Todas las explicaciones y acciones recomendadas de la tabla de validaciones ("El parentesco indicado no es válido según el catálogo del Ministerio", etc.)</li>
+    <li>Enlace de dashboard "Continuar con la reserva en curso"</li>
+  </ul>
+  <p>Por código, los mensajes de error de varias rutas API (<code>download/xml</code>, entre otras) están hardcodeados en español sin variante por idioma. <span class="ev ev-MEASURED_CODE">MEASURED_CODE</span>.</p>
+  <p>Adicionalmente, el <code>&lt;title&gt;</code> del documento permanece como "Anclora GuestHub — Gestión de huéspedes y alquiler vacacional" (español) tanto con la interfaz en inglés como tras cambiar explícitamente el idioma a español de nuevo — no se detectó cambio observable en el title al conmutar idiomas. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>.</p>
+  <p>DE (alemán) no se auditó en profundidad por límite de tiempo; se realizó únicamente verificación de que la opción existe en el selector de idioma de landing. <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span> (solo presencia de opción, no contenido).</p>
+</section>
+
+<section id="s29">
+  <h2>29 — Legacy / Rename Regression Check</h2>
+  <p>Búsqueda dirigida de "SyncXML" / "syncxml" en superficies visibles (landing, login, workspace, dashboard, títulos, footers, mensajes de error observados): <strong>no se encontró ninguna aparición visible al usuario</strong> en las pantallas navegadas. El <code>&lt;title&gt;</code> y la marca visible dicen consistentemente "Anclora GuestHub". <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>: FIXED.</p>
+  <p>Identificadores técnicos legacy confirmados por código/documentación y correctamente confinados a capas no visibles: cookies <code>anclora-syncxml-*</code>, evento <code>syncxml:new</code>, variable <code>GUESTHUB_SES_APPLICATION="Anclora SyncXML"</code> (nombre registrado ante SES, no debe cambiarse), prefijo de Blob <code>syncxml/</code>, símbolo interno <code>SyncXmlWorkflow</code> (nombre de componente React que renderiza <code>/app</code>, confirmado en <code>src/app/app/page.tsx</code>). Estos son <strong>NOT_APPLICABLE</strong> como defecto: están documentados como retenidos intencionalmente por compatibilidad y no llegan al usuario final.</p>
+  <p>Único punto gris: el dominio de despliegue de producción verificado vía Vercel CLI sigue siendo <code>anclora-syncxml.vercel.app</code> (alias de producción activo). No es una superficie de UI y los propios documentos del repositorio (<code>VERCEL_PREVIEW_SETUP.md</code>) señalan esto como pendiente de decisión del propietario — se reporta como nota de proyecto, no como defecto de UX.</p>
+</section>
+
+<section id="s30">
+  <h2>30 — What Works Well</h2>
+  <ul class="tight">
+    <li><strong>Checklist de consentimiento antes de importar</strong> — bloquea el selector de fichero hasta cinco confirmaciones explícitas de minimización, autorización y revisión humana. Patrón de error prevention de referencia.</li>
+    <li><strong>Enmascarado de PII por defecto</strong> en toda la tabla de revisión, sin acción del usuario.</li>
+    <li><strong>Gate de generación de XML</strong> ligado a ausencia de errores + confirmaciones explícitas de revisión.</li>
+    <li><strong>Botón "View demo with synthetic data"</strong> — permite ejercer el flujo completo sin exponer datos reales, beneficioso tanto para onboarding de nuevos pilotos como para QA/auditoría.</li>
+    <li><strong>Trazabilidad de auto-correcciones</strong> con valor original y corregido, fila y campo.</li>
+    <li><strong>Stepper de 4 etapas</strong> en la barra superior — comunica progreso sin ocupar más de una fila.</li>
+  </ul>
+</section>
+
+<section id="s31">
+  <h2>31 — Findings</h2>
+
+  <div class="finding CRITICAL">
+    <h4>F1 · La columna de avisos muestra "OK" para datos inválidos antes de ejecutar validación explícita</h4>
+    <div class="tags">
+      <span class="pill sev-CRITICAL">CRITICAL</span>
+      <span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span>
+      <span class="pill" style="background:#3a3630">SYSTEM_STATE / COMPLIANCE_CONFIDENCE</span>
+    </div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Import → Review (PRIMARY_JOURNEY, FIRST_TIME_JOURNEY)</dd>
+      <dt>SCREEN</dt><dd>/app — paso "Review data"</dd>
+      <dt>USER_TYPE</dt><dd>AUTHENTICATED_USER_WITH_IMPORTS</dd>
+      <dt>TASK_CRITICALITY</dt><dd>CORE</dd>
+      <dt>FRICTION_TYPE</dt><dd>FEEDBACK_FRICTION, ERROR_RECOVERY_FRICTION</dd>
+      <dt>FREQUENCY</dt><dd>FRECUENTE — ocurre en toda importación antes de validar</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>Tras cargar el fixture de demo, la fila del huésped "Carla Ficticia" (fecha de nacimiento origen 32/13/1995, normalizada a "1995-13-32") muestra WARNINGS="OK". La fila 5, duplicado exacto del huésped "Ana Demo Ejemplo" de la fila 2, también muestra "OK". Solo tras pulsar "Validate data" ambas pasan a "ERR" con explicación correcta.</dd>
+      <dt>ROOT_UX_CAUSE</dt><dd>El mismo vocabulario de estado ("OK"/"ERR") se usa para dos garantías distintas: "formato aceptado tras auto-corrección" y "contenido semánticamente válido". No hay distinción visual entre ambas hasta que el usuario ejecuta un paso adicional no obviamente obligatorio.</dd>
+      <dt>WHY_IT_MATTERS</dt><dd>El producto reporta a un organismo público (SES.HOSPEDAJES) datos de huéspedes reales, incluidos menores y datos de identidad. Una falsa señal de "OK" en el punto de revisión es exactamente el tipo de fallo que el checklist de import intenta prevenir en el paso anterior.</dd>
+      <dt>USER_IMPACT</dt><dd>Un operador que confíe en la columna de avisos sin pulsar "Validate data" puede avanzar creyendo que los datos están limpios cuando no lo están.</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Sustituir "OK" por un estado neutro explícito antes de la validación (p. ej. "Sin validar" / "Pendiente de validación") y reservar "OK" únicamente para filas que hayan pasado la validación semántica completa. Alternativamente, ejecutar la validación semántica automáticamente al finalizar el import, sin esperar un clic adicional.</dd>
+      <dt>WHY_THIS_CHANGE</dt><dd>Elimina la ambigüedad de vocabulario sin quitar ningún paso ni control existente; es un cambio de estado/etiqueta, no de flujo.</dd>
+      <dt>EXPECTED_BENEFIT</dt><dd>Cierra la brecha de falsa confianza identificada como mayor riesgo de cumplimiento del informe.</dd>
+      <dt>EFFORT</dt><dd>LOW–MEDIUM (depende de si se opta por relabeling o por adelantar la ejecución de validación)</dd>
+      <dt>RISK</dt><dd>LOW si es relabeling; MEDIUM si se cambia el momento de ejecución de la validación (verificar coste de cómputo en imports grandes)</dd>
+      <dt>PRIORITY</dt><dd>P1</dd>
+      <dt>QUICK_WIN</dt><dd>Sí, en su variante de relabeling</dd>
+      <dt>AFFECTED_SCREENS</dt><dd>/app — paso Review data</dd>
+      <dt>AFFECTED_COMPONENTS</dt><dd>Componente de tabla de revisión de huéspedes dentro de <code>SyncXmlWorkflow</code> (src/app/app/page.tsx → componente de workflow)</dd>
+      <dt>BEHAVIOR_BEFORE</dt><dd>WARNINGS="OK" inmediatamente tras import, sin validación semántica ejecutada</dd>
+      <dt>BEHAVIOR_AFTER</dt><dd>WARNINGS="Sin validar" hasta que la validación semántica se ejecute (automática o manualmente); "OK" solo tras validación real</dd>
+      <dt>UX_REGRESSION_RISKS</dt><dd>Ninguno identificado si se mantiene el resto del flujo intacto</dd>
+    </dl>
+    <div class="dnb"><strong>DO_NOT_BREAK:</strong> el panel de auto-correcciones con valor original/corregido, el enmascarado de PII, y el gate de "Generate XML" sobre ausencia de errores.</div>
+    <div class="ac"><b>Given</b> un huésped con fecha de nacimiento inválida en el Excel importado<br/><b>When</b> el import termina de procesar el fichero<br/><b>Then</b> la fila no debe mostrar "OK" en la columna de avisos<br/><b>And</b> debe mostrar un estado neutro que indique que la validación semántica aún no se ha ejecutado</div>
+  </div>
+
+  <div class="finding HIGH">
+    <h4>F2 · Un huésped duplicado exacto no genera ningún aviso de duplicado</h4>
+    <div class="tags"><span class="pill sev-HIGH">HIGH</span><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span><span class="ev ev-DECLARED_DOCS">DECLARED_DOCS</span></div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Import → Review</dd>
+      <dt>SCREEN</dt><dd>/app — Review data</dd>
+      <dt>USER_TYPE</dt><dd>AUTHENTICATED_USER_WITH_IMPORTS</dd>
+      <dt>TASK_CRITICALITY</dt><dd>CORE</dd>
+      <dt>FRICTION_TYPE</dt><dd>ERROR_RECOVERY_FRICTION</dd>
+      <dt>FREQUENCY</dt><dd>UNKNOWN en producción real; el propio fixture de demo del equipo incluye este caso, lo que sugiere que es un escenario contemplado</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>La fila 5 replica exactamente nombre, documento, fecha de nacimiento, país, contacto y dirección de la fila 2. Ni antes ni después de "Validate data" aparece un aviso específico de duplicado; solo hereda el mismo error de "documento de soporte requerido" que la fila original.</dd>
+      <dt>ROOT_UX_CAUSE</dt><dd>La validación parece operar campo a campo por fila, sin una pasada de detección de duplicados entre huéspedes de la misma reserva.</dd>
+      <dt>WHY_IT_MATTERS</dt><dd>La landing promete explícitamente "Detect errors or duplicates" como parte del valor central del producto.</dd>
+      <dt>USER_IMPACT</dt><dd>Un huésped repetido por error de origen en el Excel (fila copiada) podría llegar a XML sin que el operador lo note, o el operador debe detectarlo manualmente sin ayuda de la herramienta.</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Añadir una regla de validación que compare documento de identidad (o combinación nombre+fecha de nacimiento) entre huéspedes de la misma reserva y levante un aviso "Huésped duplicado" señalando las filas implicadas.</dd>
+      <dt>WHY_THIS_CHANGE</dt><dd>Cierra la brecha entre promesa de producto y comportamiento observado sin alterar el resto del pipeline de validación.</dd>
+      <dt>EXPECTED_BENEFIT</dt><dd>Evita duplicados accidentales en el XML reportado; recupera la promesa de "detección de duplicados" del landing.</dd>
+      <dt>EFFORT</dt><dd>MEDIUM</dd>
+      <dt>RISK</dt><dd>LOW</dd>
+      <dt>PRIORITY</dt><dd>P2</dd>
+      <dt>QUICK_WIN</dt><dd>No</dd>
+    </dl>
+    <div class="dnb"><strong>DO_NOT_BREAK:</strong> la validación de campo por campo ya existente no debe reemplazarse, solo complementarse.</div>
+  </div>
+
+  <div class="finding HIGH">
+    <h4>F3 · Mezcla de idiomas dentro del workspace bajo interfaz en inglés</h4>
+    <div class="tags"><span class="pill sev-HIGH">HIGH</span><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span><span class="ev ev-MEASURED_CODE">MEASURED_CODE</span></div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Import → Review → Validate (todo el PRIMARY_JOURNEY)</dd>
+      <dt>SCREEN</dt><dd>/app, /dashboard, respuestas de API de descarga</dd>
+      <dt>USER_TYPE</dt><dd>Todos los AUTHENTICATED_USER_*</dd>
+      <dt>TASK_CRITICALITY</dt><dd>CORE</dd>
+      <dt>FRICTION_TYPE</dt><dd>CONSISTENCY_FRICTION, COGNITIVE_FRICTION</dd>
+      <dt>FREQUENCY</dt><dd>FRECUENTE — presente en cada import bajo interfaz no española</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>Con idioma de interfaz en inglés, aparecen sin traducir: "Modo Temporal Activo", "¿Qué ocurre con tus datos?", cabeceras de la tabla de auto-correcciones ("Pago", "Huésped", "Tipo de pago"), todas las explicaciones/acciones recomendadas de la tabla de validaciones, el enlace de dashboard "Continuar con la reserva en curso", y mensajes de error de API de descarga de XML.</dd>
+      <dt>ROOT_UX_CAUSE</dt><dd>Estas cadenas parecen no estar conectadas al sistema de i18n usado por el resto de la interfaz (que sí traduce correctamente landing, checklist de import y stepper).</dd>
+      <dt>WHY_IT_MATTERS</dt><dd>El producto declara soporte ES/EN/DE como parte de su posicionamiento premium; la mezcla de idiomas rompe la sensación de producto pulido justo en las pantallas de mayor responsabilidad (validación, errores).</dd>
+      <dt>USER_IMPACT</dt><dd>Un operador que no lea español debe interpretar mensajes de error y recomendaciones de corrección en un idioma que no domina, en la tarea más crítica del producto.</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Migrar estas cadenas al mismo sistema de claves i18n usado en landing; priorizar la tabla de validaciones y los mensajes de error de API por ser las de mayor criticidad de tarea.</dd>
+      <dt>WHY_THIS_CHANGE</dt><dd>Reutiliza infraestructura de i18n ya probada en landing; no requiere rediseño.</dd>
+      <dt>EXPECTED_BENEFIT</dt><dd>Elimina la fricción cognitiva mayor identificada en el resumen ejecutivo.</dd>
+      <dt>EFFORT</dt><dd>MEDIUM–HIGH (volumen de cadenas, incluidas las generadas en backend)</dd>
+      <dt>RISK</dt><dd>LOW</dd>
+      <dt>PRIORITY</dt><dd>P2</dd>
+      <dt>QUICK_WIN</dt><dd>No en su totalidad; sí por partes (por ejemplo, solo cabeceras de tabla)</dd>
+    </dl>
+    <div class="dnb"><strong>DO_NOT_BREAK:</strong> la correcta traducción ya existente en landing y checklist de import.</div>
+  </div>
+
+  <div class="finding MEDIUM">
+    <h4>F4 · El &lt;title&gt; del documento no responde al idioma seleccionado</h4>
+    <div class="tags"><span class="pill sev-MEDIUM">MEDIUM</span><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Cualquiera — afecta a la pestaña del navegador en todo momento</dd>
+      <dt>SCREEN</dt><dd>Landing y, previsiblemente, resto de páginas</dd>
+      <dt>FRICTION_TYPE</dt><dd>CONSISTENCY_FRICTION</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>El title permanece "Anclora GuestHub — Gestión de huéspedes y alquiler vacacional" (español) tanto en inglés como tras volver a español explícitamente.</dd>
+      <dt>USER_IMPACT</dt><dd>Menor — visible solo en pestaña/historial del navegador, pero perceptible por usuarios que no leen español.</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Conectar el metadato de título al mismo locale que el resto de la página.</dd>
+      <dt>EFFORT</dt><dd>LOW</dd>
+      <dt>RISK</dt><dd>LOW</dd>
+      <dt>PRIORITY</dt><dd>P4</dd>
+      <dt>QUICK_WIN</dt><dd>Sí</dd>
+    </dl>
+  </div>
+
+  <div class="finding MEDIUM">
+    <h4>F5 · El selector de tema ocupa tres controles persistentes en la barra global</h4>
+    <div class="tags"><span class="pill sev-MEDIUM">MEDIUM</span><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Todas las pantallas autenticadas</dd>
+      <dt>FRICTION_TYPE</dt><dd>CHROME_DENSITY_FRICTION</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>Tres botones separados "dark"/"light"/"system" siempre visibles en la barra superior de /app.</dd>
+      <dt>WHY_IT_MATTERS</dt><dd>Es una preferencia de baja frecuencia de cambio que ocupa el mismo nivel de prominencia que "New booking" o "Dashboard".</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Consolidar en un único control cíclico o en un desplegable dentro de "Global preferences", que ya existe como menú contenedor de preferencias.</dd>
+      <dt>EFFORT</dt><dd>LOW</dd>
+      <dt>RISK</dt><dd>LOW</dd>
+      <dt>PRIORITY</dt><dd>P3</dd>
+      <dt>QUICK_WIN</dt><dd>Sí</dd>
+    </dl>
+    <div class="dnb"><strong>DO_NOT_BREAK:</strong> la opción "system" (seguir preferencia del sistema operativo) debe seguir disponible.</div>
+  </div>
+
+  <div class="finding LOW">
+    <h4>F6 · Sin adaptación de navegación observable a 390px de ancho en la pantalla más densa del producto</h4>
+    <div class="tags"><span class="pill sev-LOW">LOW</span><span class="ev ev-MEASURED_BROWSER">MEASURED_BROWSER</span></div>
+    <dl>
+      <dt>JOURNEY</dt><dd>Import → Review en móvil</dd>
+      <dt>FRICTION_TYPE</dt><dd>RESPONSIVE_FRICTION</dd>
+      <dt>CURRENT_BEHAVIOR</dt><dd>El árbol de accesibilidad capturado a 390×844 conserva la misma estructura de barra superior y stepper que a 1440×900, sin evidencia de colapso a patrón de navegación móvil (por ejemplo, menú hamburguesa).</dd>
+      <dt>USER_IMPACT</dt><dd>Potencial de scroll horizontal o controles apretados en la tabla de 8 columnas en pantallas pequeñas; no confirmado con medición de overflow en píxeles en esta pasada.</dd>
+      <dt>RECOMMENDED_CHANGE</dt><dd>Evaluar un patrón de tabla-a-tarjetas o navegación colapsable específico para <code>&lt;768px</code> en el workspace de revisión.</dd>
+      <dt>EFFORT</dt><dd>MEDIUM</dd>
+      <dt>RISK</dt><dd>MEDIUM (cambio de layout en la pantalla más usada)</dd>
+      <dt>PRIORITY</dt><dd>P3</dd>
+      <dt>QUICK_WIN</dt><dd>No</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s32">
+  <h2>32 — Quick Wins</h2>
+  <ul class="tight">
+    <li><strong>F1 (variante relabeling):</strong> renombrar "OK" pre-validación a un estado neutro. Máximo impacto, bajo esfuerzo.</li>
+    <li><strong>F4:</strong> localizar el &lt;title&gt; del documento.</li>
+    <li><strong>F5:</strong> consolidar el selector de tema en un único control.</li>
+    <li><strong>F3 (parcial):</strong> traducir primero las cabeceras de la tabla de auto-correcciones y validaciones, el bloque de mayor visibilidad por operación.</li>
+  </ul>
+</section>
+
+<section id="s33">
+  <h2>33 — Structural Redesign Opportunities</h2>
+  <div class="card">
+    <h4 style="margin-top:0">Consolidar el control de tema en "Global preferences"</h4>
+    <p><strong>QUÉ:</strong> mover dark/light/system dentro del menú desplegable existente "Global preferences".<br/>
+    <strong>DÓNDE:</strong> barra superior de /app.<br/>
+    <strong>POR QUÉ:</strong> tres botones persistentes para una preferencia de cambio infrecuente compiten visualmente con acciones de alta frecuencia como "New booking".<br/>
+    <strong>PARA QUIÉN:</strong> todos los usuarios autenticados.<br/>
+    <strong>FRICCIÓN:</strong> CHROME_DENSITY_FRICTION.<br/>
+    <strong>BENEFICIO ESPERADO:</strong> libera ~3 elementos de la barra global sin perder funcionalidad.<br/>
+    <strong>DO_NOT_BREAK:</strong> persistencia de preferencia de tema entre sesiones; opción "system".<br/>
+    <strong>EVIDENCIA:</strong> capturas 02–09 (evidence folder), snapshot de accesibilidad de /app.</p>
+  </div>
+</section>
+
+<section id="s34">
+  <h2>34 — Roadmap Recomendado</h2>
+  <h4>Fase 1 — Quick Wins</h4>
+  <ul class="tight"><li>F1 (relabeling de estado pre-validación)</li><li>F4 (title localizado)</li><li>F5 (consolidar tema)</li></ul>
+  <h4>Fase 2 — Alto Impacto</h4>
+  <ul class="tight"><li>F2 (detección de duplicados)</li><li>F3 (i18n completo de tabla de validaciones y errores de API)</li></ul>
+  <h4>Fase 3 — UX Estructural</h4>
+  <ul class="tight"><li>F6 (patrón responsive dedicado para la pantalla de revisión)</li><li>Verificación instrumentada de viewport economy con medición en píxeles reales</li><li>Diseño de la experiencia real de check-in / pre-check-in del huésped, hoy no observable</li></ul>
+</section>
+
+<section id="s35">
+  <h2>35 — Do Not Break Summary</h2>
+  <ul class="tight">
+    <li>Checklist de consentimiento de 5 puntos antes de habilitar el import.</li>
+    <li>Enmascarado de PII por defecto en toda vista de huéspedes.</li>
+    <li>Gate de "Generate XML" sobre ausencia de errores + confirmaciones de revisión.</li>
+    <li>Botón "View demo with synthetic data" como vía segura de prueba/onboarding.</li>
+    <li>Opción "system" del selector de tema.</li>
+    <li>Traducción ya correcta de landing y checklist de import (no usar como plantilla negativa al corregir F3).</li>
+  </ul>
+</section>
+
+<section id="s36">
+  <h2>36 — Evidence Coverage</h2>
+  <div class="table-scroll"><table>
+    <tr><th>Dimensión</th><th>Cobertura</th></tr>
+    <tr><td>BROWSER_AVAILABLE</td><td>Sí (agent-browser, sesión local dedicada)</td></tr>
+    <tr><td>PUBLIC_FLOWS_COVERED</td><td>Sí — landing, piloto, legal</td></tr>
+    <tr><td>AUTHENTICATED_FLOWS_COVERED</td><td>Parcial — import/review/validate en /app y /dashboard sí; generación real de XML y descarga no ejecutadas</td></tr>
+    <tr><td>REPO_CONTEXT_AVAILABLE</td><td>Sí</td></tr>
+    <tr><td>CODE_PATHS_INSPECTED</td><td>Rutas de app, API de reservas/descarga/generación XML, .env.example, README ×3 idiomas, docs de acceso y Vercel</td></tr>
+    <tr><td>DESKTOP_COVERED</td><td>Sí (1440×900, 1366×768)</td></tr>
+    <tr><td>TABLET_COVERED</td><td>Sí (768×1024)</td></tr>
+    <tr><td>MOBILE_PORTRAIT_COVERED</td><td>Sí (390×844)</td></tr>
+    <tr><td>MOBILE_LANDSCAPE_COVERED</td><td>No</td></tr>
+    <tr><td>LIGHT_THEME_COVERED</td><td>Sí</td></tr>
+    <tr><td>DARK_THEME_COVERED</td><td>Sí (capturas de la pantalla de validación)</td></tr>
+    <tr><td>ACCESSIBILITY_COMPOSED</td><td>UNAVAILABLE en esta corrida — no se ejecutó accessibility-audit dedicado</td></tr>
+    <tr><td>I18N_COMPOSED</td><td>UNAVAILABLE como skill formal; se realizó inspección manual ES/EN equivalente con hallazgos (F3, F4)</td></tr>
+    <tr><td>DESIGN_SYSTEM_COMPOSED</td><td>UNAVAILABLE</td></tr>
+    <tr><td>VISUAL_REGRESSION_COMPOSED</td><td>UNAVAILABLE</td></tr>
+    <tr><td>AUTH_COVERED</td><td>Parcial — solo variante demo local; login real por credenciales no ejercido</td></tr>
+    <tr><td>IMPORT_COVERED</td><td>Sí</td></tr>
+    <tr><td>RESERVATIONS_COVERED</td><td>Parcial (dashboard vacío en demo)</td></tr>
+    <tr><td>GUESTS_COVERED</td><td>Sí</td></tr>
+    <tr><td>CHECKIN_COVERED</td><td>No — UNKNOWN</td></tr>
+    <tr><td>VALIDATION_COVERED</td><td>Sí</td></tr>
+    <tr><td>XML_GENERATION_COVERED</td><td>Parcial — gate verificado, generación real no ejecutada</td></tr>
+    <tr><td>ZIP_DOWNLOAD_COVERED</td><td>No</td></tr>
+    <tr><td>HISTORY_COVERED</td><td>No</td></tr>
+    <tr><td>APPLICATION_SHELL_COVERED</td><td>Sí</td></tr>
+    <tr><td>PREMIUM_PRODUCT_SURFACE_COVERED</td><td>Sí (cualitativo)</td></tr>
+    <tr><td>VIEWPORT_ECONOMY_MEASURED</td><td>Cualitativo, no en píxeles exactos</td></tr>
+    <tr><td>PII_UX_COVERED</td><td>Sí</td></tr>
+    <tr><td>COMPLIANCE_CONFIDENCE_COVERED</td><td>Sí</td></tr>
+    <tr><td>HISTORICAL_REGRESSION_CHECK_COMPLETED</td><td>Sí</td></tr>
+  </table></div>
+</section>
+
+<section id="s37">
+  <h2>37 — Limitaciones y Gaps</h2>
+  <ul class="tight">
+    <li>Auditoría ejecutada contra <strong>entorno local en modo demo</strong> (<code>GUESTHUB_LOCAL_DEMO=true</code>), no contra la URL de producción verificada (<code>anclora-syncxml.vercel.app</code>), para poder ejercer flujos autenticados sin credenciales reales del piloto. El comportamiento de producción con credenciales reales de piloto no fue observado directamente.</li>
+    <li>No se ejecutó la generación real de XML ni la descarga, por prudencia ante rutas que tocan persistencia/Blob; el análisis de esa fase es de código, no de navegador.</li>
+    <li>No se pudo verificar el flujo real de pre-check-in del huésped: el token sintético usado renderizó una pantalla de prueba, no el formulario real.</li>
+    <li>No se compusieron formalmente los skills <code>accessibility-audit</code>, <code>i18n-integrity-check</code>, <code>design-system-consumer-check</code> ni <code>visual-regression-check</code> en esta corrida; los hallazgos de i18n y accesibilidad reportados provienen de inspección manual directa, no de sus motores dedicados.</li>
+    <li>DE (alemán) solo se verificó como opción presente en el selector, sin auditoría de contenido.</li>
+    <li>No se probó explícitamente si los checkboxes de confirmación final ("reviewed preview", "mapping reviewed") pueden marcarse sin haber ejecutado antes "Validate data" — variable que agravaría o no F1 según el resultado.</li>
+    <li>Medición de viewport economy es cualitativa (capturas + árbol de accesibilidad), no instrumentada con <code>getBoundingClientRect</code> en vivo.</li>
+    <li>Móvil apaisado (landscape) no cubierto.</li>
+    <li>No se probó el envío real de SES.HOSPEDAJES, email vía Resend, ni cualquier acción con efecto externo — por diseño de seguridad de esta auditoría.</li>
+  </ul>
+  <p style="margin-top:20px"><strong>Estado final: PASS_WITH_GAPS.</strong> La cobertura alcanzada es suficiente para fundamentar los hallazgos reportados con evidencia real de navegador y código; los huecos declarados arriba delimitan honestamente lo que esta corrida no puede afirmar.</p>
+</section>
+
+</div>
+
+<footer class="doc">
+  Anclora GuestHub — Auditoría UX/UI de producto · ux-product-experience-review (AOS canónica) · AUDIT_WITH_REPO_CONTEXT · 2026-09-07<br/>
+  Evidencia local: docs/audits/evidence/anclora-guesthub-2026-09-07/ · HEAD auditado: 6a198dc (development)
+</footer>
+
+</body>
+</html>
