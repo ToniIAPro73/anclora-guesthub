@@ -1,0 +1,84 @@
+name: Promote / Environment
+
+# Manual, human-gated promotion. Moves target branch ref to exact SHA
+# already validated upstream. Fast-forward only: no merge/rebase/
+# cherry-pick/force push.
+#
+# development -> staging -> production -> main
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Branch to promote into"
+        required: true
+        type: choice
+        options: [staging, production, main]
+
+permissions:
+  contents: write
+  statuses: read
+
+concurrency:
+  group: promote-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote to ${{ github.event.inputs.target }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: inputs.target == 'main' && hashFiles('package-lock.json') != ''
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Resolve source branch
+        id: source
+        run: |
+          case "${{ inputs.target }}" in
+            staging) echo "branch=development" >> "$GITHUB_OUTPUT" ;;
+            production) echo "branch=staging" >> "$GITHUB_OUTPUT" ;;
+            main) echo "branch=production" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Verify fast-forward safety
+        run: |
+          git fetch origin ${{ steps.source.outputs.branch }} ${{ inputs.target }}
+          SOURCE_SHA=$(git rev-parse origin/${{ steps.source.outputs.branch }})
+          TARGET_SHA=$(git rev-parse origin/${{ inputs.target }})
+          echo "source=$SOURCE_SHA" >> "$GITHUB_ENV"
+          echo "Source (${{ steps.source.outputs.branch }}): $SOURCE_SHA"
+          echo "Target (${{ inputs.target }}) current: $TARGET_SHA"
+          if [ "$SOURCE_SHA" = "$TARGET_SHA" ]; then
+            echo "Already at target SHA. Nothing to promote."
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor "$TARGET_SHA" "$SOURCE_SHA"; then
+            echo "::error::PROMOTION_BLOCKED_DIVERGENCE: ${{ inputs.target }} has commits not present in ${{ steps.source.outputs.branch }}. Refusing to move target."
+            exit 1
+          fi
+
+      - name: Verify source SHA passed its upstream gate
+        run: |
+          STATUS=$(gh api repos/${{ github.repository }}/commits/$source/status --jq .state)
+          echo "Combined status for $source: $STATUS"
+          if [ "$STATUS" = "failure" ] || [ "$STATUS" = "error" ]; then
+            echo "::error::Source SHA has failing checks. Refusing to promote red code."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Fast-forward target ref
+        run: git push origin "$source:refs/heads/${{ inputs.target }}"
+
+      - name: Main baseline integrity
+        if: inputs.target == 'main' && hashFiles('package-lock.json') != ''
+        run: npm ci
+
