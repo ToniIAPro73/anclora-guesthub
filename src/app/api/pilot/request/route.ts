@@ -30,7 +30,7 @@ const requestSchema = z.object({
   acceptsSyntheticOrAnonymizedData: z.boolean().optional(),
   acceptsPilotConditions: z.literal(true).optional(),
   locale: z.string().trim().max(12).optional(),
-  source: z.literal("syncxml_landing").optional(),
+  source: z.enum(["syncxml_landing", "guesthub_app", "external_api"]).optional(),
   alojamiento: z.string().trim().max(200).optional(),
   inmuebles: z.string().trim().max(80).optional(),
   reservas: z.string().trim().max(80).optional(),
@@ -332,13 +332,15 @@ export async function POST(request: Request) {
   const acceptsSyntheticOrAnonymizedData = Boolean(data.acceptsSyntheticOrAnonymizedData ?? data.muestraSintetica);
   const normalized = {
     // Anclora Intake Contract v1
-    // source/target_product values are part of the live Nexus intake contract —
-    // legacy "syncxml*" values kept intentionally (rename 2026-08).
     schema_version: "anclora-intake-v1" as const,
     intake_domain: "access_request" as const,
     request_type: "pilot_request" as const,
-    source: "syncxml_landing" as const,
-    target_product: "syncxml" as const,
+    source: (data.source || "guesthub_app"),
+    target_product: "guesthub",
+    product: "guesthub",
+    source_system: "guesthub_app",
+    source_channel: "in_app",
+    source_detail: "pilot_request_modal",
     service_interest: null,
     idempotency_key: idempotencyKey,
 
