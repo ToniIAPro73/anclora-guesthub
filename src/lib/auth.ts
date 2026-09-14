@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { authDisabled, canUsePasswordAuth, envValue, getSessionSecret, isExplicitLocalDemoMode, validateRuntimeConfig } from "./security/env";
+import { isAncloraIdentityEnabled } from "./anclora-identity/env";
+import { getAncloraIdentityGuestHubSession } from "./anclora-identity/session";
 
 // Legacy cookie name kept after the Anclora SyncXML → Anclora GuestHub rename
 // (2026-08): renaming it would invalidate all active sessions.
@@ -44,6 +46,16 @@ function canUseLegacySecretCookie() {
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
+  if (isAncloraIdentityEnabled()) {
+    const identitySession = await getAncloraIdentityGuestHubSession();
+    if (!identitySession) return null;
+    return {
+      id: identitySession.sub,
+      email: identitySession.email || identitySession.sub,
+      role: "admin",
+    };
+  }
+
   validateRuntimeConfig();
   if (authDisabled() || isExplicitLocalDemoMode()) return { email: "demo@anclora.local", role: "admin" };
   const value = (await cookies()).get(COOKIE_NAME)?.value;
@@ -56,6 +68,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 }
 
 export async function isAuthenticated() {
+  if (isAncloraIdentityEnabled()) {
+    return Boolean(await getSessionUser());
+  }
   if (!canUsePasswordAuth()) return false;
   return Boolean(await getSessionUser());
 }

@@ -30,6 +30,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^1.16.0",
     "next": "^16.2.2",
+    "openid-client": "^6.8.8",
     "prisma": "^6.19.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
