@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { isAncloraIdentityEnabled } from '@/lib/anclora-identity/env'
-import { getAncloraIdentityOidcConfig, authorizationCodeGrant } from '@/lib/anclora-identity/oidcClient'
+import { isAncloraIdentityEnabled, getAncloraIdentityConfig } from '@/lib/anclora-identity/env'
+import { getAncloraIdentityOidcConfig, authorizationCodeGrant, fetchUserInfo } from '@/lib/anclora-identity/oidcClient'
 import { consumeOidcStateCookie, createAncloraIdentityGuestHubSession } from '@/lib/anclora-identity/session'
 import { resolveGuestHubAccess, type AncloraIdentityClaims } from '@/lib/anclora-identity/authorization'
 
@@ -14,11 +14,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'INVALID_OIDC_STATE' }, { status: 400 })
   }
 
+  const { redirectUri } = getAncloraIdentityConfig()
   const oidcConfig = await getAncloraIdentityOidcConfig()
+
+  const callbackUrl = new URL(redirectUri)
+  new URL(request.url).searchParams.forEach((val, key) => callbackUrl.searchParams.set(key, val))
 
   let tokens
   try {
-    tokens = await authorizationCodeGrant(oidcConfig, new URL(request.url), {
+    tokens = await authorizationCodeGrant(oidcConfig, callbackUrl, {
       pkceCodeVerifier: stateCookie.codeVerifier,
       expectedState: stateCookie.state,
     })
@@ -26,9 +30,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'TOKEN_EXCHANGE_FAILED' }, { status: 400 })
   }
 
-  const claims = tokens.claims() as unknown as AncloraIdentityClaims | undefined
-  if (!claims?.sub) {
+  const idClaims = tokens.claims() as unknown as AncloraIdentityClaims | undefined
+  if (!idClaims?.sub) {
     return NextResponse.json({ error: 'INVALID_ID_TOKEN' }, { status: 400 })
+  }
+
+  let userInfoClaims: Partial<AncloraIdentityClaims> = {}
+  if (tokens.access_token) {
+    try {
+      userInfoClaims = (await fetchUserInfo(oidcConfig, tokens.access_token, idClaims.sub)) as unknown as Partial<AncloraIdentityClaims>
+    } catch {
+      // Proceed with idClaims
+    }
+  }
+
+  const claims: AncloraIdentityClaims = {
+    ...idClaims,
+    ...userInfoClaims,
   }
 
   const decision = resolveGuestHubAccess(claims)

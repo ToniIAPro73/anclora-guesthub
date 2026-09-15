@@ -29,3 +29,4 @@ export const randomPKCECodeVerifier = client.randomPKCECodeVerifier
 export const calculatePKCECodeChallenge = client.calculatePKCECodeChallenge
 export const randomState = client.randomState
 export const authorizationCodeGrant = client.authorizationCodeGrant
+export const fetchUserInfo = client.fetchUserInfo
