@@ -1,3 +1,10 @@
+
+> [!IMPORTANT]
+> This repository is governed by the Anclora canonical contracts under `.anclora/`.
+> Agent-specific defaults, personal presets, or global agent configurations must NOT override those contracts.
+> Read `.anclora/AGENT_PROJECT_CONTEXT.md` before starting substantial work.
+
+
 <!-- MEMANTO-MANAGED-SECTION -->
 ## Uso de Memanto
 
