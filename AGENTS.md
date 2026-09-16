@@ -88,7 +88,7 @@ memanto memory sync --project-dir .
 
 - [`docs/devops/AGENT_GIT_WORKFLOW_CONTRACT.md`](docs/devops/AGENT_GIT_WORKFLOW_CONTRACT.md) — Contrato obligatorio
 - [`docs/devops/BRANCHING_MODEL.md`](docs/devops/BRANCHING_MODEL.md) — Modelo detallado
-- [`docs/devops/TONI_GIT_WORKFLOW_PLAYBOOK.md`](docs/devops/TONI_GIT_WORKFLOW_PLAYBOOK.md) — Pasos prácticos
+-  — Pasos prácticos
 
 ### Regla base
 
