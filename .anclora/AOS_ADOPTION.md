@@ -36,13 +36,22 @@ Declaración de adopción AOS para `anclora-guesthub`.
 | Identidad y reglas | [`../AGENTS.md`](../AGENTS.md) | ToniIAPro73 | Reglas locales subordinadas a AOS. |
 
 
-## Adopción de Gobernanza QA Proporcional
+## Adopción de Gobernanza QA Proporcional y Economía Adaptativa
 
 - PROPORTIONAL_QA_CONTRACT_ADOPTED=true
 - BATCHED_VALIDATION_CONTRACT_ADOPTED=true
 - QA_MODE_DEFAULT=AUTO
 - QA_OVERRIDE_MODEL_ADOPTED=true
-- WORKSPACE_QA_POLICY_AUTHORITY=ANCLORA_WORKSPACE_AGENT_POLICY.md
+- FAST_MINIMUM_SUFFICIENT_TESTING_ADOPTED=true
+- FAST_FULL_SUITE_PROHIBITION_ADOPTED=true
+- STOP_WHEN_SUFFICIENT_EVIDENCE_ADOPTED=true
+
+- ADAPTIVE_TOKEN_ECONOMY_CONTRACT_ADOPTED=true
+- CAVEMAN_MODE_DEFAULT=AUTO
+- CAVEMAN_TASK_LEVEL_REEVALUATION=true
+- CAVEMAN_OVERRIDE_MODEL_ADOPTED=true
+
+- WORKSPACE_POLICY_AUTHORITY=ANCLORA_WORKSPACE_AGENT_POLICY.md
 
 
 
@@ -52,4 +61,5 @@ Declaración de adopción AOS para `anclora-guesthub`.
 | --- | --- | --- | --- |
 | 2026-09-16 | v0.2.0 | Declaración inicial de adopción AOS. | ToniIAPro73 |
 | 2026-09-25 | v2.0 | Adopción de política canónica de QA proporcional, cadencia de puertas por lotes (BATCHED) y modelo de overrides explícitos. | ToniIAPro73 |
+| 2026-09-25 | v2.1 | Adopción de economía adaptativa (CAVEMAN_MODE=AUTO) y endurecimiento FAST QA (sin suites completas por defecto, mínimo suficiente, detención ante evidencia suficiente). | ToniIAPro73 |
 

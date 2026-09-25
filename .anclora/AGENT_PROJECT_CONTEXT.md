@@ -91,24 +91,31 @@ report `ANCLORA_AUTHORITY_CONFLICT` with details and stop the affected action.
 - **AOS_ADOPTION**: [`.anclora/AOS_ADOPTION.md`](AOS_ADOPTION.md)
   - Governs AOS alignment, governance level, standards, and referenced authoritative knowledge.
 
-## Canonical QA Bootstrap
+## Canonical QA & Adaptive Execution Bootstrap
 
-QA governance is inherited from:
+Workspace governance defines:
 [`../../ANCLORA_WORKSPACE_AGENT_POLICY.md`](../../ANCLORA_WORKSPACE_AGENT_POLICY.md)
 
-Default:
-`QA_MODE=AUTO`
+Defaults:
+- `QA_MODE=AUTO`
+- `CAVEMAN_MODE=AUTO`
+- `TOKEN_ECONOMY_POLICY=ADAPTIVE`
 
-Before planning verification, classify:
-- `FAST`
-- `STANDARD`
-- `FULL`
+QA classification determines verification depth:
+- `FAST`: minimum sufficient targeted validation; full repository test suites prohibited by default; stops when sufficient evidence exists.
+- `STANDARD`: focused functional verification; stops when sufficient evidence exists.
+- `FULL`: comprehensive verification; batched at meaningful boundaries.
 
-Task-level historical QA boilerplate does not override workspace QA classification.
-Only explicit mission tokens change the mode:
-- `QA_OVERRIDE=FAST`
-- `QA_OVERRIDE=STANDARD`
-- `QA_OVERRIDE=FULL`
+Caveman classification determines reasoning/exploration economy:
+- Dynamically evaluated at task / phase / coherent cluster granularity.
+- Deterministic, repetitive, low-ambiguity tasks -> `CAVEMAN=ON`.
+- Architectural design, investigation, diagnosis, ambiguity, security, DB design -> `CAVEMAN=OFF`.
+- Unexpected failure or ambiguity -> immediate switch `ON -> OFF` before diagnosis.
+
+Task-level historical boilerplate does not override workspace classifications.
+Only explicit mission tokens change modes:
+- `QA_OVERRIDE=FAST|STANDARD|FULL`
+- `CAVEMAN_OVERRIDE=ON|OFF`
 
 Testing, lint, and build execution must follow the workspace batched execution cadence:
 no repeated gates per micro-edit, and no rerun of unchanged successful gates without invalidation.
