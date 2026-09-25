@@ -1,0 +1,190 @@
+{
+  "$comment": "Estado: CURRENT = UI vigente (solo branding actualizado); STALE = UI obsoleta, pendiente de recaptura; PLACEHOLDER = imagen de relleno o ausente; STATIC = asset de marca, no se captura.",
+  "version": 1,
+  "change": "CHG-0014",
+  "generated": "2026-09-25",
+  "product": "Anclora GuestHub",
+  "screenshots_dir": "docs/manual/screenshots",
+  "env_file": ".env.local",
+  "app_url_default": "http://localhost:3000",
+  "start": "npm run dev   # acceso con la identidad QA vía Anclora Identity (OIDC)",
+  "generator": "node scripts/generate-guesthub-manual-pdf.mjs --lang=all",
+  "outputs": [
+    "public/manuals/anclora-guesthub-manual-usuario-es.{pdf,html}",
+    "public/manuals/anclora-guesthub-user-manual-en.{pdf,html}",
+    "public/manuals/anclora-guesthub-benutzerhandbuch-de.{pdf,html}"
+  ],
+  "qa_domains": [
+    "@anclora.local"
+  ],
+  "viewport": {
+    "width": 1440,
+    "height": 1100
+  },
+  "device_scale_factor": 1,
+  "cookies": [],
+  "roles": {
+    "qa": {
+      "login": "manual",
+      "login_path": "/login",
+      "email_env": "MANUAL_QA_EMAIL",
+      "password_env": "MANUAL_QA_PASSWORD",
+      "default_email": "qa.guesthub@anclora.local"
+    }
+  },
+  "required_env": [],
+  "data": "Excel de reserva sintético de QA (sin datos reales de huéspedes) cargado en la sesión QA.",
+  "screens": [
+    {
+      "file": "guesthub-de-dashboard-detail.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — Dashboard mit konsolidierter Buchung (sección «8. Operatives Dashboard»)"
+    },
+    {
+      "file": "guesthub-de-import.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — Importbildschirm (sección «1. Produktumfang»)"
+    },
+    {
+      "file": "guesthub-de-precheckin-form.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — Oeffentliches Pre-Check-in-Formular (sección «Test-Pre-Check-in»)"
+    },
+    {
+      "file": "guesthub-de-precheckin-panel.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — SES- und Test-Pre-Check-in-Panel (sección «7. SES und Pre-Check-in»)"
+    },
+    {
+      "file": "guesthub-de-review.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — Pruefung importierter Daten (sección «5. Gefuehrte Pruefung»)"
+    },
+    {
+      "file": "guesthub-de-xml.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma DE — Visuelle Ansicht des erzeugten XML (sección «6. XML und Download»)"
+    },
+    {
+      "file": "guesthub-en-dashboard-detail.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — Dashboard with consolidated booking (sección «8. Operational dashboard»)"
+    },
+    {
+      "file": "guesthub-en-import.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — Import screen (sección «1. Product scope»)"
+    },
+    {
+      "file": "guesthub-en-precheckin-form.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — Public pre-check-in form (sección «Test pre-check-in»)"
+    },
+    {
+      "file": "guesthub-en-precheckin-panel.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — SES and test pre-check-in panel (sección «7. SES and pre-check-in»)"
+    },
+    {
+      "file": "guesthub-en-review.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — Imported data review (sección «5. Guided review»)"
+    },
+    {
+      "file": "guesthub-en-xml.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma EN — Generated XML visual view (sección «6. XML and download»)"
+    },
+    {
+      "file": "guesthub-es-dashboard-detail.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Dashboard con reserva consolidada (sección «8. Dashboard operativo»)"
+    },
+    {
+      "file": "guesthub-es-import.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Pantalla inicial de importacion (sección «1. Alcance del producto»)"
+    },
+    {
+      "file": "guesthub-es-precheckin-form.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Formulario publico de pre-check-in (sección «Pre-check-in de prueba»)"
+    },
+    {
+      "file": "guesthub-es-precheckin-panel.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Panel SES y pre-check-in de prueba (sección «7. SES y pre-check-in»)"
+    },
+    {
+      "file": "guesthub-es-review.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Revision de datos importados (sección «5. Revision guiada»)"
+    },
+    {
+      "file": "guesthub-es-xml.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "CURRENT",
+      "instructions": "Idioma ES — Vista visual del XML generado (sección «6. XML y descarga»)"
+    },
+    {
+      "file": "logo-anclora-guesthub.png",
+      "mode": "static",
+      "role": "-",
+      "status": "STATIC",
+      "instructions": "Logo Premium de portada (ya actualizado)."
+    }
+  ]
+}
