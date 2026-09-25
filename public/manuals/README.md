@@ -21,3 +21,7 @@ This folder is the canonical publication folder for the latest user manuals.
 ## Rename regeneration (2026-09-01)
 
 Regenerated post-rename (Anclora SyncXML → Anclora GuestHub). Legacy `anclora-syncxml-*.{pdf,html}` artifacts have been removed from this folder.
+
+## Branding regeneration (2026-09-25)
+
+Regenerated after the CHG-0014 tier logo migration: cover logo and the 45 px app logo in the header of the 21 screenshots now show the Premium tier logo. The captured interface was verified as current (no UI changes after 2026-09-01 in the captured screens), so only the logo pixels were replaced; no screen content was altered.
