@@ -1,6 +1,6 @@
 # Anclora Guesthub — Agent Project Context
 
-AGENT_PROJECT_CONTEXT_VERSION=1.0
+AGENT_PROJECT_CONTEXT_VERSION=2.0
 STATUS=ACTIVE
 
 ANCLORA_AUTHORITY_MODEL_VERSION=1.0
@@ -90,6 +90,29 @@ report `ANCLORA_AUTHORITY_CONFLICT` with details and stop the affected action.
   - Governs real runtime architecture, hosting, Neon/Postgres database connection, PRISMA_MIGRATE migration strategy, auth, and production-backed local model.
 - **AOS_ADOPTION**: [`.anclora/AOS_ADOPTION.md`](AOS_ADOPTION.md)
   - Governs AOS alignment, governance level, standards, and referenced authoritative knowledge.
+
+## Canonical QA Bootstrap
+
+QA governance is inherited from:
+[`../../ANCLORA_WORKSPACE_AGENT_POLICY.md`](../../ANCLORA_WORKSPACE_AGENT_POLICY.md)
+
+Default:
+`QA_MODE=AUTO`
+
+Before planning verification, classify:
+- `FAST`
+- `STANDARD`
+- `FULL`
+
+Task-level historical QA boilerplate does not override workspace QA classification.
+Only explicit mission tokens change the mode:
+- `QA_OVERRIDE=FAST`
+- `QA_OVERRIDE=STANDARD`
+- `QA_OVERRIDE=FULL`
+
+Testing, lint, and build execution must follow the workspace batched execution cadence:
+no repeated gates per micro-edit, and no rerun of unchanged successful gates without invalidation.
+Repository-specific runtime minima are defined in [`PRODUCTION_RUNTIME.md`](PRODUCTION_RUNTIME.md).
 
 ## 4. Task Routing
 

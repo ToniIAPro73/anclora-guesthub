@@ -34,3 +34,22 @@ Declaración de adopción AOS para `anclora-guesthub`.
 | Contexto de agente | [`AGENT_PROJECT_CONTEXT.md`](AGENT_PROJECT_CONTEXT.md) | ToniIAPro73 | Fuente local de bootstrap de agentes (v1.0). |
 | Guía de runtime | [`PRODUCTION_RUNTIME.md`](PRODUCTION_RUNTIME.md) | ToniIAPro73 | Contrato operativo local canónico (v1.0). |
 | Identidad y reglas | [`../AGENTS.md`](../AGENTS.md) | ToniIAPro73 | Reglas locales subordinadas a AOS. |
+
+
+## Adopción de Gobernanza QA Proporcional
+
+- PROPORTIONAL_QA_CONTRACT_ADOPTED=true
+- BATCHED_VALIDATION_CONTRACT_ADOPTED=true
+- QA_MODE_DEFAULT=AUTO
+- QA_OVERRIDE_MODEL_ADOPTED=true
+- WORKSPACE_QA_POLICY_AUTHORITY=ANCLORA_WORKSPACE_AGENT_POLICY.md
+
+
+
+## Historial de adopción
+
+| Fecha | Versión | Cambio | Owner |
+| --- | --- | --- | --- |
+| 2026-09-16 | v0.2.0 | Declaración inicial de adopción AOS. | ToniIAPro73 |
+| 2026-09-25 | v2.0 | Adopción de política canónica de QA proporcional, cadencia de puertas por lotes (BATCHED) y modelo de overrides explícitos. | ToniIAPro73 |
+
