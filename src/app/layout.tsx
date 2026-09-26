@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import { AppPreferencesProvider } from "@/components/AppPreferencesProvider";
 import { AppShell } from "@/components/AppShell";
+import { versionedPublicAsset } from "@/lib/branding/icon-metadata";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -16,11 +17,11 @@ export const metadata: Metadata = {
   description: "Gestión de huéspedes, check-in y operación de alquiler vacacional.",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: versionedPublicAsset("/favicon.svg"), type: "image/svg+xml" },
+      { url: versionedPublicAsset("/favicon.ico"), sizes: "any" },
+      { url: versionedPublicAsset("/favicon-32.png"), type: "image/png", sizes: "32x32" },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: versionedPublicAsset("/apple-touch-icon.png"),
   },
 };
 
