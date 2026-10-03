@@ -28,7 +28,7 @@ PRODUCT_FAMILY=Anclora Group
 When starting work in this repository, agents must read sources in this exact order:
 
 1. Current explicit instruction from Toni (highest operational priority).
-2. Workspace agent policy (`../../ANCLORA_WORKSPACE_AGENT_POLICY.md` — currently `WORKSPACE_POLICY_STATUS=PENDING_GLOBAL_INSTALLATION`, with `../../AGENTS.md` as interim workspace guidance).
+2. Workspace agent policy (`../../ANCLORA_WORKSPACE_AGENT_POLICY.md`, canonical and active; `../../AGENTS.md` is only its workspace adapter). Promotion semantics inherit the workspace Canonical Promotion Policy: default no automatic promotion; explicit current-task user authorization permits gated, repository-supported promotion.
 3. Repository agent rules (`../AGENTS.md`).
 4. `.anclora/AGENT_PROJECT_CONTEXT.md` (this file — bootstrap, index, routing, and authority map).
 5. `.anclora/PRODUCTION_RUNTIME.md` (canonical runtime contract: topology, database, migrations, QA, Git).
