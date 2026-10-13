@@ -1,0 +1,29 @@
+# Matriz de gates — Fase 0
+
+**Estado:** PROPUESTA · no ejecutada. Comprobaciones futuras no realizadas en esta misión: NOT_RUN.
+PASS requiere todos los criterios técnicos, evidencia sanitizada y QA visual cuando afecte la UI o comportamiento visible; después Toni realiza revisión funcional/visual. FAIL si cualquier criterio falla. BLOCKED requiere dependencia concreta que impida implementar o verificar con seguridad. NOT_RUN es ausencia de ejecución, no PASS.
+
+| Req | Tarea | Comprobación | Fixture/evidencia | Comando o revisión futura | Esperado | Umbral / denominador | Evidencia a guardar | Responsable de ejecución / aceptación | Estado hoy |
+|---|---|---|---|---|---|---|---|---|---|
+| R-01, R-02 | GH-0.1 | Tabla de flags × env × endpoint × dryRun × rol; inspeccionar cada ruta que transmita | Config sintética sin credenciales; mock cliente SES | Revisión de código + tests focales que se acuerden en ejecución; sin host SES | Prod siempre denegado; contradicción falla cerrado; cero llamada mock a prod | 100% de rutas/métodos SES inventoried; denominador = total de route handlers SES localizados | tabla, diff futuro, salida de tests | Agente ejecuta / Toni revisa | NOT_RUN |
+| R-03, R-04 | GH-0.2 | Actor × acción × recurso/método; verificar owner server-side y child-resource access | IDs ficticios owner A/B y null; ningún registro de viajero | Revisión de routes + tests focales futuros de auth/ownership | 401/403/404 según política; no cross-owner | 100% de rutas/acciones del inventario con decisión; casos permitidos/denegados denominados | matriz y reporte de test sanitizado | Agente ejecuta / Toni revisa | NOT_RUN |
+| R-05, R-09 | GH-0.4 | Data map campo/almacén/copia/cifrado/retención/borrado | Modelo schema, nombres de campo; sin valores personales | Revisión técnica del mapa por el agente; no DB/SQL ejecutado en esta misión | Copias/owners conocidos o gaps concretos documentados; sin nueva PII | campos con clasificación / campos identificados; almacenes mapeados / almacenes encontrados; denominador cerrado antes del gate | mapa y acta revisión | Agente ejecuta / Toni revisa; especialista antes de uso público aplicable | NOT_RUN |
+| R-06 | GH-0.3 | Inspección de headers y unsafe directives por superficie | next.config + layout; browser QA futuro si hay ajuste | Tests focales de headers + agent-browser/anclora-visual-qa si cambio UI requerido | Headers definidos; excepción documentada; no regresión en rutas elegidas | superficies revisadas / total superficies del inventario; seleccionar antes de ejecutar | matriz CSP, test output, captura sanitizada | Agente ejecuta QA visual si aplica / Toni revisa | NOT_RUN |
+| R-07 | GH-0.3 | Revisión de respuestas catch/error y logs | Casos sintéticos de upstream timeout/HTTP error | Revisión y tests de API futuros | No PII, secret, XML/SOAP crudo o topología no necesaria | respuestas revisadas / endpoints con errores identificados | catálogo de códigos y test output | Agente ejecuta / Toni revisa | NOT_RUN |
+| R-08 | GH-0.6 | Claim → source → status → date/type; estados SES no colapsados | Texto de README/manuales, código y fuente pública | Revisión editorial de Toni; gate Hermes antes del merge de copy público; legal/especialistas antes del uso público que dependa de ello | Claim no excede evidencia; proveedores se etiquetan como claims | claims con fuente/fecha / claims inventariados; todo claim sin fuente es FAIL | registro claims y acta | Toni revisa; Hermes/legal antes de publicación aplicable | NOT_RUN |
+| R-08, R-10 | GH-0.5 | scripts workflow lockfile y deps directas inventariados | package, lockfile, workflow como artefactos | Revisión estática ahora; audit command solo en misión futura autorizada | No reportar tests/audit/build como pasados; ExcelJS descrito correctamente | artifacts inventariados / artifacts requeridos; no advisory rate sin audit ejecutada | índice de scripts y workflow; resultado audit futuro aparte | Agente ejecuta / Toni revisa | NOT_RUN |
+| R-01–R-10 | F0 global | revisión cruzada de gates, decisiones, owners y estado | Todos los artefactos nuevos + revisión Toni | Revisión manual de seguridad, privacy, producto | Ninguna aceptación implícita; prod SES bloqueado | todos los gates críticos con estado; cero críticos omitidos | acta de revisión y decisión por tarea | Agente presenta evidencia / Toni acepta o pide ajustes | NOT_RUN |
+
+## Casos binarios de aceptación/rechazo
+
+- Aceptación de G0.1 requiere todas las rutas y combinaciones enumeradas, prod bloqueado y conflicto fail-closed. Una bandera técnica no es autorización.
+- Aceptación de G0.2 requiere todas las rutas, recursos derivados y caminos de autorización cubiertos. Test existente no acredita ejecución.
+- Aceptación de G0.3 requiere matriz de directivas/error y ninguna excepción sin owner/reason/review date.
+- Aceptación de G0.4 requiere cada dato/almacén/copia dentro de mapa, con gaps explícitos; requisito sin lifecycle se documenta; BLOCKED solo si impide implementar/verificar una operación segura.
+- Aceptación de G0.5 requiere artefactos CI/deps inventariados, sin afirmar ejecución. Vulnerabilidad high/critical futura sin disposición es FAIL.
+- Aceptación de G0.6 requiere cada claim sustentado, legalmente prudente y revisado por Toni; especialista antes de uso público que dependa de esa revisión.
+- Rechazo de cualquier gate: cambio fuera de alcance, evidencia PII/secretos, política productiva desbloqueada, denominador o evidencia obligatoria ausente o aceptación funcional/visual de Toni pendiente.
+
+## Comandos: no ejecutar en misión documental
+
+Futura implementación puede considerar tests focales de Vitest, lint/typecheck/build según gate CI. No se fijan aquí comandos exactos de tests sin selección por tarea. El workflow vigente define check:public-docs, lint, typecheck, test y build. Todos siguen NOT_RUN en el corte de esta spec. No ejecutar npm audit, migraciones, SES ni servicios por este artefacto.
