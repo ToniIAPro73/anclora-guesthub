@@ -1,18 +1,18 @@
-# Checklist de validación — invariantes de promoción global
+# Checklist de validación — arranque local sin conflictos de puerto
 
-**Alcance:** propagar con `anclora-mods/scripts/adopt-repo.mjs` las invariantes nuevas de la política global de promoción a `.anclora/PRODUCTION_RUNTIME.md`: espera solo a que termine el workflow de cada salto, verificación de cada rama a cargo de Toni, alcance multi-repo y resumen único al final. Solo se añaden 6 líneas de contrato; no cambia código ni comportamiento de la aplicación.
+**Alcance:** el script `dev` ejecuta primero `anclora-infrastructure/scripts/free-port.mjs`, que libera el puerto asignado al repo en `anclora-infrastructure/config/dev-endpoints.yaml` si lo ocupa un proceso colgado del propio workspace (nunca un proceso ajeno). En los comandos `next dev` y `vite` simples se fija además el puerto del registro (`-p N`, `--port N --strictPort`). No cambia código de la aplicación ni la VPS.
 
 ## Comprobaciones ejecutadas
 
 | Comprobación | Resultado |
 | --- | --- |
-| `node scripts/adopt-repo.mjs apply --repo <repo>` | APPLIED |
-| Diff limitado a `.anclora/PRODUCTION_RUNTIME.md` | 6 inserciones, sin borrados |
-| Tests del adopter (`adopt-repo.test.mjs`) | PASS — 38 tests |
+| `package.json` válido tras el cambio | PASS |
+| Tests de `free-port.mjs` y `wire-dev-port.mjs` (en `anclora-infrastructure`) | PASS — 10 tests |
+| Prueba de extremo a extremo en `anclora-secureflow` (puerto ocupado, `npm run dev`) | PASS — puerto liberado y servidor arrancado en el puerto del registro |
 
 ## Verificación visual
 
-No aplica: solo contrato de documentación.
+No aplica: solo el script de arranque local.
 
 ## Promoción
 
