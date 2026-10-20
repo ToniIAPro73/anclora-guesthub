@@ -127,12 +127,14 @@ QA_AUTH_MODEL=DEDICATED_USER
 QA_IS_DEDICATED=true
 QA_IS_REAL_USER=false
 REAL_USER_AS_QA_ALLOWED=false
-QA_SCOPE=production
+QA_SCOPE=dedicated-user-owned-records
 QA_REUSE=true
 QA_CREATE_IF_MISSING=true
 QA_DELETE_AFTER_TEST=false
 QA_CREATION_CONFIRMATION_REQUIRED=false
 QA_PERSISTENT_IDENTITY=qa.guesthub@anclora.local
+QA_DATA_ISOLATION_MODEL=USER_OWNED_RECORDS
+QA_WRITE_SCOPE=authenticated QA user records only; never query or mutate another owner's records
 
 For dedicated human QA: Use designated production test identity. Never use Toni's personal account or operational admins as QA accounts. Never delete test account after testing.
 
