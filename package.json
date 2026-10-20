@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ../anclora-infrastructure/scripts/free-port.mjs && next dev -p 3009",
+    "dev": "node -e \"const p='../anclora-infrastructure/scripts/free-port.mjs';if(require('fs').existsSync(p)){try{require('child_process').execFileSync(process.execPath,[p],{stdio:'inherit'})}catch(e){process.exit(e.status||1)}}\" && next dev -p 3009",
     "build": "prisma generate && next build",
     "vercel-build": "DATABASE_URL=${DATABASE_URL:-$DIRECT_URL} prisma generate && DATABASE_URL=${DATABASE_URL:-$DIRECT_URL} next build",
     "check:public-docs": "node scripts/check-public-docs.mjs",
