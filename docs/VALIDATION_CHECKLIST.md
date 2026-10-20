@@ -1,20 +1,19 @@
-# Checklist de validación — llamada a free-port tolerante a CI
+# Checklist de validación — invariantes de promoción: sin esperar al CI de origen
 
-**Alcance:** corrección de la llamada de liberación de puerto del script `dev`. La versión anterior fallaba con `MODULE_NOT_FOUND` en los runners de CI, donde no existe el repo hermano `anclora-infrastructure` (rompió el E2E de `anclora-linguo-cam`, cuyo Playwright arranca `npm run dev`). Ahora la llamada se omite si `../anclora-infrastructure/scripts/free-port.mjs` no existe y, si existe, se propaga su código de salida. No cambia código de la aplicación.
+**Alcance:** añadir con `anclora-mods/scripts/adopt-repo.mjs` dos líneas a `.anclora/PRODUCTION_RUNTIME.md`: `PROMOTION_AGENT_WAITS_FOR_SOURCE_CI=false` y `PROMOTION_DISPATCH_IMMEDIATELY=true`. Reflejan la política global: el agente lanza la promoción en cuanto hay autorización y no espera ni sondea el CI de la rama de origen; `promote.yml` rechaza un SHA con estado en fallo. No cambia código ni comportamiento de la aplicación.
 
 ## Comprobaciones ejecutadas
 
 | Comprobación | Resultado |
 | --- | --- |
-| Tests de `free-port.mjs` y `wire-dev-port.mjs` (en `anclora-infrastructure`) | PASS — 11 tests, incluido el caso sin repo hermano |
-| Extremo a extremo en `anclora-secureflow` (puerto ocupado, `npm run dev`) | PASS — liberado y servidor arrancado en el puerto del registro |
-| Ejecución de la llamada en un directorio sin `anclora-infrastructure` | PASS — salida 0 |
-| `package.json` válido | PASS |
+| `node scripts/adopt-repo.mjs apply --repo <repo>` | APPLIED |
+| `node scripts/adopt-repo.mjs check-all` | 40 PASS, 1 exento, 0 bloqueados |
+| Diff limitado a `.anclora/PRODUCTION_RUNTIME.md` | 2 inserciones |
 
 ## Verificación visual
 
-No aplica: solo el script de arranque local.
+No aplica: solo contrato de documentación.
 
 ## Promoción
 
-No solicitada en este cambio.
+Se promueve `development` → `staging` → `production` → `main` con `promote.yml`.
