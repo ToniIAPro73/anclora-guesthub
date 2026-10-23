@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> Historical reference only. Operational Git rules are superseded by the Anclora workspace policy v2.2 and `.anclora/PRODUCTION_RUNTIME.md`: work on `development`, keep changes uncommitted until Toni explicitly validates them in development, then commit/push; wait for Toni's Preview review; only `PROMOTE=FULL` starts the asynchronous full chain. Do not follow legacy feature-branch, automatic-commit, per-hop CI wait, or manual promotion commands below.
+
 # Contrato Git obligatorio para agentes IA
 
 **Versión:** 1.0  

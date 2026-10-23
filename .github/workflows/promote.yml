@@ -10,21 +10,25 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "Branch to promote into"
+        description: "Branch to promote into, or full chain"
         required: true
         type: choice
-        options: [staging, production, main]
+        options: [staging, production, main, full]
+      source_sha:
+        description: "Exact development SHA reviewed in Preview (required for full chain)"
+        required: false
+        type: string
 
 permissions:
-  contents: write
   statuses: read
-
+  contents: write
 concurrency:
-  group: promote-${{ inputs.target }}
+  group: promote-${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
   promote:
+    if: inputs.target != 'full'
     name: Promote to ${{ github.event.inputs.target }}
     runs-on: ubuntu-latest
     steps:
@@ -81,4 +85,55 @@ jobs:
       - name: Main baseline integrity
         if: inputs.target == 'main' && hashFiles('package-lock.json') != ''
         run: npm ci
+  promote_full:
+    if: inputs.target == 'full'
+    name: Promote development through staging, production, and main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Promote the full chain without waiting for environment checks
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_NAME" != "development" ]; then
+            echo "::error::PROMOTION_BLOCKED_WRONG_REF: dispatch this workflow from development."
+            exit 1
+          fi
+          if [ -z "$SOURCE_SHA" ]; then
+            echo "::error::PROMOTION_BLOCKED_MISSING_REVIEWED_SHA: supply the exact SHA shown in Preview."
+            exit 1
+          fi
+          git fetch origin \
+            "+refs/heads/development:refs/remotes/origin/development" \
+            "+refs/heads/staging:refs/remotes/origin/staging" \
+            "+refs/heads/production:refs/remotes/origin/production" \
+            "+refs/heads/main:refs/remotes/origin/main"
+          git cat-file -e "$SOURCE_SHA^{commit}"
+          current_development_sha="$(git rev-parse origin/development)"
+          if [ "$current_development_sha" != "$SOURCE_SHA" ]; then
+            echo "::error::PROMOTION_BLOCKED_UNREVIEWED_DEVELOPMENT: development moved after Preview review. Review the new Preview first."
+            exit 1
+          fi
+          source_sha="$SOURCE_SHA"
+          echo "Reviewed development SHA: $source_sha"
+          source_status="$(gh api "repos/$GITHUB_REPOSITORY/commits/$source_sha/status" --jq .state)"
+          if [ "$source_status" = "failure" ] || [ "$source_status" = "error" ]; then
+            echo "::error::PROMOTION_BLOCKED_FAILED_SOURCE_CHECKS: development has failing checks."
+            exit 1
+          fi
+          for target in staging production main; do
+            target_sha="$(git rev-parse "origin/$target")"
+            if ! git merge-base --is-ancestor "$target_sha" "$source_sha"; then
+              echo "::error::PROMOTION_BLOCKED_DIVERGENCE: $target has commits outside development."
+              exit 1
+            fi
+          done
+          for target in staging production main; do
+            git push origin "$source_sha:refs/heads/$target"
+          done
