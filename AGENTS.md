@@ -122,7 +122,7 @@ Antes de modificar este repositorio, todo agente IA debe leer:
 6. `.anclora/SECURITY_RULES.md`
 7. `MEMORY.md`
 
-Regla base: No trabajar directamente en `development`, `staging` ni `production`.
+Regla base: trabajar directamente en la rama existente `development`, según la política canónica del workspace.
 <!-- ANCLORA-GLOBAL-AGENT-MEMORY-END -->
 
 <!-- ANCLORA-SDD-STANDARDS-START -->
@@ -161,7 +161,7 @@ Toda feature o fix sigue este flujo antes de escribir código:
 - Crear tasks: `sdd/features/<nombre>/<nombre>-tasks-v1.md`
 - Implementar tarea a tarea (tests primero)
 - Validar contra criterios de aceptación de la spec
-- PR contra `development`, con referencia a la spec
+- Tras validar la spec, presentar los cambios en `development` y esperar la validación expresa de Toni antes de commit/push; el flujo normal no requiere PR.
 
 ### Reglas obligatorias
 

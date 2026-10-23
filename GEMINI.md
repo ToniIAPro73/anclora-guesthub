@@ -91,22 +91,4 @@ memanto memory sync --project-dir .
 
 ### Regla base
 
-Crea rama desde `development` usando `feat/<tu-nombre>-<descripcion>`:
-
-```bash
-git fetch origin --prune
-git checkout development
-git pull --ff-only origin development
-git checkout -b feat/gemini-<descripcion>
-```
-
-Ejecuta checks y haz commit:
-
-```bash
-npm run lint && npm run typecheck && npm run test && npm run build
-git add .
-git commit -m "<tipo>(<scope>): <resumen>"
-git push -u origin feat/gemini-<descripcion>
-```
-
-**No hagas merge, promoción ni push a ramas permanentes.** Toni integra tu rama.
+Trabaja directamente en la rama existente `development`; no crees ramas de tarea ni worktrees para el trabajo normal. Comprueba la rama y el estado antes de editar y conserva el trabajo previo que encuentres. Mantén los cambios locales sin commit ni push hasta que Toni valide el resultado en el entorno de desarrollo. Tras su validación expresa, haz commit y push a `origin/development`. Después espera la revisión de Preview; solo `PROMOTE=FULL` autoriza la promoción completa según la política canónica del workspace. No promociones automáticamente ni esperes a que terminen CI o despliegues.
