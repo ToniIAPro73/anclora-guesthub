@@ -62,7 +62,7 @@ manifest override generic agent defaults or home-directory agent policies.
 
 APPLICATION_NAME=Anclora Guesthub
 REPOSITORY=anclora-guesthub
-APPLICATION_TYPE=fullstack_or_application
+APPLICATION_TYPE=fullstack
 FRAMEWORK=Next.js
 
 ## 2. Runtime Topology
