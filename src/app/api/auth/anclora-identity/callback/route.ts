@@ -6,16 +6,22 @@ import { resolveGuestHubAccess, type AncloraIdentityClaims } from '@/lib/anclora
 
 export async function GET(request: Request) {
   if (!isAncloraIdentityEnabled()) {
-    return NextResponse.json({ error: 'ANCLORA_IDENTITY_DISABLED' }, { status: 404 })
+    return redirectIdentityError(request.url, 'unavailable')
   }
 
   const stateCookie = await consumeOidcStateCookie()
   if (!stateCookie) {
-    return NextResponse.json({ error: 'INVALID_OIDC_STATE' }, { status: 400 })
+    return redirectIdentityError(request.url, 'retry')
   }
 
-  const { redirectUri } = getAncloraIdentityConfig()
-  const oidcConfig = await getAncloraIdentityOidcConfig()
+  let redirectUri: string
+  let oidcConfig
+  try {
+    ({ redirectUri } = getAncloraIdentityConfig())
+    oidcConfig = await getAncloraIdentityOidcConfig()
+  } catch {
+    return redirectIdentityError(request.url, 'unavailable')
+  }
 
   const callbackUrl = new URL(redirectUri)
   new URL(request.url).searchParams.forEach((val, key) => callbackUrl.searchParams.set(key, val))
@@ -26,13 +32,15 @@ export async function GET(request: Request) {
       pkceCodeVerifier: stateCookie.codeVerifier,
       expectedState: stateCookie.state,
     })
-  } catch {
-    return NextResponse.json({ error: 'TOKEN_EXCHANGE_FAILED' }, { status: 400 })
+  } catch (error) {
+    const safeCode = getSafeOidcErrorCode(error)
+    console.error('[guesthub-auth] Identity token exchange failed', { code: safeCode })
+    return redirectIdentityError(request.url, 'exchange')
   }
 
   const idClaims = tokens.claims() as unknown as AncloraIdentityClaims | undefined
   if (!idClaims?.sub) {
-    return NextResponse.json({ error: 'INVALID_ID_TOKEN' }, { status: 400 })
+    return redirectIdentityError(request.url, 'retry')
   }
 
   let userInfoClaims: Partial<AncloraIdentityClaims> = {}
@@ -52,8 +60,7 @@ export async function GET(request: Request) {
   const decision = resolveGuestHubAccess(claims)
 
   if (!decision.allowed) {
-    // Authenticated identity, no GuestHub membership: explicit 403, never an infinite loop
-    return NextResponse.json({ error: 'ACCESS_DENIED', message: 'User does not have an active GuestHub membership' }, { status: 403 })
+    return redirectIdentityError(request.url, 'membership_required')
   }
 
   await createAncloraIdentityGuestHubSession({
@@ -64,4 +71,25 @@ export async function GET(request: Request) {
   })
 
   return NextResponse.redirect(new URL('/', request.url))
+}
+
+function redirectIdentityError(requestUrl: string, error: 'exchange' | 'membership_required' | 'retry' | 'unavailable') {
+  const destination = new URL('/login', requestUrl)
+  destination.searchParams.set('identity_error', error)
+  return NextResponse.redirect(destination)
+}
+
+function getSafeOidcErrorCode(error: unknown): string {
+  if (!error || typeof error !== 'object' || !('error' in error)) return 'other'
+  const code = error.error
+  const knownCodes = new Set([
+    'invalid_client',
+    'invalid_grant',
+    'invalid_request',
+    'unauthorized_client',
+    'invalid_scope',
+    'server_error',
+    'temporarily_unavailable',
+  ])
+  return typeof code === 'string' && knownCodes.has(code) ? code : 'other'
 }

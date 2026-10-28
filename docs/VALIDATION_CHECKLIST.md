@@ -1,4 +1,4 @@
-# Checklist de validación — GuestHub Identity login entry (2026-10-28)
+# Checklist de validación — GuestHub Identity access guidance (2026-10-28)
 
 **Repositorio:** anclora-guesthub
 **Rama:** development
@@ -7,12 +7,13 @@
 
 ## 1. Qué cambia
 
-- `/login` y `/admin/login` entran mediante Anclora Identity cuando está activo.
-- Las rutas locales de login, recuperación y cambio de contraseña quedan
-  bloqueadas en modo Identity.
-- Logout limpia las cookies local y de Identity.
-- El descubrimiento OIDC tiene un límite de 8 segundos.
-- Se conserva el control de pertenencia al piloto y el mapeo local de roles.
+- Los errores de callback de Identity vuelven a `/login` con una explicación
+  clara y sin exponer códigos OAuth ni detalles técnicos.
+- Si la cuenta no tiene membresía GuestHub activa, se explica cómo solicitar
+  acceso al piloto.
+- La autorización sigue denegando el acceso y no crea una sesión sin membresía.
+- Se añadieron pruebas focalizadas para membresía ausente, fallo de intercambio
+  y estado caducado.
 
 ## 2. Comprobaciones
 
@@ -21,9 +22,11 @@
 | TypeScript | `npm run typecheck` | PASS |
 | ESLint focalizado | Archivos de login, auth y cliente OIDC afectados | PASS |
 | Integridad del diff | `git diff --check` y `git diff --cached --check` | PASS |
-| Visual QA de Production actual | `anclora-visual-qa check https://guesthub.anclora.com/login` | PASS; confirmó la pantalla local anterior al cambio |
-| Visual QA tras el cambio | Pendiente de publicación del SHA | NOT_RUN |
-| Suite Vitest | No ejecutada | No solicitada |
+| Pruebas focalizadas | `npx vitest run tests/anclora-identity-callback.test.ts tests/anclora-identity-authorization.test.ts` | PASS; 9 pruebas |
+| TypeScript | `npm run typecheck` | PASS |
+| ESLint focalizado | Rutas y pantalla de login afectadas | PASS |
+| Integridad del diff | `git diff --check` | PASS |
+| Visual QA local | `anclora-visual-qa` en estados de membresía, intercambio y reintento, más `/piloto` | PASS |
 
 ## 3. Revisión de Toni
 
