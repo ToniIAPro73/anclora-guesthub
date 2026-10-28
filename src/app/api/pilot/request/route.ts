@@ -30,6 +30,7 @@ const requestSchema = z.object({
   acceptsSyntheticOrAnonymizedData: z.boolean().optional(),
   acceptsPilotConditions: z.literal(true).optional(),
   locale: z.string().trim().max(12).optional(),
+  requestId: z.string().uuid().optional(),
   source: z.enum(["syncxml_landing", "guesthub_app", "external_api"]).optional(),
   alojamiento: z.string().trim().max(200).optional(),
   inmuebles: z.string().trim().max(80).optional(),
@@ -236,7 +237,7 @@ function buildPilotRequestEmail(normalized: {
 }
 
 async function forwardPilotRequestToNexus(input: {
-  normalized: unknown;
+  normalized: { email: string; name: string; companyName?: string; idempotency_key: string; [key: string]: unknown };
   nexusWebhookUrl: string;
   nexusApiKey: string;
   requestId: string;
@@ -254,7 +255,16 @@ async function forwardPilotRequestToNexus(input: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${nexusApiKey}`,
       },
-      body: JSON.stringify(normalized),
+      body: JSON.stringify(nexusWebhookUrl.includes('/guesthub-qa-pilot')
+        ? {
+            applicant: {
+              email: normalized.email,
+              name: normalized.name,
+              organization_name: normalized.companyName,
+            },
+            idempotency_key: normalized.idempotency_key,
+          }
+        : normalized),
       signal: AbortSignal.timeout(90000),
     });
 
@@ -309,14 +319,23 @@ export async function POST(request: Request) {
 
   // Nexus contract: canonical NEXUS_GUESTHUB_* names read first, legacy
   // NEXUS_SYNCXML_* kept as fallback (rename 2026-08; cross-repo contract).
-  const nexusWebhookUrl = process.env.NEXUS_GUESTHUB_WEBHOOK_URL || process.env.NEXUS_SYNCXML_WEBHOOK_URL || process.env.NEXUS_WEBHOOK_URL;
-  const nexusApiKey = process.env.NEXUS_GUESTHUB_WEBHOOK_SECRET || process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || process.env.NEXUS_INTERNAL_API_KEY;
+  const qaRequestScope = process.env.GUESTHUB_ACCESS_REQUEST_SCOPE === 'qa';
+  const nexusWebhookUrl = qaRequestScope
+    ? process.env.NEXUS_QA_GUESTHUB_WEBHOOK_URL
+    : process.env.NEXUS_GUESTHUB_WEBHOOK_URL || process.env.NEXUS_SYNCXML_WEBHOOK_URL || process.env.NEXUS_WEBHOOK_URL;
+  const nexusApiKey = qaRequestScope
+    ? process.env.NEXUS_QA_GUESTHUB_WEBHOOK_SECRET
+    : process.env.NEXUS_GUESTHUB_WEBHOOK_SECRET || process.env.NEXUS_SYNCXML_WEBHOOK_SECRET || process.env.NEXUS_INTERNAL_API_KEY;
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL;
   const resendTo = process.env.ADMIN_EMAILS || envValue("GUESTHUB_PILOT_REQUEST_TO", "SYNCXML_PILOT_REQUEST_TO");
   // Legacy endpoint: anclora-syncxml.vercel.app — pending owner domain decision.
   const appUrl = envValue("GUESTHUB_APP_URL", "SYNCXML_APP_URL") || process.env.NEXT_PUBLIC_APP_URL || "https://anclora-syncxml.vercel.app";
+
+  if (qaRequestScope && (!nexusWebhookUrl || !nexusApiKey || !nexusWebhookUrl.includes('/guesthub-qa-pilot'))) {
+    return NextResponse.json({ error: "Solicitud QA no disponible: configuración aislada incompleta." }, { status: 503 });
+  }
 
   if (!nexusWebhookUrl && !resendApiKey) {
     console.error("Missing Nexus and Resend configuration for pilot request forwarding");
@@ -328,7 +347,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
 
   const data = parsed.data;
-  const idempotencyKey = crypto.randomUUID();
+  const idempotencyKey = data.requestId || crypto.randomUUID();
   const acceptsSyntheticOrAnonymizedData = Boolean(data.acceptsSyntheticOrAnonymizedData ?? data.muestraSintetica);
   const normalized = {
     // Anclora Intake Contract v1
@@ -390,7 +409,7 @@ export async function POST(request: Request) {
     });
   };
 
-  if (resendApiKey && resendFrom && resendTo) {
+  if (!qaRequestScope && resendApiKey && resendFrom && resendTo) {
     try {
       await sendPilotRequestEmail({
         normalized,
@@ -414,6 +433,7 @@ export async function POST(request: Request) {
   if (nexusResult.ok) {
     return NextResponse.json({
       ok: true,
+      requestId: idempotencyKey,
       warning: normalized.raw.adminEmailSentBySyncxml ? undefined : "email_not_sent_nexus_registered",
     });
   }
@@ -423,6 +443,7 @@ export async function POST(request: Request) {
       error: "No se pudo registrar la solicitud en Nexus",
       code: "NEXUS_FORWARD_FAILED",
       nexusStatus: nexusResult.status,
+      requestId: idempotencyKey,
     },
     { status: 502 },
   );

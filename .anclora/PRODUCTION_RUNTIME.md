@@ -158,6 +158,11 @@ QA_CREATION_CONFIRMATION_REQUIRED=false
 QA_PERSISTENT_IDENTITY=qa.guesthub@anclora.local
 QA_DATA_ISOLATION_MODEL=USER_OWNED_RECORDS
 QA_WRITE_SCOPE=authenticated QA user records only; never query or mutate another owner's records
+QA_ACCESS_REQUEST_IDENTITY=tonipmi.test@gmail.com
+QA_ACCESS_REQUEST_SCOPE=server-configured Nexus QA organization; never selected by email or client input
+QA_ACCESS_REQUEST_ROLE=guesthub:qa
+QA_ACCESS_REQUEST_CONFIGURATION=NEXUS_QA_GUESTHUB_WEBHOOK_URL + NEXUS_QA_GUESTHUB_WEBHOOK_SECRET; Nexus requires GUESTHUB_QA_ORG_ID + GUESTHUB_QA_WEBHOOK_SECRET + GUESTHUB_QA_APPLICANT_EMAIL
+QA_ACCESS_REQUEST_STATUS=dedicated Nexus QA organization and reviewer verified; preview request endpoint, secret, and deployment remain unconfigured
 
 For dedicated human QA: Use designated production test identity. Never use Toni's personal account or operational admins as QA accounts. Never delete test account after testing.
 

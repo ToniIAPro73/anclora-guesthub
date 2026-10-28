@@ -40,6 +40,7 @@ export function PilotRequestForm() {
   const [acceptsPilotConditions, setAcceptsPilotConditions] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [retryRequestId, setRetryRequestId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   function set(name: string, value: string) {
@@ -74,6 +75,7 @@ export function PilotRequestForm() {
     track("submit_pilot_request");
     setSubmitting(true);
     setSubmitError(null);
+    const requestId = retryRequestId ?? crypto.randomUUID();
     try {
       const response = await fetch("/api/pilot/request", {
         method: "POST",
@@ -103,14 +105,19 @@ export function PilotRequestForm() {
           presupuesto,
           mensaje,
           privacy: acceptsPilotConditions,
+          requestId,
         }),
       });
       if (!response.ok) {
+        const result = await response.json().catch(() => null) as { requestId?: string } | null;
+        setRetryRequestId(result?.requestId ?? requestId);
         setSubmitError(copy.form.submitError);
         return;
       }
+      setRetryRequestId(null);
       setSubmitted(true);
     } catch {
+      setRetryRequestId(requestId);
       setSubmitError(copy.form.submitError);
     } finally {
       setSubmitting(false);

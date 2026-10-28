@@ -25,4 +25,14 @@ describe("pilot request synthetic sample handling", () => {
     expect(source).not.toContain("synthetic data acceptance required");
     expect(source).not.toContain("acceptsSyntheticOrAnonymizedData: true");
   });
+
+  it('reuses one idempotency key when the applicant retries a failed delivery', () => {
+    const route = readFileSync('src/app/api/pilot/request/route.ts', 'utf8');
+    const form = readFileSync('src/components/landing/PilotRequestForm.tsx', 'utf8');
+
+    expect(route).toContain('const idempotencyKey = data.requestId || crypto.randomUUID()');
+    expect(route).toContain('requestId: idempotencyKey');
+    expect(form).toContain('const requestId = retryRequestId ?? crypto.randomUUID()');
+    expect(form).toContain('setRetryRequestId(result?.requestId ?? requestId)');
+  });
 });

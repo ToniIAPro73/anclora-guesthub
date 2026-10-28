@@ -20,6 +20,15 @@ describe('Anclora Identity — GuestHub authorization', () => {
     expect(decision).toEqual({ allowed: true, reason: 'APPLICATION_MEMBERSHIP' })
   })
 
+  it('identifies an explicitly scoped QA membership', () => {
+    const decision = resolveGuestHubAccess({
+      sub: 'qa-user',
+      application_memberships: ['guesthub'],
+      application_roles: { guesthub: 'qa' },
+    })
+    expect(decision).toEqual({ allowed: true, reason: 'QA_MEMBERSHIP' })
+  })
+
   it('a user with a legacy syncxml membership is allowed', () => {
     const decision = resolveGuestHubAccess({
       sub: 'user-legacy',

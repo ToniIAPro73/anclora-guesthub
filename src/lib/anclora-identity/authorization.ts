@@ -14,19 +14,27 @@ export interface AncloraIdentityClaims {
   email?: string
   platform_roles?: string[]
   application_memberships?: string[]
+  application_roles?: Record<string, string>
 }
 
 export type GuestHubAccessDecision =
   | { allowed: true; reason: 'GUESTHUB_FULL_ACCESS' }
   | { allowed: true; reason: 'APPLICATION_MEMBERSHIP' }
+  | { allowed: true; reason: 'QA_MEMBERSHIP' }
   | { allowed: false; reason: 'NO_MEMBERSHIP' }
 
 export function resolveGuestHubAccess(claims: AncloraIdentityClaims): GuestHubAccessDecision {
   const platformRoles = claims.platform_roles ?? []
   const memberships = claims.application_memberships ?? []
+  const applicationRoles = claims.application_roles ?? {}
 
   if (platformRoles.includes('GROUP_OWNER')) {
     return { allowed: true, reason: 'GUESTHUB_FULL_ACCESS' }
+  }
+
+  if ((memberships.includes(GUESTHUB_APPLICATION_ID) || memberships.includes('syncxml'))
+      && applicationRoles[GUESTHUB_APPLICATION_ID] === 'qa') {
+    return { allowed: true, reason: 'QA_MEMBERSHIP' }
   }
 
   if (memberships.includes(GUESTHUB_APPLICATION_ID) || memberships.includes('syncxml')) {
