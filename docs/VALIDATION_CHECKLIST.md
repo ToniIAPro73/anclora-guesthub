@@ -1,42 +1,40 @@
-# Checklist de validación — política de promoción (2026-10-23)
-
-> Entrega de cambios de flujo y configuración. El SHA final queda registrado en el commit que incluye este checklist.
+# Checklist de validación — Anclora Identity roles (2026-10-28)
 
 **Repositorio:** anclora-guesthub
 **Rama:** development
-**Entorno de validación:** entorno development/Preview del repositorio, pendiente de revisión de Toni
-**Datos:** no se usaron ni modificaron datos de aplicación.
+**Validación en development:** Toni confirmó que el cambio está verificado.
+**Datos:** no se modificaron datos de aplicación ni secretos.
 
 ## 1. Qué cambia
-- El workflow promote.yml admite el dispatch de cadena completa con target=full y source_sha revisado en Preview.
-- El contrato runtime define validación expresa en development, Preview y promoción completa asíncrona.
-- Los documentos operativos antiguos quedan marcados como históricos y se aplica el flujo actual.
 
-## 2. Ya comprobado por el agente
+- Las sesiones Identity solo obtienen el rol GuestHub `admin` cuando su email
+  coincide con el administrador local configurado; los demás miembros obtienen
+  `pilot_user`.
+- Data Lab y GuestHub usan el issuer canónico `https://anclora-identity.anclora.com`.
+  Vercel actualizó el registro compartido en Production, Preview y Development.
+- No se cambió ningún client secret ni session secret.
+
+## 2. Comprobaciones del agente
+
 | Comprobación | Comando o método | Resultado |
 | --- | --- | --- |
-| Sintaxis de workflows | Parser YAML sobre los 41 `promote.yml` del workspace | PASS |
-| Integridad del diff | `git diff --check` | PASS |
+| ESLint focalizado | `./node_modules/.bin/eslint src/lib/auth.ts` | PASS |
+| TypeScript | `npm run typecheck` | PASS |
+| Integridad del diff | `git diff --check` y `git diff --cached --check` | PASS |
+| Configuración Vercel | `vercel env run` con salida limitada a booleanos y host/path | PASS; Identity activo, variables requeridas presentes, issuer y callbacks correctos |
+| Suite Vitest | No ejecutada | Toni verificó el cambio en development; la suite no se solicitó en esta tarea |
 
-## 3. Pruebas no ejecutadas (NOT_RUN)
-| Prueba | Motivo concreto |
-| --- | --- |
-| Suite de la aplicación, lint y build | Cambios de políticas y configuración de promoción; no se ejecutaron suites por no afectar código de aplicación. |
-| Revisión visual y smoke test de Preview | Pendiente de Toni en el entorno publicado tras este push. |
-| Resultado de CI/deployments | No se esperará ni consultará; Toni revisa los entornos según la política acordada. |
+## 3. Revisión de Toni
 
-## 4. Checklist para Toni
-| # | Dónde | Pasos | Resultado esperado | Bloqueante |
-| --- | --- | --- | --- | --- |
-| 1 | development | Revisar el contrato y `promote.yml` de este repositorio | Cambios acordes con el flujo aprobado | Sí |
-| 2 | Preview | Confirmar la Preview correspondiente al SHA de este push | La revisión corresponde al SHA publicado | Sí, antes de promoción |
+| # | Dónde | Resultado |
+| --- | --- | --- |
+| 1 | development | Validado por Toni antes del commit y push |
+| 2 | Preview | Pendiente tras el deployment del commit |
+| 3 | Production | El deployment activo conserva su configuración anterior hasta una nueva promoción gobernada |
 
-## 5. Riesgos y limitaciones
-- La promoción requiere el SHA exacto revisado en Preview. Si `development` avanza, el workflow completo se detendrá y requerirá revisión nueva.
-- Los resultados de staging, production y main quedan bajo revisión de Toni.
+## 4. Promoción
 
-## 6. Decisión de Toni
-- [ ] Validado en development
+- [x] Validado en development
 - [ ] Validado en Preview
-- [ ] PROMOTE=FULL
-- [ ] No se promociona. Motivo: ______________________
+- [ ] `PROMOTE=FULL`
+- [ ] Promoción completa. Pendiente de revisión de Preview y autorización explícita.
