@@ -49,10 +49,12 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (isAncloraIdentityEnabled()) {
     const identitySession = await getAncloraIdentityGuestHubSession();
     if (!identitySession) return null;
+    const email = identitySession.email || identitySession.sub;
+    const localAdminEmail = (envValue("GUESTHUB_ADMIN_EMAIL", "SYNCXML_ADMIN_EMAIL") || "").trim().toLowerCase();
     return {
       id: identitySession.sub,
-      email: identitySession.email || identitySession.sub,
-      role: "admin",
+      email,
+      role: localAdminEmail && email.trim().toLowerCase() === localAdminEmail ? "admin" : "pilot_user",
     };
   }
 
