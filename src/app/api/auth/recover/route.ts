@@ -7,6 +7,7 @@ import { generateTemporaryPassword, hashPassword } from "@/lib/password";
 import { pseudonymizeSession } from "@/lib/audit";
 import { authRateLimiter, getRateLimitKey, passwordRecoveryLimiter } from "@/lib/security/rateLimit";
 import { envValue } from "@/lib/security/env";
+import { isAncloraIdentityEnabled } from "@/lib/anclora-identity/env";
 
 const APP_NAME = "Anclora GuestHub";
 const BRAND_BG = "#070A12";
@@ -84,6 +85,9 @@ function buildRecoveryEmail(input: {
 }
 
 export async function POST(request: Request) {
+  if (isAncloraIdentityEnabled()) {
+    return NextResponse.json({ error: "La recuperación de acceso se gestiona con Anclora Identity", code: "ANCLORA_IDENTITY_ENABLED" }, { status: 409 });
+  }
   const rateLimit = authRateLimiter.check(getRateLimitKey(request));
   if (!rateLimit.allowed) return NextResponse.json({ ok: true });
 

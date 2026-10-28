@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { setSessionCookie } from "@/lib/auth";
 import { envValue, getSessionSecret } from "@/lib/security/env";
 import { authRateLimiter, getRateLimitKey } from "@/lib/security/rateLimit";
+import { isAncloraIdentityEnabled } from "@/lib/anclora-identity/env";
 
 export async function POST(request: Request) {
+  if (isAncloraIdentityEnabled()) {
+    return NextResponse.json({ error: "Inicia sesión con Anclora Identity", code: "ANCLORA_IDENTITY_ENABLED" }, { status: 409 });
+  }
   const rateLimit = authRateLimiter.check(getRateLimitKey(request));
   if (!rateLimit.allowed) return NextResponse.json({ error: "Demasiados intentos" }, { status: 429 });
 

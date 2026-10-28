@@ -11,7 +11,13 @@ export async function getAncloraIdentityOidcConfig(): Promise<client.Configurati
   if (cachedConfig) return cachedConfig
 
   const { issuerUrl, clientId, clientSecret } = getAncloraIdentityConfig()
-  cachedConfig = await client.discovery(new URL(issuerUrl), clientId, clientSecret, client.ClientSecretBasic(clientSecret))
+  cachedConfig = await client.discovery(
+    new URL(issuerUrl),
+    clientId,
+    clientSecret,
+    client.ClientSecretBasic(clientSecret),
+    { timeout: 8 },
+  )
   return cachedConfig
 }
 

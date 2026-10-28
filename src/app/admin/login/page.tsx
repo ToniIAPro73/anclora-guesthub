@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { AdminLoginView } from "@/components/AdminLoginView";
+import { redirect } from "next/navigation";
+import { isAncloraIdentityEnabled } from "@/lib/anclora-identity/env";
 
 export const metadata: Metadata = {
   title: "Acceso aplicación — Anclora GuestHub",
@@ -8,5 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLoginPage() {
+  if (isAncloraIdentityEnabled()) redirect("/api/auth/anclora-identity/login");
   return <AdminLoginView />;
 }

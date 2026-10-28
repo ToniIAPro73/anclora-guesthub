@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { LoginPageContent } from "@/components/landing/LoginPageContent";
+import { redirect } from "next/navigation";
+import { isAncloraIdentityEnabled } from "@/lib/anclora-identity/env";
 
 export const metadata: Metadata = {
   title: "Iniciar sesión — Anclora GuestHub",
@@ -9,5 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
+  if (isAncloraIdentityEnabled()) redirect("/api/auth/anclora-identity/login");
   return <LoginPageContent />;
 }

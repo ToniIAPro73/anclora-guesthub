@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma, hasDatabase } from "@/lib/db/prisma";
 import { verifyPassword, hashPassword } from "@/lib/password";
 import { getSessionUser, setSessionCookie } from "@/lib/auth";
+import { isAncloraIdentityEnabled } from "@/lib/anclora-identity/env";
 
 export async function POST(request: Request) {
+  if (isAncloraIdentityEnabled()) {
+    return NextResponse.json({ error: "La contraseña se gestiona con Anclora Identity", code: "ANCLORA_IDENTITY_ENABLED" }, { status: 409 });
+  }
   if (!hasDatabase()) {
     return NextResponse.json({ error: "Base de datos no disponible." }, { status: 503 });
   }
