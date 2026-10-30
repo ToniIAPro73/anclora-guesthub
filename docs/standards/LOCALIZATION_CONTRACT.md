@@ -15,8 +15,8 @@ Regla:
 
 ## Autoridad
 
-- Registro operativo: `contracts/governance/contracts-registry.json`
-- Inventario aplicable: `docs/governance/ecosystem-repos.json`
+- Registro operativo: `00-governance/registry/contracts-registry.json`
+- Inventario aplicable: `00-governance/registry/ecosystem-repos.json`
 - Fuente ejecutable relacionada: `anclora-design-system`
 
 ## Regla base
@@ -33,7 +33,7 @@ Cobertura objetivo por aplicación:
 - `anclora-energyscan`: `es`, `en`, `de` con preferencias asociadas `es/de -> EUR + m²` y `en -> GBP + sq ft`
 - `anclora-talent`: `es`, `en`
 - `anclora-private-estates`: `es`, `en`, `de`, `fr`
-- landing pública de `anclora-private-estates`: `es`, `en`, `de` (excepción: `fr` aplazado; ver nota en `contracts/core/ANCLORA_ECOSYSTEM_CONTRACT_GROUPS.md`)
+- landing pública de `anclora-private-estates`: `es`, `en`, `de` (excepción: `fr` aplazado; ver nota en `00-governance/contracts/core/ANCLORA_ECOSYSTEM_CONTRACT_GROUPS.md`)
 
 ## Repos a los que aplica
 
@@ -49,16 +49,15 @@ Cobertura objetivo por aplicación:
 - `anclora-private-estates`
 - `anclora-portfolio`
 - `anclora-azure-bay-landing`
-- `anclora-playa-viva-uniestate`
 
 Nota:
 - `anclora-group` mantiene la autoridad matriz de marca y gobernanza, pero no es target normal de propagación de este contrato transversal.
 
 ## Sincronización con repos consumidores
 
-- Contrato fuente en la bóveda: `contracts/logic/LOCALIZATION_CONTRACT.md`
-- Target normal de propagación: `docs/standards/`
-- Dependencia de auditoría y propagación desde `contracts/governance/contracts-registry.json`
+- Contrato fuente en la bóveda: `00-governance/contracts/logic/LOCALIZATION_CONTRACT.md`
+- Target normal de propagación: `10-group/brand/`
+- Dependencia de auditoría y propagación desde `00-governance/registry/contracts-registry.json`
 
 ## Directrices Editoriales y de Copy (Unified)
 

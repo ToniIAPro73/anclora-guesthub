@@ -5,7 +5,6 @@ Fijar una gramática premium compartida para productos públicos o semi-público
 
 Ámbito:
 - `anclora-impulso`
-- `anclora-command-center`
 - `anclora-synergi`
 - `anclora-data-lab`
 - `anclora-energyscan`
@@ -13,14 +12,13 @@ Fijar una gramática premium compartida para productos públicos o semi-público
 
 ## Autoridad
 
-- Registro operativo: `contracts/governance/contracts-registry.json`
-- Inventario aplicable: `docs/governance/ecosystem-repos.json`
+- Registro operativo: `00-governance/registry/contracts-registry.json`
+- Inventario aplicable: `00-governance/registry/ecosystem-repos.json`
 - Fuente ejecutable relacionada: `anclora-design-system`
 
 ## Repos a los que aplica
 
 - `anclora-impulso`
-- `anclora-command-center`
 - `anclora-synergi`
 - `anclora-data-lab`
 - `anclora-energyscan`
@@ -28,9 +26,9 @@ Fijar una gramática premium compartida para productos públicos o semi-público
 
 ## Sincronización con repos consumidores
 
-- Contrato fuente en la bóveda: `contracts/core/ANCLORA_PREMIUM_APP_CONTRACT.md`
-- Target normal de propagación: `docs/standards/`
-- Dependencia de auditoría y propagación desde `contracts/governance/contracts-registry.json`
+- Contrato fuente en la bóveda: `00-governance/contracts/core/ANCLORA_PREMIUM_APP_CONTRACT.md`
+- Target normal de propagación: `10-group/brand/`
+- Dependencia de auditoría y propagación desde `00-governance/registry/contracts-registry.json`
 
 ## Piezas canónicas del design system
 
@@ -185,4 +183,3 @@ Una feature premium no está lista si:
 - el selector de idioma o tema rompe el acabado de marca
 - una misma familia de botón cambia el foreground o la legibilidad entre temas sin motivo contractual explícito
 - resuelve sus componentes críticos fuera de `anclora-design-system` sin haber promovido antes la pieza común
-

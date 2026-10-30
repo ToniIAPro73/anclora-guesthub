@@ -46,7 +46,6 @@ Este contrato aplica a todas las apps públicas del ecosistema Anclora Group, in
 - `anclora-data-lab`
 - `anclora-synergi`
 - `anclora-azure-bay-landing`
-- `anclora-playa-viva-uniestate`
 - Cualquier nueva app pública o semi-pública que se incorpore al ecosistema.
 
 Apps internas o sin superficie pública pueden aplicar un subconjunto reducido de este contrato, siempre que documenten la excepción.

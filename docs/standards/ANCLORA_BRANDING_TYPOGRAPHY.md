@@ -60,9 +60,10 @@ Justificación: Inter es la fuente más adecuada para interfaces operativas dens
 | `anclora-advisor-ai` | Sin fuente custom | Añadir Inter como `--font-sans` |
 | `anclora-nexus` | Inter ✓ + Playfair Display | Eliminar Playfair (reservada para ultra premium) |
 | `anclora-content-generator-ai` | DM Sans + Bricolage Grotesque | Eliminar ambas, migrar a Inter |
-| `anclora-filestudio` *(añadido 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir Inter como `--font-sans` |
+| `anclora-filestudio` *(actualizado 2026-08-12)* | Inter añadida/verificada en auditoría branding 2026-08-01; QA final 2026-08-12 no cierra JetBrains Mono | Mantener Inter; añadir/verificar JetBrains Mono como `--font-mono` si se decide cerrar el gap |
 | `anclora-fiscal` | **Excepción formal 2026-08** — Montserrat + Playfair Display + EB Garamond vía `next/font`, respaldada por ADR-003/004 de `docs/decision-log.md` del propio repo (identidad visual compartida con Anclora Insights como sello editorial) | No aplicar Inter — excepción de marca aceptada, no deuda técnica |
 | `anclora-visionflow` *(añadido 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir Inter como `--font-sans` |
+| `anclora-linguo-cam` *(añadido 2026-08-02)* | Inter ✓ como `--anclora-font-sans` (verificado en `index.css` real) | Sin cambios — ya conforme |
 
 ---
 
@@ -88,7 +89,7 @@ Justificación: DM Sans aporta un carácter más redondo y accesible que Inter, 
 | `anclora-talent` | Sin fuente custom *(pausado, fuera de alcance activo)* | Añadir DM Sans (si se reactiva) |
 | `anclora-synergi` | Cardo (display) + Inter (body) | Eliminar Cardo (reservada para ultra premium). Migrar a DM Sans. |
 | `anclora-command-center` | Sin fuente custom | Añadir DM Sans |
-| `anclora-guesthub` *(añadido 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir DM Sans |
+| `anclora-guesthub` *(añadido 2026-08 como `anclora-syncxml`; renombrado a GuestHub 2026-08)* | Pendiente de verificar fuente real — no auditado en esta sesión (solo se verificó color) | Confirmar/añadir DM Sans |
 
 ---
 
@@ -142,9 +143,10 @@ Justificación: Contraste serif (display) + sans-serif (body) clásico de marcas
 | `anclora-advisor-ai` | Interna | Inter | — |
 | `anclora-nexus` | Interna | — | Playfair Display |
 | `anclora-content-generator-ai` | Interna | Inter | DM Sans, Bricolage Grotesque |
-| `anclora-filestudio` | Interna | Inter *(pendiente de verificar estado real)* | Pendiente de auditoría |
+| `anclora-filestudio` | Interna | — (Inter ya presente según auditoría branding 2026-08-01) | JetBrains Mono pendiente como `--font-mono` |
 | `anclora-fiscal` | Interna | Inter *(pendiente de verificar estado real)* | Pendiente de auditoría |
 | `anclora-visionflow` | Interna | Inter *(pendiente de verificar estado real)* | Pendiente de auditoría |
+| `anclora-linguo-cam` | Interna | — (Inter ya presente, verificado 2026-08-02) | — |
 | `anclora-impulso` | Premium | DM Sans | — |
 | `anclora-data-lab` | Premium | DM Sans | Georgia |
 | `anclora-talent` | Premium *(pausado)* | DM Sans | — |

@@ -15,8 +15,8 @@ La bóveda no define animaciones locales; define qué familias de motion existen
 
 ## Autoridad
 
-- Registro operativo: `contracts/governance/contracts-registry.json`
-- Inventario aplicable: `docs/governance/ecosystem-repos.json`
+- Registro operativo: `00-governance/registry/contracts-registry.json`
+- Inventario aplicable: `00-governance/registry/ecosystem-repos.json`
 - Fuente ejecutable relacionada: `anclora-design-system`
 
 ## Superficies soportadas
@@ -88,16 +88,15 @@ Aplicaciones ultra premium:
 - `anclora-private-estates`
 - `anclora-portfolio`
 - `anclora-azure-bay-landing`
-- `anclora-playa-viva-uniestate`
 
 Nota:
 - `anclora-group` mantiene autoridad matriz y criterios globales, pero no es target normal de propagación de este contrato transversal.
 
 ## Sincronización con repos consumidores
 
-- Contrato fuente en la bóveda: `contracts/components/UI_MOTION_CONTRACT.md`
-- Target normal de propagación: `docs/standards/`
-- Dependencia de auditoría y propagación desde `contracts/governance/contracts-registry.json`
+- Contrato fuente en la bóveda: `00-governance/contracts/components/UI_MOTION_CONTRACT.md`
+- Target normal de propagación: `10-group/brand/`
+- Dependencia de auditoría y propagación desde `00-governance/registry/contracts-registry.json`
 
 ## Gate de aceptación
 

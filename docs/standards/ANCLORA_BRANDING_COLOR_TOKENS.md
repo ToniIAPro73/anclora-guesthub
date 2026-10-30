@@ -501,6 +501,44 @@ Accent: Teal `#4FB3BF` *(sin matiz de marca propio confirmado en el repo — ver
 
 ---
 
+## Anclora Linguo Cam (Interna)
+
+Accent: Lima `#59B635` | Secondary: Mint `#A1DBC6`
+
+> **Nota 2026-08-02:** app incorporada al ecosistema gobernado en esta fecha (antes clasificada como "Independent Product"). Su acento anterior (`#1DAB89`) era idéntico byte a byte al de `anclora-advisor-ai` — coincidencia no deliberada confirmada por el cliente: Advisor AI conserva el teal y Linguo Cam recibe el lima `#59B635` (hue 103°, derivado de las ondas de su icono canónico), con separación ≥30° respecto a todos los acentos del workspace.
+
+### Dark
+```css
+:root, [data-theme='dark'] {
+  --background: #101E30; --surface: #152438; --card: #1A2C42;
+  --elevated: #20344C; --hover: #263C56;
+  --accent: #59B635; --accent-hover: #6ECA49; --accent-dim: #4B932F;
+  --accent-soft: rgba(89, 182, 53, 0.12); --accent-glow: rgba(89, 182, 53, 0.10);
+  --accent-border: rgba(89, 182, 53, 0.30);
+  --secondary: #A1DBC6; --secondary-soft: rgba(161, 219, 198, 0.10);
+  --secondary-border: rgba(161, 219, 198, 0.18);
+  --sidebar: #132133; --sidebar-border: rgba(161, 219, 198, 0.12);
+  --sidebar-active: rgba(89, 182, 53, 0.16);
+  --text-primary: #ECF2FB; --text-secondary: #BFD0E7;
+  --text-muted: #7A96B5; --text-on-accent: #FFFFFF;
+}
+```
+### Light
+```css
+[data-theme='light'] {
+  --background: #F3F6FB; --surface: #FFFFFF; --card: #FFFFFF;
+  --elevated: #EDF2FA; --hover: #E4ECF6;
+  --accent: #468E29; --accent-hover: #3A7722; --accent-dim: #468E29;
+  --accent-soft: rgba(70, 142, 41, 0.08);
+  --secondary: #4A8A74; --sidebar: #E8EEF8;
+  --text-primary: #102033; --text-secondary: #425B78;
+  --text-muted: #7A96B5; --text-on-accent: #FFFFFF;
+}
+```
+Fuente: `index.css` real del repo (commit `b68dda8`, 2026-08-02) — ambos modos verificados.
+
+---
+
 ## Anclora EnergyScan (Premium)
 
 Accent: Verde `#00DC82`
@@ -522,6 +560,8 @@ Fuente: `src/app/globals.css` real — `#00DC82` confirmado con 625 apariciones,
 ---
 
 ## Anclora GuestHub (Premium)
+
+*(Renombrado de Anclora SyncXML, 2026-08; tokens sin cambios.)*
 
 Accent: Dorado apagado `#BFA46A`
 
@@ -546,6 +586,36 @@ Fuente: `src/app/globals.css` real (variables nombradas `--accent`, `--bg`, `--s
 }
 ```
 Fuente: mismo archivo, bloque `[data-theme='light']` real — única de las 6 apps nuevas con ambos modos verificados directamente en código.
+
+---
+
+## Anclora GroundSync (Premium)
+
+Accent de icono (canónico, reasignado): Verde musgo `#6AAD49` (100°) | Accent real en código (pendiente de sincronizar): Azul cielo `#afd2fa` (dark) / `#2f6fd9` (light) | Primary: `#192350` / `#3152a5`
+
+> **Nota 2026-08-03:** app añadida al ecosistema gobernado en esta fecha — interna de uso operativo pero gobernada como producto independiente, comparable a `anclora-impulso`. El azul real (verificado byte a byte contra `src/index.css`) colisionaba en hue (7°) con `anclora-talent`; se resolvió reasignando el acento canónico del icono a verde musgo `#6AAD49`, ver `ANCLORA_BRANDING_MASTER_CONTRACT.md`. Los bloques CSS de abajo documentan el código real tal cual existe hoy (sin tocar) — **pendiente**: actualizar `src/index.css` de la app y regenerar el icono para que ambos usen `#6AAD49`.
+
+### Dark
+```css
+:root {
+  --background: #0f1739; --surface: #192350; --card: #192350;
+  --accent: #afd2fa; --accent-gold: #d4af37;
+  --danger: #ef4444;
+  --text-primary: #f5f5f0; --text-secondary: rgba(245, 245, 240, 0.72);
+}
+```
+Fuente: `src/index.css` real (`--color-bg-base`, `--color-bg-elevated`, `--color-accent`, `--color-gold`).
+
+### Light
+```css
+[data-theme='light'] {
+  --background: #eef4ff; --surface: #ffffff; --card: #ffffff;
+  --accent: #2f6fd9; --accent-gold: #a47a00;
+  --danger: #cf2436;
+  --text-primary: #17233f; --text-secondary: rgba(23, 35, 63, 0.74);
+}
+```
+Fuente: mismo archivo, bloque `:root[data-theme='light']` real — ambos modos verificados directamente en código.
 
 ---
 

@@ -17,6 +17,8 @@ related:
 
 Definir el paquete de favicons que cada aplicación del ecosistema debe generar e implementar. Garantizar reconocimiento y diferenciación a todos los tamaños.
 
+> **Favicons por tier (CHG-0014, 2026-09-25):** todos los favicons, `favicon.ico` multirresolución, apple-touch, iconos PWA/maskable y SVG con raster embebido se generan desde el logo del tier de la app (o de su app de origen, en showcases), conservando nombres, prefijos, rutas y dimensiones existentes. Ver `ANCLORA_BRANDING_ICON_SYSTEM.md` § "Sistema de logos por tier".
+
 ## Paquete obligatorio por app
 
 | Archivo | Formato | Tamaño | Uso |
@@ -80,24 +82,18 @@ Colocar en `public/` (o `static/` en SvelteKit) y referenciar en `index.html` o 
 
 ## Nomenclatura de archivos por app
 
-| App | Prefijo | Ejemplo |
-|-----|---------|---------|
-| `anclora-group` | `group_` | `group_favicon.ico` |
-| `anclora-advisor-ai` | `advisor_` | `advisor_favicon.ico` |
-| `anclora-nexus` | `nexus_` | `nexus_favicon.ico` |
-| `anclora-content-generator-ai` | `contentgen_` | `contentgen_favicon.ico` |
-| `anclora-filestudio` *(añadido 2026-08)* | `filestudio_` | `filestudio_favicon.ico` |
-| `anclora-fiscal` *(añadido 2026-08)* | `fiscal_` | `fiscal_favicon.ico` |
-| `anclora-visionflow` *(añadido 2026-08)* | `visionflow_` | `visionflow_favicon.ico` |
-| `anclora-impulso` | `impulso_` | `impulso_favicon.ico` |
-| `anclora-data-lab` | `datalab_` | `datalab_favicon.ico` |
-| `anclora-talent` *(pausado)* | `talent_` | `talent_favicon.ico` |
-| `anclora-synergi` | `synergi_` | `synergi_favicon.ico` |
-| `anclora-command-center` | `commandcenter_` | `commandcenter_favicon.ico` |
-| `anclora-guesthub` *(añadido 2026-08)* | `guesthub_` | `guesthub_favicon.ico` |
-| `anclora-private-estates` | `pe_` | `pe_favicon.ico` |
-| `anclora-private-estates-landing-page` | `pe_` | Comparte favicon con PE web app |
-| `anclora-group-landing` | `grouplanding_` | `grouplanding_favicon.ico` |
+> **Revisado 2026-08-03:** esta sección documentaba un esquema de prefijo por app (`group_favicon.ico`, `advisor_favicon.ico`, etc.) que nunca fue la convención real dominante en el ecosistema — una auditoría del workspace completo (24 repos de producto) encontró que GroundSync, Linguo Cam y las 4 apps showcase ya usaban nombres sin prefijo, y que el propio Next.js App Router genera sus iconos de convención de archivo (`favicon.ico`, `icon.png`, `apple-icon.png`) siempre sin prefijo. Se normalizaron los 13 repos que sí llevaban prefijo (renombrado + referencias de código corregidas) para converger en una única convención sin prefijo. Esta tabla de prefijos queda obsoleta y se sustituye por la regla única de abajo.
+
+**Convención única (sin prefijo), todas las apps:**
+
+| Archivo | Uso |
+|---------|-----|
+| `favicon.ico` | Fallback universal, `<link rel="icon">` |
+| `favicon-32.png` | Pestaña de navegador |
+| `favicon-512.png` | PWA manifest, social sharing |
+| `apple-touch-icon.png` | iOS home screen (180×180) |
+
+No se antepone el nombre de la app al archivo — la carpeta (`public/`, `public/brand/`, o el `app/` de Next.js) ya proporciona el contexto de a qué app pertenece cada favicon. Esto aplica a las 24 apps de producto del workspace (`Anclora.code-workspace`), incluidas `anclora-private-estates` y `anclora-private-estates-landing` (comparten el mismo paquete, sin prefijo `pe_`).
 
 ## Validación de diferenciación a 32px
 
@@ -111,8 +107,8 @@ A 32px, el borde ocupa ~3px y es el elemento de máxima superficie relativa. Ver
 | Grupo | Apps en el grupo | Diferenciación a 32px |
 |-------|------------------|-----------------------|
 | Entidad Matriz | Anclora Group | Plata monocromático — inconfundible |
-| Internas | Advisor, Nexus, Content Gen, FileStudio, Fiscal, VisionFlow | Interior azul+teal, índigo+oro, marrón+coral, carbón+teal claro, navy+dorado, índigo+azul — con 6 apps en el grupo, dos pares caen por debajo del mínimo de 30° de hue (ver advertencia de gobernanza en `ANCLORA_BRANDING_MASTER_CONTRACT.md`); distinguibles en la práctica por diferencia de saturación/luminosidad aunque el hue esté cerca |
-| Premium | Impulso, Data Lab, Talent *(pausado)*, Synergi, Command Ctr, GuestHub | Naranja, verde, azul, púrpura, azul/violeta y dorado apagado — 6 hues, con una colisión exacta preexistente (Data Lab/EnergyScan, no forman parte de la misma vista) y una separación estrecha (Impulso/GuestHub, 16°) |
+| Internas | Advisor, Nexus, Content Gen, FileStudio, Fiscal, VisionFlow, Linguo Cam | Interior azul+teal, índigo+oro, marrón+coral, carbón+teal claro, navy+dorado, índigo+azul, verde pastel+lima — 7 apps en el grupo; Linguo Cam (lima, 103°) queda ≥30° de todas las demás; siguen existiendo dos pares por debajo del mínimo de 30° de hue (ver advertencia de gobernanza en `ANCLORA_BRANDING_MASTER_CONTRACT.md`); distinguibles en la práctica por diferencia de saturación/luminosidad aunque el hue esté cerca |
+| Premium | Impulso, Data Lab, Talent *(pausado)*, Synergi, Command Ctr, GuestHub, GroundSync | Naranja, verde, azul, púrpura, azul/violeta, dorado apagado y verde musgo — 7 hues, con una colisión exacta preexistente (Data Lab/EnergyScan, no forman parte de la misma vista) y una separación estrecha (Impulso/GuestHub, 16°); la colisión GroundSync/Talent (7°) detectada 2026-08-03 quedó resuelta reasignando GroundSync a 100° (verde musgo, ≥30° de todos) |
 | Ultra | Private Estates, Private Estates Landing | Oro monocromático+teal — inconfundible; ambas apps comparten el mismo favicon (misma marca, misma app conceptualmente) |
 
 ## Criterio de cumplimiento
@@ -122,4 +118,4 @@ Una app no cumple esta spec si:
 - El favicon no corresponde al icono canónico actual definido en [[ANCLORA_BRANDING_ICON_SYSTEM]]
 - El fondo no es transparente
 - El tamaño del `.ico` no contiene las 6 resoluciones requeridas
-- No usa la nomenclatura de prefijo asignada
+- Usa nombres con prefijo de app (`<app>_favicon.ico`) en lugar de la convención única sin prefijo
