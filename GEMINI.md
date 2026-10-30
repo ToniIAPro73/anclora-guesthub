@@ -92,3 +92,9 @@ memanto memory sync --project-dir .
 ### Regla base
 
 Trabaja directamente en la rama existente `development`; no crees ramas de tarea ni worktrees para el trabajo normal. Comprueba la rama y el estado antes de editar y conserva el trabajo previo que encuentres. Mantén los cambios locales sin commit ni push hasta que Toni valide el resultado en el entorno de desarrollo. Tras su validación expresa, haz commit y push a `origin/development`. Después espera la revisión de Preview; solo `PROMOTE=FULL` autoriza la promoción completa según la política canónica del workspace. No promociones automáticamente ni esperes a que terminen CI o despliegues.
+
+<!-- ANCLORA-AOS:START -->
+# Gemini adapter
+
+This repository follows AOS. Use `AGENTS.md` as bootstrap and resolve canonical Governance and the repository runtime contract from it. Provider-specific behavior must not override AOS.
+<!-- ANCLORA-AOS:END -->

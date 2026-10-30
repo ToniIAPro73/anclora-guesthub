@@ -93,8 +93,8 @@ memanto memory sync --project-dir .
 
 Trabaja directamente en la rama existente `development`; no crees ramas de tarea ni worktrees para el trabajo normal. Comprueba la rama y el estado antes de editar y conserva el trabajo previo que encuentres. Mantén los cambios locales sin commit ni push hasta que Toni valide el resultado en el entorno de desarrollo. Tras su validación expresa, haz commit y push a `origin/development`. Después espera la revisión de Preview; solo `PROMOTE=FULL` autoriza la promoción completa según la política canónica del workspace. No promociones automáticamente ni esperes a que terminen CI o despliegues.
 
-<!-- ANCLORA-MODS:START -->
-# Anclora contract adapter
+<!-- ANCLORA-AOS:START -->
+# Claude adapter
 
-Before substantial work, read `.anclora/AGENT_PROJECT_CONTEXT.md`, `.anclora/PRODUCTION_RUNTIME.md`, and `.anclora/AOS_ADOPTION.md`. These contracts and [Anclora Mods common rules](../anclora-mods/contracts/ANCLORA_COMMON_AGENT_CONTRACT_V1.md) govern precedence, QA, token economy, Git, and promotion. Preserve repository-specific runtime and branch settings.
-<!-- ANCLORA-MODS:END -->
+This repository follows AOS. Use `AGENTS.md` as bootstrap and resolve canonical Governance and the repository runtime contract from it. Provider-specific behavior must not override AOS.
+<!-- ANCLORA-AOS:END -->

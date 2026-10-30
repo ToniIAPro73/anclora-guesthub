@@ -1,20 +1,8 @@
 # Anclora Guesthub — Agent Project Context
 
-AGENT_PROJECT_CONTEXT_VERSION=2.0
+AGENT_PROJECT_CONTEXT_VERSION=3.0
 STATUS=ACTIVE
-
-ANCLORA_AUTHORITY_MODEL_VERSION=1.0
-ANCLORA_PROJECT_RULES_OVERRIDE_AGENT_DEFAULTS=true
-ANCLORA_PROJECT_RULES_OVERRIDE_HOME_AGENT_CONFIG=true
-ANCLORA_PROJECT_RULES_OVERRIDE_GENERIC_BEST_PRACTICES=true
-AGENT_HOME_CONFIG_IS_SUBORDINATE=true
-AGENT_GENERIC_DEFAULTS_ARE_SUBORDINATE=true
-IMMUTABLE_PLATFORM_CONSTRAINTS_REMAIN_SUPERIOR=true
-
-ON_AGENT_RULE_CONFLICT=FOLLOW_ANCLORA
-ON_GENERIC_DEFAULT_CONFLICT=FOLLOW_ANCLORA
-ON_HOME_CONFIG_CONFLICT=FOLLOW_ANCLORA
-ON_PLATFORM_CONSTRAINT_CONFLICT=REPORT_AND_STOP_AFFECTED_ACTION
+AUTHORITY=anclora-governance
 
 ## 1. Project Identity
 
@@ -23,66 +11,19 @@ REPOSITORY=anclora-guesthub
 PROJECT_ROLE=Core Application (Next.js)
 PRODUCT_FAMILY=Anclora Group
 
-## 2. Mandatory Bootstrap
-
-When starting work in this repository, agents must read sources in this exact order:
-
-1. Current explicit instruction from Toni (highest operational priority).
-2. Workspace agent policy (`../../ANCLORA_WORKSPACE_AGENT_POLICY.md`, canonical and active; `../../AGENTS.md` is only its workspace adapter). Promotion semantics inherit the workspace Canonical Promotion Policy: default no automatic promotion; explicit current-task user authorization permits gated, repository-supported promotion.
-3. Repository agent rules (`../AGENTS.md`).
-4. `.anclora/AGENT_PROJECT_CONTEXT.md` (this file — bootstrap, index, routing, and authority map).
-5. `.anclora/PRODUCTION_RUNTIME.md` (canonical runtime contract: topology, database, migrations, QA, Git).
-6. `.anclora/AOS_ADOPTION.md` (governance declaration, canonical AOS sources, decisions, exceptions).
-7. Repository-specific agent instructions (`../CLAUDE.md`, `../GEMINI.md`, etc., when present).
-8. Task-specific canonical sources (see Section 4: Task Routing).
-
-## Authority & Precedence
-
-ANCLORA contracts are the highest project/workspace-level operational authority.
-They override agent-specific defaults, home-directory rules, generic workflows,
-personal presets, and repository-agnostic conventions whenever those rules conflict
-with Anclora.
-
-Only immutable platform/system/security constraints that sit above project/user
-instructions remain higher authority.
-
-### Canonical Hierarchy of Authority:
+## 2. Bootstrap (minimal router)
 
 ```text
-LEVEL 0: Immutable platform / system / security constraints
-   ↓
-LEVEL 1: Current explicit instruction from Toni for the current mission
-   ↓
-LEVEL 2: ANCLORA_WORKSPACE_AGENT_POLICY.md (when installed)
-   ↓
-LEVEL 3: Repository canonical Anclora contracts (.anclora/)
-   ├── AGENT_PROJECT_CONTEXT.md (bootstrap, routing, precedence and authority map)
-   ├── PRODUCTION_RUNTIME.md (runtime, infra, DB, migrations, QA, env and Git model)
-   └── AOS_ADOPTION.md (governance, decisions, exceptions, AOS adoption)
-   ↓
-LEVEL 4: Canonical task/domain sources (SDD, Constitution, Master Decisions, Vault contracts)
-   ↓
-LEVEL 5: Repository adapter/instruction files (AGENTS.md, CLAUDE.md, GEMINI.md)
-   ↓
-LEVEL 6: Agent-specific user/home configuration (~/.claude/, ~/.codex/, ~/.gemini/, etc.)
-   ↓
-LEVEL 7: Generic agent defaults and conventions
-   ↓
-LEVEL 8: Historical / non-normative context (MEMORY.md, archives, legacy notes)
+AUTHORITY=anclora-governance
+AGENT_PROJECT_CONTEXT_ROLE=MINIMAL_ROUTER
 ```
 
-### Conflict Resolution Invariant:
-If an agent-specific instruction, global agent preset, home-directory rule,
-generic best practice, or repository-agnostic convention conflicts with an
-applicable Anclora canonical contract, the Anclora contract MUST be followed.
-
-An agent default is never sufficient justification to override an Anclora contract.
-Generic reasoning such as "best practice", "safer default", "usual workflow",
-"recommended pattern", or "standard agent behavior" MUST NOT override a documented
-Anclora decision.
-
-If a conflict arises with an immutable Level 0 platform security constraint:
-report `ANCLORA_AUTHORITY_CONFLICT` with details and stop the affected action.
+Authority, QA, token economy, Git, promotion and the verification matrix are defined by Governance
+([`AOS_ADOPTION_STANDARD`](../../anclora-governance/standards/AOS_ADOPTION_STANDARD.md),
+[`AGENT_EXECUTION_POLICY`](../../anclora-governance/standards/AGENT_EXECUTION_POLICY.md),
+[`AGENT_OPERATING_STANDARD`](../../anclora-governance/standards/AGENT_OPERATING_STANDARD.md)) and are not
+duplicated here. Entry point: [`../AGENTS.md`](../AGENTS.md). Repository facts: [`PRODUCTION_RUNTIME.md`](PRODUCTION_RUNTIME.md).
+Adoption and exceptions: [`AOS_ADOPTION.md`](AOS_ADOPTION.md). Load each only when the task needs it.
 
 ## 4. Core Project Contracts
 
@@ -90,36 +31,6 @@ report `ANCLORA_AUTHORITY_CONFLICT` with details and stop the affected action.
   - Governs real runtime architecture, hosting, Neon/Postgres database connection, PRISMA_MIGRATE migration strategy, auth, and production-backed local model.
 - **AOS_ADOPTION**: [`.anclora/AOS_ADOPTION.md`](AOS_ADOPTION.md)
   - Governs AOS alignment, governance level, standards, and referenced authoritative knowledge.
-
-## Canonical QA & Adaptive Execution Bootstrap
-
-Workspace governance defines:
-[`../../ANCLORA_WORKSPACE_AGENT_POLICY.md`](../../ANCLORA_WORKSPACE_AGENT_POLICY.md)
-
-Defaults:
-- `QA_MODE=AUTO`
-- `CAVEMAN_MODE=AUTO`
-- `TOKEN_ECONOMY_POLICY=ADAPTIVE`
-
-QA classification determines verification depth:
-- `FAST`: minimum sufficient targeted validation; full repository test suites prohibited by default; stops when sufficient evidence exists.
-- `STANDARD`: focused functional verification; stops when sufficient evidence exists.
-- `FULL`: comprehensive verification; batched at meaningful boundaries.
-
-Caveman classification determines reasoning/exploration economy:
-- Dynamically evaluated at task / phase / coherent cluster granularity.
-- Deterministic, repetitive, low-ambiguity tasks -> `CAVEMAN=ON`.
-- Architectural design, investigation, diagnosis, ambiguity, security, DB design -> `CAVEMAN=OFF`.
-- Unexpected failure or ambiguity -> immediate switch `ON -> OFF` before diagnosis.
-
-Task-level historical boilerplate does not override workspace classifications.
-Only explicit mission tokens change modes:
-- `QA_OVERRIDE=FAST|STANDARD|FULL`
-- `CAVEMAN_OVERRIDE=ON|OFF`
-
-Testing, lint, and build execution must follow the workspace batched execution cadence:
-no repeated gates per micro-edit, and no rerun of unchanged successful gates without invalidation.
-Repository-specific runtime minima are defined in [`PRODUCTION_RUNTIME.md`](PRODUCTION_RUNTIME.md).
 
 ## 4. Task Routing
 
@@ -136,7 +47,7 @@ Repository-specific runtime minima are defined in [`PRODUCTION_RUNTIME.md`](PROD
 - Operational Rules: `../AGENTS.md`
 - Governance: [`../../anclora-governance/`](../../anclora-governance/)
 
-<!-- ANCLORA-MODS:START -->
-ANCLORA_MODS_COMMON_CONTRACT_VERSION=1.0.0
-Canonical shared rules: [Anclora Common Agent Contract](../anclora-mods/contracts/ANCLORA_COMMON_AGENT_CONTRACT_V1.md) and [Flow Amendment v2](../anclora-mods/ANCLORA_FLUJO_UNICO_V2.md). Repository-specific facts remain in this repository's `.anclora/` contracts.
-<!-- ANCLORA-MODS:END -->
+<!-- ANCLORA-AOS:START -->
+ANCLORA_AOS_AUTHORITY=anclora-governance
+Canonical rules: [AOS Adoption Standard](../../anclora-governance/standards/AOS_ADOPTION_STANDARD.md). Repository-specific facts remain in this repository's `.anclora/` contracts.
+<!-- ANCLORA-AOS:END -->
