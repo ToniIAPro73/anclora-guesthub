@@ -135,10 +135,12 @@ jobs:
           app_dupes="$(printf '%s' "$authorized_apps" | tr ',' '\n' | sort | uniq -d)"
           [ -z "$app_dupes" ] || fail "AMBIGUOUS_AUTHORIZED_CHECK_APPS_DECLARATION: duplicate ($app_dupes)."
 
-          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
-          echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
-          echo "required_checks=$required_checks" >> "$GITHUB_OUTPUT"
-          echo "authorized_apps=$authorized_apps" >> "$GITHUB_OUTPUT"
+          {
+            echo "source_sha=$source_sha"
+            echo "source_branch=$source_branch"
+            echo "required_checks=$required_checks"
+            echo "authorized_apps=$authorized_apps"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Verify source check-runs and commit status
         shell: bash
