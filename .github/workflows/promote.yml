@@ -4,6 +4,17 @@ name: Promote / Environment
 # already validated upstream. Fast-forward only: no merge/rebase/
 # cherry-pick/force push.
 #
+# CI gate (fail-closed, inside GitHub Actions):
+# - Source SHA is exact and immutable for the run.
+# - Required checks and authorized check-run apps come from
+#   .anclora/PRODUCTION_RUNTIME.md at that exact SHA.
+# - Check-runs are fully paginated and reconciled with total_count.
+# - Every required check is present for the SHA, completed and SUCCESS from an
+#   authorized app. Duplicate/ambiguous apps, runs or pages fail closed.
+# - Optional observed check-runs must not be pending or failing.
+# - Legacy commit statuses, when present, must be success.
+# The agent only dispatches; it never polls CI.
+#
 # development -> staging -> production -> main
 
 on:
@@ -15,21 +26,1121 @@ on:
         type: choice
         options: [staging, production, main, full]
       source_sha:
-        description: "Exact development SHA reviewed in Preview (required for full chain)"
+        description: "Exact current development SHA (required for full chain)"
         required: false
         type: string
 
 permissions:
   statuses: read
+  checks: read
+  actions: read
+  deployments: read
+  attestations: read
   contents: write
 concurrency:
   group: promote-${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
+  verify:
+    name: Verify source and checks
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.source.outputs.source_sha }}
+      source_branch: ${{ steps.source.outputs.source_branch }}
+      required_checks: ${{ steps.source.outputs.required_checks }}
+      authorized_apps: ${{ steps.source.outputs.authorized_apps }}
+      migration_gate_required: ${{ steps.migration_gate.outputs.migration_gate_required }}
+      migration_runner_workflow: ${{ steps.migration_gate.outputs.migration_runner_workflow }}
+      migration_environment: ${{ steps.migration_gate.outputs.migration_environment }}
+      migration_attested_run_id: ${{ steps.migration_gate.outputs.migration_attested_run_id }}
+      migration_attested_run_attempt: ${{ steps.migration_gate.outputs.migration_attested_run_attempt }}
+      migration_manifest_sha256: ${{ steps.migration_gate.outputs.migration_manifest_sha256 }}
+      migration_tree_sha256: ${{ steps.migration_gate.outputs.migration_tree_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve source SHA
+        id: source
+        shell: bash
+        env:
+          TARGET: ${{ inputs.target }}
+          REVIEWED_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
+          if [ "$TARGET" = "full" ]; then
+            [ "${GITHUB_REF_NAME:-}" = "development" ] || fail "WRONG_REF: dispatch the full chain from development."
+            [ -n "$REVIEWED_SHA" ] || fail "MISSING_REVIEWED_SHA: supply the exact development SHA."
+            git fetch origin "+refs/heads/development:refs/remotes/origin/development"
+            git cat-file -e "$REVIEWED_SHA^{commit}" || fail "UNKNOWN_SOURCE_SHA: the reviewed SHA is not in this repository."
+            current_development_sha="$(git rev-parse origin/development)"
+            [ "$current_development_sha" = "$REVIEWED_SHA" ] || fail "DEVELOPMENT_MOVED: development changed after the source SHA was selected."
+            source_sha="$REVIEWED_SHA"
+            source_branch="development"
+          else
+            case "$TARGET" in
+              staging) source_branch="development" ;;
+              production) source_branch="staging" ;;
+              main) source_branch="production" ;;
+              *) fail "INVALID_TARGET: unsupported promotion target $TARGET." ;;
+            esac
+            git fetch origin "$source_branch"
+            source_sha="$(git rev-parse "origin/$source_branch")"
+          fi
+
+          contract="$(git show "$source_sha:.anclora/PRODUCTION_RUNTIME.md" 2>/dev/null || true)"
+          [ -n "$contract" ] || fail "MISSING_RUNTIME_CONTRACT: the source SHA has no .anclora/PRODUCTION_RUNTIME.md."
+
+          # Required check names (comma-separated, exactly one declaration).
+          count="$(printf '%s\n' "$contract" | grep -cE '^PROMOTION_REQUIRED_CHECKS=' || true)"
+          [ "$count" -gt 0 ] || fail "MISSING_REQUIRED_CHECKS_DECLARATION: declare PROMOTION_REQUIRED_CHECKS."
+          [ "$count" -eq 1 ] || fail "AMBIGUOUS_REQUIRED_CHECKS_DECLARATION: declare PROMOTION_REQUIRED_CHECKS exactly once."
+          required_line="$(printf '%s\n' "$contract" | grep -E '^PROMOTION_REQUIRED_CHECKS=' | head -n 1)"
+          required_raw="${required_line#PROMOTION_REQUIRED_CHECKS=}"
+          [ -n "$(printf '%s' "$required_raw" | tr -d '[:space:]')" ] \
+            || fail "INVALID_REQUIRED_CHECKS_DECLARATION: PROMOTION_REQUIRED_CHECKS is empty."
+          IFS=',' read -ra required <<< "$required_raw"
+          required_checks=""
+          for name in "${required[@]}"; do
+            name="$(printf '%s' "$name" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+            [ -n "$name" ] || fail "INVALID_REQUIRED_CHECKS_DECLARATION: empty required check."
+            required_checks="${required_checks:+$required_checks,}$name"
+          done
+          [ -n "$required_checks" ] || fail "INVALID_REQUIRED_CHECKS_DECLARATION: PROMOTION_REQUIRED_CHECKS is empty."
+          dupes="$(printf '%s' "$required_checks" | tr ',' '\n' | sort | uniq -d)"
+          [ -z "$dupes" ] || fail "AMBIGUOUS_REQUIRED_CHECKS_DECLARATION: duplicate ($dupes)."
+
+          # Authorized check-run app slugs (comma-separated, exactly one declaration).
+          count="$(printf '%s\n' "$contract" | grep -cE '^PROMOTION_AUTHORIZED_CHECK_APPS=' || true)"
+          [ "$count" -gt 0 ] || fail "MISSING_AUTHORIZED_CHECK_APPS_DECLARATION: declare PROMOTION_AUTHORIZED_CHECK_APPS."
+          [ "$count" -eq 1 ] || fail "AMBIGUOUS_AUTHORIZED_CHECK_APPS_DECLARATION: declare PROMOTION_AUTHORIZED_CHECK_APPS exactly once."
+          apps_line="$(printf '%s\n' "$contract" | grep -E '^PROMOTION_AUTHORIZED_CHECK_APPS=' | head -n 1)"
+          apps_raw="${apps_line#PROMOTION_AUTHORIZED_CHECK_APPS=}"
+          [ -n "$(printf '%s' "$apps_raw" | tr -d '[:space:]')" ] \
+            || fail "INVALID_AUTHORIZED_CHECK_APPS_DECLARATION: PROMOTION_AUTHORIZED_CHECK_APPS is empty."
+          IFS=',' read -ra apps <<< "$apps_raw"
+          authorized_apps=""
+          for app in "${apps[@]}"; do
+            app="$(printf '%s' "$app" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+            [ -n "$app" ] || fail "INVALID_AUTHORIZED_CHECK_APPS_DECLARATION: empty app slug."
+            case "$app" in
+              *[!a-z0-9-]*) fail "INVALID_AUTHORIZED_CHECK_APPS_DECLARATION: app slug must be lowercase [a-z0-9-]: $app" ;;
+            esac
+            authorized_apps="${authorized_apps:+$authorized_apps,}$app"
+          done
+          [ -n "$authorized_apps" ] || fail "INVALID_AUTHORIZED_CHECK_APPS_DECLARATION: PROMOTION_AUTHORIZED_CHECK_APPS is empty."
+          app_dupes="$(printf '%s' "$authorized_apps" | tr ',' '\n' | sort | uniq -d)"
+          [ -z "$app_dupes" ] || fail "AMBIGUOUS_AUTHORIZED_CHECK_APPS_DECLARATION: duplicate ($app_dupes)."
+
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+          echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
+          echo "required_checks=$required_checks" >> "$GITHUB_OUTPUT"
+          echo "authorized_apps=$authorized_apps" >> "$GITHUB_OUTPUT"
+
+      - name: Verify source check-runs and commit status
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+          REQUIRED_CHECKS: ${{ steps.source.outputs.required_checks }}
+          AUTHORIZED_APPS: ${{ steps.source.outputs.authorized_apps }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
+
+          # Fetch every page. A failed request must never become an empty list.
+          if ! pages="$(gh api --paginate "repos/$GITHUB_REPOSITORY/commits/$SOURCE_SHA/check-runs?per_page=100")"; then
+            fail "GITHUB_API_ERROR: check-runs request failed (HTTP/auth/rate limit)."
+          fi
+          page_count="$(jq -s 'length' <<< "$pages" 2>/dev/null || true)"
+          case "$page_count" in
+            ''|0|*[!0-9]*) fail "MALFORMED_CHECK_RUNS_RESPONSE: no valid pages." ;;
+          esac
+          invalid_pages="$(jq -s '[.[] | select(
+              (type != "object") or
+              ((.total_count | type) != "number") or
+              ((.check_runs | type) != "array")
+            )] | length' <<< "$pages")"
+          [ "$invalid_pages" -eq 0 ] || fail "MALFORMED_CHECK_RUNS_RESPONSE: invalid page structure."
+          totals="$(jq -s '[.[].total_count] | unique' <<< "$pages")"
+          [ "$(jq 'length' <<< "$totals")" -eq 1 ] \
+            || fail "CHECK_RUNS_PAGINATION_TOTAL_COUNT_MISMATCH: pages disagree on total_count."
+          total_count="$(jq -r '.[0]' <<< "$totals")"
+          received="$(jq -s '[.[].check_runs | length] | add // 0' <<< "$pages")"
+          [ "$received" -eq "$total_count" ] \
+            || fail "CHECK_RUNS_PAGINATION_INCOMPLETE: total_count=$total_count received=$received."
+          if ! checks="$(jq -s '[.[].check_runs[]]' <<< "$pages")"; then
+            fail "MALFORMED_CHECK_RUNS_RESPONSE: invalid check_runs payload."
+          fi
+          malformed_runs="$(jq '[.[] | select(
+              (type != "object") or
+              ((.id | type) != "number") or
+              ((.name | type) != "string") or
+              ((.head_sha | type) != "string") or
+              ((.status | type) != "string")
+            )] | length' <<< "$checks")"
+          [ "$malformed_runs" -eq 0 ] || fail "MALFORMED_CHECK_RUNS_RESPONSE: invalid check run."
+          duplicates="$(jq '[.[].id] | length - (unique | length)' <<< "$checks")"
+          [ "$duplicates" -eq 0 ] || fail "DUPLICATED_CHECK_RUNS: $duplicates duplicate id(s)."
+          [ "$received" -gt 0 ] || fail "NO_CHECK_RUNS: the source SHA has no GitHub Actions check-runs."
+
+          # Same check name from more than one app is ambiguous: fail closed.
+          ambiguous="$(jq -r '
+            group_by(.name) | map(select((map(.app.id) | unique | length) > 1)) |
+            .[] | .[0].name' <<< "$checks")"
+          [ -z "$ambiguous" ] || fail "AMBIGUOUS_CHECK_APP: $ambiguous."
+
+          [ -n "$REQUIRED_CHECKS" ] || fail "MISSING_REQUIRED_CHECKS: no required checks declared for this SHA."
+          [ -n "$AUTHORIZED_APPS" ] || fail "MISSING_AUTHORIZED_CHECK_APPS: no authorized apps declared for this SHA."
+
+          # Required checks: presence, exact SHA, app identity, completed, SUCCESS.
+          # The latest run per name (highest id) is the current attempt.
+          IFS=',' read -ra required <<< "$REQUIRED_CHECKS"
+          for name in "${required[@]}"; do
+            name="$(printf '%s' "$name" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+            [ -n "$name" ] || fail "INVALID_REQUIRED_CHECKS_DECLARATION: empty required check."
+            info="$(jq -r --arg name "$name" --arg sha "$SOURCE_SHA" '
+              [ .[] | select(.name == $name and .head_sha == $sha) ] as $runs
+              | if ($runs | length) == 0 then "MISSING"
+                else ($runs | max_by(.id) | "\(.status)\t\(.conclusion)\t\(.app.slug // "")\t\(.app.id // "")")
+                end' <<< "$checks")"
+            [ "$info" != "MISSING" ] || fail "MISSING_REQUIRED_CHECK: $name."
+            IFS=$'\t' read -r required_status required_conclusion app_slug app_id <<< "$info"
+            [ -n "$app_slug" ] || fail "MISSING_REQUIRED_CHECK_APP: $name has no app identity."
+            case "$app_id" in
+              ''|*[!0-9]*) fail "MISSING_REQUIRED_CHECK_APP: $name has no app id." ;;
+            esac
+            case ",$AUTHORIZED_APPS," in
+              *",$app_slug,"*) ;;
+              *) fail "UNAUTHORIZED_REQUIRED_CHECK_APP: $name from $app_slug." ;;
+            esac
+            [ "$required_status" = "completed" ] || fail "PENDING_REQUIRED_CHECK: $name ($required_status)."
+            [ "$required_conclusion" = "success" ] || fail "REQUIRED_CHECK_NOT_SUCCESS: $name ($required_conclusion)."
+          done
+
+          # Optional observed check-runs must be completed and non-failing.
+          # Promotion workflow executions (current and prior promote.yml runs on this SHA)
+          # are excluded by verifiable identity (GitHub Actions app slug + workflow run ID
+          # in details/html URL), never by generic name.
+          if ! promo_runs_json="$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/workflows/promote.yml/runs?head_sha=$SOURCE_SHA&per_page=100")"; then
+            fail "GITHUB_API_ERROR: promotion workflow runs request failed."
+          fi
+          promo_run_ids="$(jq -s -r '[.[].workflow_runs[]?.id | tostring] | unique | join(",")' <<< "$promo_runs_json")"
+          current_run_id="${CURRENT_RUN_ID:-${GITHUB_RUN_ID:-}}"
+          bad="$(jq -r --arg current_run_id "$current_run_id" --arg promo_run_ids "$promo_run_ids" '
+            ([($current_run_id | select(. != "" and test("^[0-9]+$"))), ($promo_run_ids | split(",")[] | select(. != "" and test("^[0-9]+$")))] | unique) as $excluded_ids |
+            def is_promotion_execution:
+              (.app.slug == "github-actions" and
+               ((.details_url // "") as $du | (.html_url // "") as $hu |
+                any($excluded_ids[]; . as $id |
+                  (($du | test("/actions/runs/" + $id + "(/|$)")) or
+                   ($hu | test("/actions/runs/" + $id + "(/|$)"))))));
+            [ .[] | select(is_promotion_execution | not) ] |
+            group_by(.name) | map(max_by(.id)) |
+            map(select(
+              .status != "completed" or
+              (.conclusion != "success" and .conclusion != "neutral" and .conclusion != "skipped")
+            )) |
+            .[] | "\(.name) (status=\(.status), conclusion=\(.conclusion))"' <<< "$checks" | tr '\n' ';')"
+          [ -z "$bad" ] || fail "PENDING_OR_FAILED_CHECK_RUNS: $bad"
+
+          successes="$(jq -r --arg current_run_id "$current_run_id" --arg promo_run_ids "$promo_run_ids" '
+            ([($current_run_id | select(. != "" and test("^[0-9]+$"))), ($promo_run_ids | split(",")[] | select(. != "" and test("^[0-9]+$")))] | unique) as $excluded_ids |
+            def is_promotion_execution:
+              (.app.slug == "github-actions" and
+               ((.details_url // "") as $du | (.html_url // "") as $hu |
+                any($excluded_ids[]; . as $id |
+                  (($du | test("/actions/runs/" + $id + "(/|$)")) or
+                   ($hu | test("/actions/runs/" + $id + "(/|$)"))))));
+            [ .[] | select(is_promotion_execution | not) ] |
+            [group_by(.name)[] | max_by(.id) | select(.conclusion == "success")] | length' <<< "$checks")"
+          [ "$successes" -gt 0 ] || fail "NO_SUCCESSFUL_CHECK_RUN: at least one check-run must conclude success."
+
+          # Legacy commit statuses, when present, must also be green.
+          if ! status_json="$(gh api "repos/$GITHUB_REPOSITORY/commits/$SOURCE_SHA/status")"; then
+            fail "GITHUB_API_ERROR: commit status request failed."
+          fi
+          if ! status_total="$(jq -r '.total_count // 0' <<< "$status_json")"; then
+            fail "MALFORMED_COMMIT_STATUS_RESPONSE."
+          fi
+          case "$status_total" in
+            ''|*[!0-9]*) fail "MALFORMED_COMMIT_STATUS_RESPONSE: total_count missing." ;;
+          esac
+          if [ "$status_total" -gt 0 ]; then
+            state="$(jq -r '.state // "pending"' <<< "$status_json")"
+            [ "$state" = "success" ] || fail "LEGACY_STATUS_NOT_SUCCESS: combined status is $state."
+          fi
+
+      - name: Verify database migration attestation
+        id: migration_gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { createHash } from 'node:crypto'
+          import { execFileSync } from 'node:child_process'
+          import { appendFileSync } from 'node:fs'
+          import { inflateRawSync } from 'node:zlib'
+
+          const fail = (code, msg) => {
+            console.error(`::error::PROMOTION_BLOCKED_${code}: ${msg}`)
+            process.exit(1)
+          }
+
+          const sha256Hex = (buf) => createHash('sha256').update(buf).digest('hex')
+
+          const setOutput = (key, val) => {
+            const outFile = process.env.GITHUB_OUTPUT
+            if (outFile) appendFileSync(outFile, `${key}=${val ?? ''}\n`)
+          }
+
+          const canonicalSort = (value) => {
+            if (Array.isArray(value)) return value.map(canonicalSort)
+            if (value && typeof value === 'object') {
+              const sorted = {}
+              for (const k of Object.keys(value).sort()) sorted[k] = canonicalSort(value[k])
+              return sorted
+            }
+            return value
+          }
+
+          const gitText = (args) => {
+            try {
+              return execFileSync('git', args, { encoding: 'utf8' })
+            } catch (err) {
+              throw new Error(err.message)
+            }
+          }
+
+          const gitBuf = (args) => execFileSync('git', args)
+
+          const isAncestor = (ancestor, descendant) => {
+            if (!/^[0-9a-f]{40}$/i.test(ancestor) || !/^[0-9a-f]{40}$/i.test(descendant)) return false
+            if (ancestor.toLowerCase() === descendant.toLowerCase()) return true
+            try {
+              execFileSync('git', ['merge-base', '--is-ancestor', ancestor, descendant], { stdio: 'ignore' })
+              return true
+            } catch {
+              return false
+            }
+          }
+
+          const parseRuntimeContract = (markdown) => {
+            const map = new Map()
+            for (const line of markdown.split(/\r?\n/)) {
+              const m = /^([A-Z][A-Z0-9_]*)=(.*)$/.exec(line)
+              if (!m) continue
+              const [, key, rawVal] = m
+              const val = rawVal.trim()
+              if (!map.has(key)) map.set(key, [])
+              map.get(key).push(val)
+            }
+            const out = {}
+            for (const [k, vals] of map.entries()) {
+              const nonEmpty = vals.filter((v) => v.length > 0)
+              const unique = [...new Set(nonEmpty)]
+              if (unique.length > 1) {
+                fail('MIGRATION_CONTRACT_CONTRADICTION', `Conflicting contract values for ${k} at ${sourceSha}.`)
+              }
+              out[k] = vals[vals.length - 1] ?? ''
+            }
+            return out
+          }
+
+          const parseZipEntry = (zipBuf, targetFileName, { required = true } = {}) => {
+            if (!Buffer.isBuffer(zipBuf) || zipBuf.length < 22) {
+              fail('MIGRATION_EVIDENCE_TAMPERED', 'Corrupt or empty attestation artifact archive.')
+            }
+            let eocdOffset = -1
+            for (let i = zipBuf.length - 22; i >= Math.max(0, zipBuf.length - 65557); i -= 1) {
+              if (zipBuf.readUInt32LE(i) === 0x06054b50) {
+                eocdOffset = i
+                break
+              }
+            }
+            if (eocdOffset < 0) fail('MIGRATION_EVIDENCE_TAMPERED', 'Missing ZIP End of Central Directory.')
+
+            const cdCount = zipBuf.readUInt16LE(eocdOffset + 10)
+            const cdOffset = zipBuf.readUInt32LE(eocdOffset + 16)
+            if (cdOffset + 46 > zipBuf.length) fail('MIGRATION_EVIDENCE_TAMPERED', 'Truncated ZIP central directory.')
+
+            let ptr = cdOffset
+            let foundEntry = null
+            for (let idx = 0; idx < cdCount; idx += 1) {
+              if (ptr + 46 > zipBuf.length || zipBuf.readUInt32LE(ptr) !== 0x02014b50) {
+                fail('MIGRATION_EVIDENCE_TAMPERED', 'Malformed ZIP central directory entry.')
+              }
+              const method = zipBuf.readUInt16LE(ptr + 10)
+              const compSize = zipBuf.readUInt32LE(ptr + 20)
+              const uncompSize = zipBuf.readUInt32LE(ptr + 24)
+              const nameLen = zipBuf.readUInt16LE(ptr + 28)
+              const extraLen = zipBuf.readUInt16LE(ptr + 30)
+              const commentLen = zipBuf.readUInt16LE(ptr + 32)
+              const localHeaderOffset = zipBuf.readUInt32LE(ptr + 42)
+              const name = zipBuf.subarray(ptr + 46, ptr + 46 + nameLen).toString('utf8')
+              ptr += 46 + nameLen + extraLen + commentLen
+
+              if (name.includes('..') || name.startsWith('/')) {
+                fail('MIGRATION_EVIDENCE_TAMPERED', `Unsafe ZIP entry path: ${name}`)
+              }
+              if (name === targetFileName) {
+                if (foundEntry) fail('MIGRATION_EVIDENCE_TAMPERED', `Duplicate ${targetFileName} entries in archive.`)
+                foundEntry = { method, compSize, uncompSize, localHeaderOffset }
+              }
+            }
+
+            if (!foundEntry) {
+              if (!required) return null
+              fail('MIGRATION_EVIDENCE_TAMPERED', `Artifact missing ${targetFileName}.`)
+            }
+            const lfh = foundEntry.localHeaderOffset
+            if (lfh + 30 > zipBuf.length || zipBuf.readUInt32LE(lfh) !== 0x04034b50) {
+              fail('MIGRATION_EVIDENCE_TAMPERED', 'Corrupt ZIP local file header.')
+            }
+            const lfhNameLen = zipBuf.readUInt16LE(lfh + 26)
+            const lfhExtraLen = zipBuf.readUInt16LE(lfh + 28)
+            const dataStart = lfh + 30 + lfhNameLen + lfhExtraLen
+            const dataEnd = dataStart + foundEntry.compSize
+            if (dataEnd > zipBuf.length) fail('MIGRATION_EVIDENCE_TAMPERED', 'Truncated ZIP compressed entry.')
+            const compData = zipBuf.subarray(dataStart, dataEnd)
+
+            let outBuf
+            if (foundEntry.method === 0) outBuf = compData
+            else if (foundEntry.method === 8) outBuf = inflateRawSync(compData)
+            else fail('MIGRATION_EVIDENCE_TAMPERED', `Unsupported ZIP compression method ${foundEntry.method}.`)
+
+            if (outBuf.length !== foundEntry.uncompSize) {
+              fail('MIGRATION_EVIDENCE_TAMPERED', 'Decompressed entry size mismatch.')
+            }
+            return outBuf
+          }
+
+          const parseSingleZipEntry = (zipBuf, targetFileName) => parseZipEntry(zipBuf, targetFileName, { required: true })
+          const parseOptionalZipEntry = (zipBuf, targetFileName) => parseZipEntry(zipBuf, targetFileName, { required: false })
+
+          const ghJson = (apiPath) => {
+            let raw
+            try {
+              raw = execFileSync('gh', ['api', apiPath], { encoding: 'utf8' })
+            } catch (err) {
+              fail('MIGRATION_GITHUB_API_UNAVAILABLE', `GitHub API failed on ${apiPath}: ${err.message}`)
+            }
+            try {
+              return JSON.parse(raw)
+            } catch {
+              fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Malformed JSON from GitHub API on ${apiPath}.`)
+            }
+          }
+
+          const ghArray = (apiPath) => {
+            const parsed = ghJson(apiPath)
+            if (!Array.isArray(parsed)) {
+              fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Expected JSON array from GitHub API on ${apiPath}.`)
+            }
+            return parsed
+          }
+
+          const ghPaginatedList = (basePath, arrayKey) => {
+            const sep = basePath.includes('?') ? '&' : '?'
+            const items = []
+            const seenIds = new Set()
+            let expectedTotal = null
+            for (let page = 1; page <= 50; page += 1) {
+              const payload = ghJson(`${basePath}${sep}per_page=100&page=${page}`)
+              if (!payload || typeof payload !== 'object' || typeof payload.total_count !== 'number' || !Array.isArray(payload[arrayKey])) {
+                fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Malformed paginated payload for ${basePath}.`)
+              }
+              if (expectedTotal === null) expectedTotal = payload.total_count
+              else if (payload.total_count !== expectedTotal) {
+                fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Pagination total_count changed mid-query on ${basePath}.`)
+              }
+              const batch = payload[arrayKey]
+              for (const item of batch) {
+                if (!item || typeof item !== 'object' || typeof item.id !== 'number') {
+                  fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Invalid item inside ${basePath} response.`)
+                }
+                if (seenIds.has(item.id)) {
+                  fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Duplicate item id ${item.id} inside ${basePath}.`)
+                }
+                seenIds.add(item.id)
+                items.push(item)
+              }
+              if (items.length >= expectedTotal || batch.length === 0) break
+            }
+            if (expectedTotal === null || items.length !== expectedTotal) {
+              fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Pagination incomplete on ${basePath}: expected=${expectedTotal} received=${items.length}.`)
+            }
+            return items
+          }
+
+          const ghBuffer = (apiPath) => {
+            try {
+              return execFileSync('gh', ['api', apiPath])
+            } catch (err) {
+              fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Failed downloading artifact from ${apiPath}: ${err.message}`)
+            }
+          }
+
+          const sourceSha = (process.env.SOURCE_SHA ?? '').trim()
+          const target = (process.env.TARGET ?? 'staging').trim()
+          const repo = (process.env.GITHUB_REPOSITORY ?? '').trim()
+          if (!/^[0-9a-f]{40}$/i.test(sourceSha)) fail('MIGRATION_CANDIDATE_SHA_MISMATCH', 'Invalid SOURCE_SHA.')
+          if (!repo) fail('MIGRATION_GITHUB_API_UNAVAILABLE', 'GITHUB_REPOSITORY is missing.')
+
+          let contractRaw = ''
+          try {
+            contractRaw = gitText(['show', `${sourceSha}:.anclora/PRODUCTION_RUNTIME.md`])
+          } catch {
+            fail('MIGRATION_CONTRACT_MISSING', '.anclora/PRODUCTION_RUNTIME.md missing at source SHA.')
+          }
+          const contract = parseRuntimeContract(contractRaw)
+
+          const dbProvider = contract.DATABASE_PROVIDER ?? ''
+          if (!dbProvider) {
+            fail('MIGRATION_CONTRACT_MISSING', 'DATABASE_PROVIDER declaration missing in .anclora/PRODUCTION_RUNTIME.md.')
+          }
+
+          const treeFiles = gitText(['ls-tree', '-r', '--name-only', sourceSha])
+            .split(/\r?\n/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+          const standardMigrationFiles = treeFiles.filter((f) =>
+            /(?:^|\/)(?:prisma\/migrations\/[^/]+\/migration\.sql|drizzle\/[^/]+\.sql|alembic\/versions\/[^/]+\.py|db\/migrations\/[^/]+\.sql|neon\/migrations\/[^/]+\.sql)$/.test(f),
+          )
+
+          if (dbProvider.toLowerCase() === 'none') {
+            const migSys = (contract.MIGRATION_SYSTEM ?? 'none').toLowerCase()
+            const migDir = (contract.MIGRATION_DIRECTORY ?? 'none').toLowerCase()
+            if (migSys !== 'none' || migDir !== 'none' || standardMigrationFiles.length > 0) {
+              fail('MIGRATION_CONTRACT_CONTRADICTION', 'DATABASE_PROVIDER is NONE but migration contract or files are present.')
+            }
+            setOutput('migration_gate_required', 'false')
+            setOutput('migration_runner_workflow', '')
+            setOutput('migration_environment', '')
+            setOutput('migration_attested_run_id', '')
+            setOutput('migration_attested_run_attempt', '')
+            setOutput('migration_manifest_sha256', '')
+            setOutput('migration_tree_sha256', '')
+            console.log('NO_DATABASE_DECLARED: database-less repository verified with zero migration artifacts.')
+            process.exit(0)
+          }
+
+          const migrationSystem = contract.MIGRATION_SYSTEM ?? ''
+          const rawMigDir = contract.MIGRATION_DIRECTORY ?? ''
+          const runnerWorkflow = contract.MIGRATION_RUNNER_WORKFLOW ?? ''
+          const migrationEnv = contract.MIGRATION_ENVIRONMENT ?? ''
+          const expectedFingerprint = contract.DATABASE_TARGET_FINGERPRINT ?? ''
+          const declaredManifestPath = contract.MIGRATION_MANIFEST_PATH ?? ''
+          const cryptoMode = (contract.MIGRATION_CRYPTO_ATTESTATION ?? 'optional').toLowerCase()
+          const gateOnStaging = (contract.MIGRATION_GATE_ON_STAGING ?? 'false').toLowerCase() === 'true'
+
+          if (!migrationSystem || migrationSystem.toLowerCase() === 'none' ||
+              !rawMigDir || rawMigDir.toLowerCase() === 'none' ||
+              !runnerWorkflow || !migrationEnv) {
+            fail('MIGRATION_CONTRACT_MISSING', 'DB repository missing MIGRATION_SYSTEM, MIGRATION_DIRECTORY, MIGRATION_RUNNER_WORKFLOW, or MIGRATION_ENVIRONMENT.')
+          }
+          if (!/^sha256:[0-9a-f]{64}$/.test(expectedFingerprint)) {
+            fail('MIGRATION_CONTRACT_MISSING', 'DATABASE_TARGET_FINGERPRINT missing or not in non-secret sha256:<64-hex> format.')
+          }
+
+          const normalizedDir = rawMigDir.replace(/^\.\//, '').replace(/\/+$/, '')
+
+          const prismaPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)/migration\\.sql$`)
+          const directPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)\\.(sql|py)$`)
+
+          const crlfSqlSha256 = (bytes) =>
+            sha256Hex(Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n').replace(/\n/g, '\r\n'), 'utf8'))
+
+          const migrations = []
+          for (const filePath of treeFiles) {
+            const pm = prismaPattern.exec(filePath)
+            if (pm) {
+              const bytes = gitBuf(['show', `${sourceSha}:${filePath}`])
+              migrations.push({ name: pm[1], sha256: sha256Hex(bytes), crlfSha256: crlfSqlSha256(bytes) })
+            }
+          }
+          if (migrations.length === 0) {
+            for (const filePath of treeFiles) {
+              const dm = directPattern.exec(filePath)
+              if (dm) {
+                const bytes = gitBuf(['show', `${sourceSha}:${filePath}`])
+                migrations.push({ name: dm[1], sha256: sha256Hex(bytes), crlfSha256: crlfSqlSha256(bytes) })
+              }
+            }
+          }
+          migrations.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+          const actualCount = migrations.length
+          const actualNames = migrations.map((m) => m.name)
+          const actualNameSet = new Set(actualNames)
+          const migrationByName = new Map(migrations.map((m) => [m.name, m]))
+          const actualTreeSha256 = sha256Hex(migrations.map((m) => `${m.name}:${m.sha256}\n`).join(''))
+
+          const manifestPath = declaredManifestPath || (treeFiles.includes('scripts/release/release-manifest.json') ? 'scripts/release/release-manifest.json' : '')
+          let actualManifestSha256 = null
+          const authorizedEquivalencesByName = new Map()
+          if (manifestPath) {
+            if (!treeFiles.includes(manifestPath)) {
+              fail('MIGRATION_MANIFEST_MISMATCH', `Declared manifest ${manifestPath} missing at ${sourceSha}.`)
+            }
+            const manifestBytes = gitBuf(['show', `${sourceSha}:${manifestPath}`])
+            actualManifestSha256 = sha256Hex(manifestBytes)
+            let manifestJson
+            try {
+              manifestJson = JSON.parse(manifestBytes.toString('utf8'))
+            } catch {
+              fail('MIGRATION_MANIFEST_MISMATCH', `Manifest ${manifestPath} is invalid JSON.`)
+            }
+            if (!manifestJson || !Array.isArray(manifestJson.migrations)) {
+              fail('MIGRATION_MANIFEST_MISMATCH', `Manifest ${manifestPath} missing migrations array.`)
+            }
+            const sortedManifest = [...manifestJson.migrations].sort((a, b) =>
+              a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+            )
+            if (sortedManifest.length !== actualCount) {
+              fail('MIGRATION_MANIFEST_MISMATCH', `Manifest count (${sortedManifest.length}) differs from tree (${actualCount}).`)
+            }
+            for (let i = 0; i < actualCount; i += 1) {
+              if (sortedManifest[i].name !== migrations[i].name || sortedManifest[i].sha256 !== migrations[i].sha256) {
+                fail('MIGRATION_MANIFEST_MISMATCH', `Manifest mismatch at migration ${migrations[i].name}.`)
+              }
+            }
+            if (manifestJson.historicalChecksumEquivalences !== undefined) {
+              if (!Array.isArray(manifestJson.historicalChecksumEquivalences)) {
+                fail('MIGRATION_MANIFEST_MISMATCH', `Manifest ${manifestPath} historicalChecksumEquivalences must be an array.`)
+              }
+              const hex64 = /^[a-f0-9]{64}$/
+              for (const eq of manifestJson.historicalChecksumEquivalences) {
+                if (
+                  !eq ||
+                  typeof eq !== 'object' ||
+                  typeof eq.name !== 'string' ||
+                  !eq.name.trim() ||
+                  typeof eq.reason !== 'string' ||
+                  !eq.reason.trim() ||
+                  typeof eq.lfSha256 !== 'string' ||
+                  !hex64.test(eq.lfSha256) ||
+                  typeof eq.crlfSha256 !== 'string' ||
+                  !hex64.test(eq.crlfSha256) ||
+                  (eq.lineEndingMode !== undefined && eq.lineEndingMode !== 'CRLF')
+                ) {
+                  fail('MIGRATION_MANIFEST_MISMATCH', `Manifest ${manifestPath} contains malformed historicalChecksumEquivalences entry.`)
+                }
+                if (authorizedEquivalencesByName.has(eq.name)) {
+                  fail('MIGRATION_MANIFEST_MISMATCH', `Manifest ${manifestPath} contains duplicate historical equivalence for ${eq.name}.`)
+                }
+                const treeMigration = migrationByName.get(eq.name)
+                if (!treeMigration) {
+                  fail('MIGRATION_MANIFEST_MISMATCH', `Manifest historical equivalence references missing migration ${eq.name}.`)
+                }
+                if (
+                  eq.lfSha256 !== treeMigration.sha256 ||
+                  eq.crlfSha256 !== treeMigration.crlfSha256 ||
+                  eq.lfSha256 === eq.crlfSha256
+                ) {
+                  fail('MIGRATION_MANIFEST_MISMATCH', `Manifest historical equivalence checksum verification failed for ${eq.name}.`)
+                }
+                authorizedEquivalencesByName.set(eq.name, {
+                  reason: eq.reason.trim(),
+                  lineEndingMode: 'CRLF',
+                  canonicalSha256: eq.lfSha256,
+                  recordedChecksum: eq.crlfSha256,
+                })
+              }
+            }
+          }
+
+          if (target === 'staging' && !gateOnStaging) {
+            setOutput('migration_gate_required', 'false')
+            setOutput('migration_runner_workflow', runnerWorkflow)
+            setOutput('migration_environment', migrationEnv)
+            setOutput('migration_attested_run_id', '')
+            setOutput('migration_attested_run_attempt', '')
+            setOutput('migration_manifest_sha256', actualManifestSha256 ?? '')
+            setOutput('migration_tree_sha256', actualTreeSha256)
+            console.log('Target is staging and MIGRATION_GATE_ON_STAGING is false; production DB gate deferred.')
+            process.exit(0)
+          }
+
+          const workflowFile = runnerWorkflow.replace(/^\.github\/workflows\//, '')
+          const runs = ghPaginatedList(`repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs`, 'workflow_runs')
+            .sort((a, b) => (b.id - a.id) || ((b.run_attempt ?? 1) - (a.run_attempt ?? 1)))
+
+          if (runs.length === 0) {
+            fail('MIGRATION_EVIDENCE_MISSING', `No runs recorded for ${runnerWorkflow}.`)
+          }
+
+          for (const r of runs) {
+            if (r.path && r.path !== runnerWorkflow) {
+              fail('MIGRATION_WORKFLOW_UNAUTHORIZED', `Observed run ${r.id} has unexpected path ${r.path}.`)
+            }
+          }
+
+          const activeRun = runs.find((r) => r.status !== 'completed')
+          if (activeRun) {
+            fail('MIGRATION_CONCURRENT_RUN_CONFLICT', `Migration runner run ${activeRun.id} is still ${activeRun.status}.`)
+          }
+
+          const relevantRuns = runs.filter((r) => r.head_sha === sourceSha || isAncestor(r.head_sha, sourceSha))
+          if (relevantRuns.length === 0) {
+            fail('MIGRATION_CANDIDATE_SHA_MISMATCH', `No migration runner run matches candidate SHA ${sourceSha} or its ancestors.`)
+          }
+
+          const selectedRun = relevantRuns[0]
+          if (['pull_request', 'pull_request_target', 'pull_request_review', 'pull_request_review_comment', 'fork'].includes(selectedRun.event ?? '')) {
+            fail('MIGRATION_WORKFLOW_UNAUTHORIZED', `Migration run ${selectedRun.id} triggered by untrusted event ${selectedRun.event}.`)
+          }
+          for (const newer of runs) {
+            if (newer.id > selectedRun.id) {
+              if (newer.conclusion === 'cancelled') {
+                fail('MIGRATION_RUNNER_CANCELLED', `Newer migration run ${newer.id} was cancelled after candidate run ${selectedRun.id}.`)
+              }
+              if (newer.conclusion !== 'success') {
+                fail('MIGRATION_CONCURRENT_RUN_CONFLICT', `Newer migration run ${newer.id} ended ${newer.conclusion} after run ${selectedRun.id}.`)
+              }
+            }
+          }
+
+          if (selectedRun.conclusion === 'cancelled') {
+            fail('MIGRATION_RUNNER_CANCELLED', `Latest relevant migration run ${selectedRun.id} was cancelled.`)
+          }
+          if (selectedRun.conclusion !== 'success') {
+            fail('MIGRATION_RUNNER_FAILED', `Latest relevant migration run ${selectedRun.id} concluded ${selectedRun.conclusion}.`)
+          }
+
+          const runAttempt = selectedRun.run_attempt ?? 1
+          const jobs = ghPaginatedList(
+            `repos/${repo}/actions/runs/${selectedRun.id}/attempts/${runAttempt}/jobs`,
+            'jobs',
+          )
+          if (jobs.length === 0) fail('MIGRATION_RUNNER_FAILED', `Run ${selectedRun.id} reports zero jobs.`)
+          const succeededJobIds = new Set()
+          for (const job of jobs) {
+            if (job.status !== 'completed') {
+              fail('MIGRATION_CONCURRENT_RUN_CONFLICT', `Job ${job.name} in run ${selectedRun.id} is ${job.status}.`)
+            }
+            if (job.conclusion === 'cancelled') {
+              fail('MIGRATION_RUNNER_CANCELLED', `Job ${job.name} in run ${selectedRun.id} was cancelled.`)
+            }
+            if (!['success', 'skipped', 'neutral'].includes(job.conclusion)) {
+              fail('MIGRATION_RUNNER_FAILED', `Job ${job.name} in run ${selectedRun.id} failed (${job.conclusion}).`)
+            }
+            if (job.conclusion === 'success') succeededJobIds.add(job.id)
+            if (job.environment && typeof job.environment === 'object' && job.environment.name && job.environment.name !== migrationEnv) {
+              fail('MIGRATION_ENVIRONMENT_MISMATCH', `Job ${job.name} ran in environment ${job.environment.name} instead of ${migrationEnv}.`)
+            }
+          }
+          if (succeededJobIds.size === 0) fail('MIGRATION_RUNNER_FAILED', `Run ${selectedRun.id} had zero successful jobs.`)
+
+          const deployments = ghArray(`repos/${repo}/deployments?sha=${selectedRun.head_sha}&per_page=100`)
+          const shaDeployments = deployments.filter((d) => d && d.sha === selectedRun.head_sha)
+          const envDeployments = shaDeployments.filter((d) => d.environment === migrationEnv)
+          if (envDeployments.length === 0) {
+            if (shaDeployments.length > 0) {
+              fail('MIGRATION_ENVIRONMENT_MISMATCH', `Deployments for ${selectedRun.head_sha} exist only in other environment(s), not ${migrationEnv}.`)
+            }
+            fail('MIGRATION_APPROVAL_MISSING', `No GitHub Deployment exists for ${selectedRun.head_sha} in ${migrationEnv}.`)
+          }
+
+          const verifiedDeploymentIds = new Set()
+          let sawForeignRunDeployment = false
+          for (const dep of envDeployments) {
+            const statuses = ghArray(`repos/${repo}/deployments/${dep.id}/statuses?per_page=50`)
+            if (statuses.length > 0 && statuses[0].state === 'success') {
+              if (statuses[0].environment && statuses[0].environment !== migrationEnv) {
+                continue
+              }
+              const statusUrl = statuses[0].log_url || statuses[0].target_url || ''
+              const urlMatch = /\/actions\/runs\/(\d+)\/job\/(\d+)(?:[/?#]|$)/.exec(statusUrl)
+              if (!urlMatch) continue
+              if (Number(urlMatch[1]) !== selectedRun.id || !succeededJobIds.has(Number(urlMatch[2]))) {
+                sawForeignRunDeployment = true
+                continue
+              }
+              verifiedDeploymentIds.add(dep.id)
+            }
+          }
+          if (verifiedDeploymentIds.size === 0) {
+            if (sawForeignRunDeployment) {
+              fail('MIGRATION_WORKFLOW_UNAUTHORIZED', `Deployment status for ${migrationEnv} binds to a different workflow run or job than ${selectedRun.id}.`)
+            }
+            fail('MIGRATION_APPROVAL_MISSING', `Deployment in ${migrationEnv} for ${selectedRun.head_sha} lacks success status bound to run ${selectedRun.id}.`)
+          }
+
+          const approvals = ghArray(`repos/${repo}/actions/runs/${selectedRun.id}/approvals`)
+          const envApprovals = approvals.filter(
+            (a) => a && Array.isArray(a.environments) && a.environments.some((e) => e && e.name === migrationEnv),
+          )
+          if (approvals.length > 0 && envApprovals.length === 0) {
+            fail('MIGRATION_ENVIRONMENT_MISMATCH', `Run ${selectedRun.id} approvals reference wrong environment instead of ${migrationEnv}.`)
+          }
+          const validApproval = envApprovals.some((a) => a.state === 'approved' && a.user && typeof a.user.login === 'string' && a.user.login.length > 0)
+          if (!validApproval) {
+            fail('MIGRATION_APPROVAL_MISSING', `Run ${selectedRun.id} has no approved reviewer record for ${migrationEnv}.`)
+          }
+
+          const artifacts = ghPaginatedList(`repos/${repo}/actions/runs/${selectedRun.id}/artifacts`, 'artifacts')
+          const matchingArtifacts = artifacts.filter((a) => a && a.name === 'migration-attestation')
+          if (matchingArtifacts.length === 0) {
+            fail('MIGRATION_EVIDENCE_MISSING', `Run ${selectedRun.id} missing migration-attestation artifact.`)
+          }
+          if (matchingArtifacts.length > 1) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', `Run ${selectedRun.id} contains ambiguous multiple migration-attestation artifacts.`)
+          }
+          const artifact = matchingArtifacts[0]
+          if (artifact.expired === true) {
+            fail('MIGRATION_EVIDENCE_MISSING', `Attestation artifact ${artifact.id} on run ${selectedRun.id} is expired.`)
+          }
+          if (artifact.workflow_run && (artifact.workflow_run.id !== selectedRun.id || artifact.workflow_run.head_sha !== selectedRun.head_sha)) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', `Artifact ${artifact.id} workflow_run metadata does not match run ${selectedRun.id}.`)
+          }
+
+          const zipBuf = ghBuffer(`repos/${repo}/actions/artifacts/${artifact.id}/zip`)
+          if (typeof artifact.digest === 'string' && artifact.digest.length > 0) {
+            const actualZipDigest = `sha256:${sha256Hex(zipBuf)}`
+            if (actualZipDigest !== artifact.digest) {
+              fail('MIGRATION_EVIDENCE_TAMPERED', `Artifact ZIP digest mismatch: expected ${artifact.digest} got ${actualZipDigest}.`)
+            }
+          }
+
+          const attestationBytes = parseSingleZipEntry(zipBuf, 'migration-attestation.json')
+          let att
+          try {
+            att = JSON.parse(attestationBytes.toString('utf8'))
+          } catch {
+            fail('MIGRATION_EVIDENCE_TAMPERED', 'migration-attestation.json is invalid JSON.')
+          }
+
+          if (!att || typeof att !== 'object' || att.schemaVersion !== 'MigrationAttestationV1' || typeof att.attestationDigest !== 'string') {
+            fail('MIGRATION_EVIDENCE_TAMPERED', 'Invalid MigrationAttestationV1 schema or missing attestationDigest.')
+          }
+          const withoutDigest = { ...att }
+          delete withoutDigest.attestationDigest
+          const recomputedDigest = sha256Hex(JSON.stringify(canonicalSort(withoutDigest)))
+          if (recomputedDigest !== att.attestationDigest) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', 'attestationDigest verification failed; payload was altered.')
+          }
+
+          if (cryptoMode === 'required') {
+            const subjectHex = sha256Hex(attestationBytes)
+            const sigData = ghJson(`repos/${repo}/attestations/sha256:${subjectHex}`)
+            if (!sigData || !Array.isArray(sigData.attestations) || sigData.attestations.length === 0) {
+              fail('MIGRATION_CRYPTO_ATTESTATION_MISSING', `No GitHub Sigstore attestation found for sha256:${subjectHex}.`)
+            }
+            const verifiedBundle = sigData.attestations.some((entry) => {
+              const b64 = entry?.bundle?.dsseEnvelope?.payload
+              if (typeof b64 !== 'string' || !b64) return false
+              let stmt
+              try {
+                stmt = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'))
+              } catch {
+                return false
+              }
+              const subjects = Array.isArray(stmt?.subject) ? stmt.subject : []
+              if (!subjects.some((s) => s?.digest?.sha256 === subjectHex)) return false
+              const wf = stmt?.predicate?.buildDefinition?.externalParameters?.workflow
+              if (!wf || wf.repository !== `https://github.com/${repo}` || wf.path !== runnerWorkflow) return false
+              const ghMeta = stmt?.predicate?.buildDefinition?.internalParameters?.github
+              if (!ghMeta || ghMeta.environment !== migrationEnv) return false
+              if (ghMeta.run_id && String(ghMeta.run_id) !== String(selectedRun.id)) return false
+              if (ghMeta.sha && ghMeta.sha !== selectedRun.head_sha) return false
+              return true
+            })
+            if (!verifiedBundle) {
+              fail('MIGRATION_CRYPTO_ATTESTATION_MISSING', `Sigstore DSSE payload does not bind ${repo} ${runnerWorkflow} environment=${migrationEnv} run=${selectedRun.id}.`)
+            }
+          }
+
+          if (att.repository !== repo) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', `Attestation repository ${att.repository} != ${repo}.`)
+          }
+          if (att.workflowRun?.workflowPath !== runnerWorkflow) {
+            fail('MIGRATION_WORKFLOW_UNAUTHORIZED', `Attestation workflowPath ${att.workflowRun?.workflowPath} != ${runnerWorkflow}.`)
+          }
+          if (att.workflowRun?.runId !== selectedRun.id || att.workflowRun?.runAttempt !== runAttempt) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', `Attestation run identity mismatch (${att.workflowRun?.runId}/${att.workflowRun?.runAttempt}).`)
+          }
+          if (att.workflowRun?.candidateSha !== selectedRun.head_sha) {
+            fail('MIGRATION_CANDIDATE_SHA_MISMATCH', `Attestation candidateSha ${att.workflowRun?.candidateSha} != run head_sha ${selectedRun.head_sha}.`)
+          }
+          if (att.environment?.name !== migrationEnv) {
+            fail('MIGRATION_ENVIRONMENT_MISMATCH', `Attestation environment ${att.environment?.name} != ${migrationEnv}.`)
+          }
+          if (!verifiedDeploymentIds.has(att.environment?.deploymentId)) {
+            fail('MIGRATION_EVIDENCE_TAMPERED', `Attestation deploymentId ${att.environment?.deploymentId} is not verified on GitHub.`)
+          }
+          if (att.database?.targetFingerprint !== expectedFingerprint) {
+            fail('MIGRATION_DATABASE_MISMATCH', `Attestation database fingerprint differs from contract ${expectedFingerprint}.`)
+          }
+          if (att.execution?.status !== 'succeeded') {
+            fail('MIGRATION_RUNNER_FAILED', `Attestation execution status is ${att.execution?.status}.`)
+          }
+
+          const post = att.dbPostCheck
+          if (!post || typeof post !== 'object' ||
+              post.status !== 'verified' ||
+              typeof post.pendingCount !== 'number' ||
+              typeof post.failedCount !== 'number' ||
+              typeof post.rolledBackCount !== 'number' ||
+              typeof post.checksumMismatchCount !== 'number' ||
+              typeof post.appliedCount !== 'number' ||
+              typeof post.appliedMigrationsDigest !== 'string' ||
+              !/^[0-9a-f]{64}$/.test(post.appliedMigrationsDigest)) {
+            fail('MIGRATION_STATE_UNKNOWN', 'Attestation dbPostCheck incomplete or missing verifiable post-migration ledger state.')
+          }
+          if (post.rolledBackCount > 0 || post.checksumMismatchCount > 0 || (post.extraDbCount ?? 0) > 0) {
+            fail('MIGRATION_STATE_UNKNOWN', `Database ledger inconsistent: rolledBack=${post.rolledBackCount} checksumMismatch=${post.checksumMismatchCount}.`)
+          }
+          if (post.pendingCount > 0 || post.failedCount > 0 || post.appliedCount < (att.migrations?.count ?? 0)) {
+            fail('MIGRATION_PRIOR_PENDING', `Database ledger reports unapplied/failed prior migrations: pending=${post.pendingCount} failed=${post.failedCount} applied=${post.appliedCount}.`)
+          }
+
+          const attestedNames = Array.isArray(att.migrations?.names) ? att.migrations.names : []
+          const attestedNameSet = new Set(attestedNames)
+          const missingInAttestation = actualNames.filter((n) => !attestedNameSet.has(n))
+
+          if (att.migrations?.directory !== normalizedDir) {
+            fail('MIGRATION_CONTRACT_CONTRADICTION', `Attestation migration directory ${att.migrations?.directory} != ${normalizedDir}.`)
+          }
+          if (missingInAttestation.length > 0) {
+            fail('MIGRATION_REQUIRED_PENDING', `Candidate introduces unattested migration(s): ${missingInAttestation.join(', ')}.`)
+          }
+          if (actualManifestSha256 !== null && att.migrations?.manifestSha256 !== actualManifestSha256) {
+            fail('MIGRATION_MANIFEST_MISMATCH', `Attestation manifestSha256 ${att.migrations?.manifestSha256} != candidate manifestSha256 ${actualManifestSha256}.`)
+          }
+          if (att.migrations?.treeSha256 !== actualTreeSha256) {
+            fail('MIGRATION_REQUIRED_PENDING', `Candidate migration tree digest differs from attested tree digest.`)
+          }
+          if (post.appliedCount < actualCount) {
+            fail('MIGRATION_PRIOR_PENDING', `Database ledger applied ${post.appliedCount} migrations < declared ${actualCount}.`)
+          }
+          if (post.appliedCount !== actualCount || post.appliedMigrationsDigest !== actualTreeSha256) {
+            fail('MIGRATION_STATE_UNKNOWN', 'Database appliedMigrationsDigest does not match candidate migration bytes.')
+          }
+          if (post.acceptedHistoricalEquivalences !== undefined) {
+            if (!Array.isArray(post.acceptedHistoricalEquivalences)) {
+              fail('MIGRATION_STATE_UNKNOWN', 'Attestation acceptedHistoricalEquivalences must be an array.')
+            }
+            const seenAccepted = new Set()
+            for (const acc of post.acceptedHistoricalEquivalences) {
+              if (!acc || typeof acc !== 'object' || typeof acc.name !== 'string' || seenAccepted.has(acc.name)) {
+                fail('MIGRATION_STATE_UNKNOWN', 'Attestation contains malformed or duplicate acceptedHistoricalEquivalences entry.')
+              }
+              seenAccepted.add(acc.name)
+              const auth = authorizedEquivalencesByName.get(acc.name)
+              if (!auth) {
+                fail('MIGRATION_STATE_UNKNOWN', `Attestation contains unauthorized historical checksum equivalence: ${acc.name}.`)
+              }
+              if (
+                acc.lineEndingMode !== auth.lineEndingMode ||
+                acc.reason !== auth.reason ||
+                acc.canonicalSha256 !== auth.canonicalSha256 ||
+                acc.recordedChecksum !== auth.recordedChecksum
+              ) {
+                fail('MIGRATION_STATE_UNKNOWN', `Attestation historical checksum equivalence mismatch for ${acc.name}.`)
+              }
+            }
+          }
+
+          // G39: Verify OD-03 BackupVerificationEvidenceV1 embedded in MigrationAttestationV1 (and optional backup-verification.json)
+          const backupArtifactBytes = parseOptionalZipEntry(zipBuf, 'backup-verification.json')
+          let backupVerificationArtifact = null
+          if (backupArtifactBytes !== null) {
+            try {
+              backupVerificationArtifact = JSON.parse(backupArtifactBytes.toString('utf8'))
+            } catch {
+              fail('MIGRATION_BACKUP_TAMPERED', 'backup-verification.json is invalid JSON.')
+            }
+          }
+          const expectedProjectId = (contract.DATABASE_NEON_PROJECT_ID ?? '').trim()
+          const expectedBranchId = (contract.DATABASE_NEON_PRODUCTION_BRANCH_ID ?? '').trim()
+          const expectedEndpointId = (contract.DATABASE_NEON_ENDPOINT_ID ?? '').trim()
+          const maxAgeRaw = (contract.MIGRATION_MAX_BACKUP_AGE_MINUTES ?? '').trim()
+          const od03Active = Boolean(maxAgeRaw) || /^OD-03_ENFORCED/i.test((contract.MIGRATION_BACKUP_GATE_POLICY ?? '').trim())
+          const MAX_OD03_BACKUP_AGE_MINUTES = 30
+          const MAX_OD03_FUTURE_CLOCK_SKEW_MS = 60 * 1000
+          const ISO_TS_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/
+
+          if (od03Active || att.backupVerification || backupVerificationArtifact) {
+            const bv = att.backupVerification
+            if (!bv || typeof bv !== 'object') {
+              fail('MIGRATION_BACKUP_EVIDENCE_MISSING', 'MigrationAttestationV1 missing mandatory backupVerification block under OD-03.')
+            }
+            if (bv.schemaVersion !== 'BackupVerificationEvidenceV1' || bv.policyDecision !== 'OD-03' || bv.evaluatorStatus !== 'VERIFIED') {
+              fail('MIGRATION_BACKUP_TAMPERED', 'Invalid backupVerification schemaVersion, policyDecision, or evaluatorStatus.')
+            }
+            if (bv.verifiedByProvider !== true || bv.providerState !== 'ready') {
+              fail('MIGRATION_BACKUP_NOT_READY', 'backupVerification does not record provider-confirmed ready state.')
+            }
+            if (
+              !bv.backupReference ||
+              typeof bv.backupReference !== 'string' ||
+              bv.backupReference.length < 4 ||
+              (expectedBranchId && bv.backupReference === expectedBranchId) ||
+              bv.backupReference.includes('://')
+            ) {
+              fail('MIGRATION_BACKUP_TAMPERED', 'Invalid or unsafe backupReference in attestation.backupVerification.')
+            }
+            if (bv.candidateSha !== att.workflowRun?.candidateSha || Number(bv.runId) !== Number(att.workflowRun?.runId)) {
+              fail('MIGRATION_BACKUP_SHA_MISMATCH', 'backupVerification candidateSha/runId differs from MigrationAttestationV1 workflowRun.')
+            }
+            if (bv.databaseTargetFingerprint !== expectedFingerprint || bv.databaseTargetFingerprint !== att.database?.targetFingerprint) {
+              fail('MIGRATION_DATABASE_MISMATCH', 'backupVerification targetFingerprint differs from contract or attestation database.')
+            }
+            if (expectedProjectId && bv.neonProjectIdSha256 !== `sha256:${sha256Hex(expectedProjectId)}`) {
+              fail('MIGRATION_BACKUP_PROJECT_MISMATCH', 'backupVerification neonProjectIdSha256 differs from contract project ID.')
+            }
+            if (expectedBranchId) {
+              const expectedBranchHash = `sha256:${sha256Hex(expectedBranchId)}`
+              if (bv.productionBranchIdSha256 !== expectedBranchHash || bv.sourceBranchIdSha256 !== expectedBranchHash) {
+                fail('MIGRATION_BACKUP_BRANCH_MISMATCH', 'backupVerification branch hash differs from contract immutable production branch.')
+              }
+            }
+            if (expectedEndpointId) {
+              const expectedEndpointHash = `sha256:${sha256Hex(expectedEndpointId)}`
+              if (bv.productionEndpointIdSha256 !== expectedEndpointHash || bv.endpointIdSha256 !== expectedEndpointHash) {
+                fail('MIGRATION_BACKUP_ENDPOINT_MISMATCH', 'backupVerification endpoint hash differs from contract endpoint ID.')
+              }
+            }
+
+            const contractMaxAgeMinutes = maxAgeRaw ? Number(maxAgeRaw) : MAX_OD03_BACKUP_AGE_MINUTES
+            if (!Number.isInteger(contractMaxAgeMinutes) || contractMaxAgeMinutes <= 0 || contractMaxAgeMinutes > MAX_OD03_BACKUP_AGE_MINUTES) {
+              fail('MIGRATION_BACKUP_THRESHOLD_INVALID', `Contract MIGRATION_MAX_BACKUP_AGE_MINUTES (${maxAgeRaw}) violates OD-03 limit (1..30).`)
+            }
+            if (
+              typeof bv.maxAllowedAgeMinutes !== 'number' ||
+              bv.maxAllowedAgeMinutes <= 0 ||
+              bv.maxAllowedAgeMinutes > contractMaxAgeMinutes ||
+              bv.maxFutureClockSkewMs !== MAX_OD03_FUTURE_CLOCK_SKEW_MS
+            ) {
+              fail('MIGRATION_BACKUP_POLICY_MISMATCH', 'backupVerification threshold or clock-skew tolerance conflicts with OD-03 policy.')
+            }
+
+            if (
+              !ISO_TS_RE.test(String(bv.verifiedAt ?? '')) ||
+              !ISO_TS_RE.test(String(bv.backupCreatedAt ?? '')) ||
+              !ISO_TS_RE.test(String(att.generatedAt ?? ''))
+            ) {
+              fail('MIGRATION_BACKUP_TAMPERED', 'backupVerification timestamps are missing or malformed ISO 8601 UTC.')
+            }
+            const verifiedMs = Date.parse(bv.verifiedAt)
+            const createdMs = Date.parse(bv.backupCreatedAt)
+            const attGeneratedMs = Date.parse(att.generatedAt)
+            if (!Number.isFinite(verifiedMs) || !Number.isFinite(createdMs) || !Number.isFinite(attGeneratedMs)) {
+              fail('MIGRATION_BACKUP_TAMPERED', 'Unparseable backupVerification timestamps.')
+            }
+            if (createdMs - verifiedMs > MAX_OD03_FUTURE_CLOCK_SKEW_MS) {
+              fail('MIGRATION_BACKUP_TIMESTAMP_FUTURE', 'backupCreatedAt exceeds 60s skew relative to verifiedAt.')
+            }
+            if (attGeneratedMs < verifiedMs || attGeneratedMs < createdMs) {
+              fail('MIGRATION_BACKUP_TIMELINE_INVALID', 'MigrationAttestationV1 generatedAt precedes backup creation/verification.')
+            }
+            const ageMs = verifiedMs - createdMs
+            if (ageMs > contractMaxAgeMinutes * 60_000 || typeof bv.ageSeconds !== 'number' || bv.ageSeconds > contractMaxAgeMinutes * 60) {
+              fail('MIGRATION_BACKUP_EXPIRED', 'Backup exceeded contract freshness window prior to migration execution.')
+            }
+
+            if (backupVerificationArtifact !== null) {
+              if (!backupVerificationArtifact || typeof backupVerificationArtifact !== 'object') {
+                fail('MIGRATION_BACKUP_TAMPERED', 'backup-verification.json must be a JSON object.')
+              }
+              const { evidenceDigest: _ignoredEvDigest, ...evWithoutDigest } = backupVerificationArtifact
+              const recomputedBackupDigest = `sha256:${sha256Hex(JSON.stringify(canonicalSort(evWithoutDigest)))}`
+              if (recomputedBackupDigest !== backupVerificationArtifact.evidenceDigest) {
+                fail('MIGRATION_BACKUP_TAMPERED', 'backup-verification.json evidenceDigest verification failed.')
+              }
+              if (
+                backupVerificationArtifact.evidenceDigest !== bv.evidenceDigest ||
+                backupVerificationArtifact.backup?.reference !== bv.backupReference ||
+                backupVerificationArtifact.backup?.createdAt !== bv.backupCreatedAt ||
+                backupVerificationArtifact.workflowRun?.candidateSha !== bv.candidateSha ||
+                backupVerificationArtifact.contract?.databaseTargetFingerprint !== bv.databaseTargetFingerprint
+              ) {
+                fail('MIGRATION_BACKUP_TAMPERED', 'backup-verification.json artifact disagrees with MigrationAttestationV1.backupVerification.')
+              }
+            }
+          }
+
+          setOutput('migration_gate_required', 'true')
+          setOutput('migration_runner_workflow', runnerWorkflow)
+          setOutput('migration_environment', migrationEnv)
+          setOutput('migration_attested_run_id', String(selectedRun.id))
+          setOutput('migration_attested_run_attempt', String(runAttempt))
+          setOutput('migration_manifest_sha256', actualManifestSha256 ?? '')
+          setOutput('migration_tree_sha256', actualTreeSha256)
+          console.log(`MIGRATION_GATE_VERIFIED: run=${selectedRun.id}#${runAttempt} count=${actualCount} tree=${actualTreeSha256.slice(0, 12)}`)
+          NODE
+
+      - name: Verify optional Render backend compatibility
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+          TARGET: ${{ inputs.target }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
+          contract="$(git show "$SOURCE_SHA:.anclora/PRODUCTION_RUNTIME.md" 2>/dev/null || true)"
+          gate_count="$(printf '%s\n' "$contract" | grep -cE '^BACKEND_COMPAT_GATE=' || true)"
+          [ "$gate_count" -le 1 ] || fail "BACKEND_COMPAT_UNVERIFIABLE: BACKEND_COMPAT_GATE must be declared at most once."
+          if [ "$gate_count" -eq 0 ]; then
+            echo "Optional Render backend compatibility gate is not configured for this repository."
+            exit 0
+          fi
+          gate_mode="$(printf '%s\n' "$contract" | grep -E '^BACKEND_COMPAT_GATE=' | head -n 1)"
+          gate_mode="${gate_mode#BACKEND_COMPAT_GATE=}"
+          [ "$gate_mode" = "required" ] || fail "BACKEND_COMPAT_UNVERIFIABLE: BACKEND_COMPAT_GATE must be 'required' when declared."
+
+          service_count="$(printf '%s\n' "$contract" | grep -cE '^BACKEND_RENDER_SERVICE_ID=' || true)"
+          [ "$service_count" -eq 1 ] || fail "BACKEND_COMPAT_UNVERIFIABLE: declare BACKEND_RENDER_SERVICE_ID exactly once."
+          service_id="$(printf '%s\n' "$contract" | grep -E '^BACKEND_RENDER_SERVICE_ID=' | head -n 1)"
+          service_id="${service_id#BACKEND_RENDER_SERVICE_ID=}"
+          [[ "$service_id" =~ ^srv-[a-z0-9]+$ ]] || fail "BACKEND_COMPAT_UNVERIFIABLE: BACKEND_RENDER_SERVICE_ID is not a Render service id."
+          [ -n "${RENDER_API_KEY:-}" ] || fail "BACKEND_COMPAT_UNVERIFIABLE: repository secret RENDER_API_KEY is missing. Add it in GitHub repository Settings > Secrets and variables > Actions."
+
+          if ! deploys="$(curl -fsS --max-time 20 \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H 'Accept: application/json' \
+              "https://api.render.com/v1/services/$service_id/deploys?limit=100")"; then
+            fail "BACKEND_COMPAT_UNVERIFIABLE: Render deploy history could not be read."
+          fi
+          if ! render_sha="$(jq -er '[.[] | .deploy? | select(type == "object" and .status == "live")] | first | .commit.id // empty' <<< "$deploys" 2>/dev/null)"; then
+            fail "BACKEND_COMPAT_UNVERIFIABLE: no LIVE Render deploy with a commit was found in the deploy history."
+          fi
+          [[ "$render_sha" =~ ^[0-9a-f]{40}$ ]] || fail "BACKEND_COMPAT_UNVERIFIABLE: LIVE Render deploy has no full commit SHA."
+          [ -f scripts/release/check-backend-compat.sh ] || fail "BACKEND_COMPAT_UNVERIFIABLE: scripts/release/check-backend-compat.sh is missing."
+
+          if git diff --quiet "$render_sha" "$SOURCE_SHA" -- backend/; then
+            echo "Backend unchanged: backend/ is identical between Render (${render_sha:0:7}) and source (${SOURCE_SHA:0:7})."
+            bash scripts/release/check-backend-compat.sh "$render_sha" "$SOURCE_SHA"
+          else
+            echo "Backend differences detected between Render (${render_sha:0:7}) and source (${SOURCE_SHA:0:7})."
+            if [ "$TARGET" = "main" ]; then
+              fail "BACKEND_NOT_LIVE: target is main but Render backend differs from source ($SOURCE_SHA) and is not live."
+            fi
+            if [ -f scripts/release/verify-release-manifest.mjs ]; then
+              node scripts/release/verify-release-manifest.mjs . || fail "BACKEND_MIGRATION_MANIFEST_INVALID: release manifest verification failed."
+            fi
+            new_migrations="$(git diff --name-only "$render_sha" "$SOURCE_SHA" -- backend/prisma/migrations prisma/migrations 2>/dev/null | grep -E 'migration\.sql$' || true)"
+            if [ -n "$new_migrations" ]; then
+              echo "New database migrations detected between Render and source:"
+              echo "$new_migrations"
+            fi
+            echo "Preconditions verified for Render Auto-Deploy on production advance."
+          fi
+
   promote:
+    needs: verify
     if: inputs.target != 'full'
-    name: Promote to ${{ github.event.inputs.target }}
+    name: Promote to ${{ inputs.target }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,50 +1153,140 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Resolve source branch
-        id: source
+      - name: Verify source and fast-forward safety
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+          SOURCE_BRANCH: ${{ needs.verify.outputs.source_branch }}
+          TARGET: ${{ inputs.target }}
         run: |
-          case "${{ inputs.target }}" in
-            staging) echo "branch=development" >> "$GITHUB_OUTPUT" ;;
-            production) echo "branch=staging" >> "$GITHUB_OUTPUT" ;;
-            main) echo "branch=production" >> "$GITHUB_OUTPUT" ;;
-          esac
-
-      - name: Verify fast-forward safety
-        run: |
-          git fetch origin ${{ steps.source.outputs.branch }} ${{ inputs.target }}
-          SOURCE_SHA=$(git rev-parse origin/${{ steps.source.outputs.branch }})
-          TARGET_SHA=$(git rev-parse origin/${{ inputs.target }})
-          echo "source=$SOURCE_SHA" >> "$GITHUB_ENV"
-          echo "Source (${{ steps.source.outputs.branch }}): $SOURCE_SHA"
-          echo "Target (${{ inputs.target }}) current: $TARGET_SHA"
-          if [ "$SOURCE_SHA" = "$TARGET_SHA" ]; then
+          set -euo pipefail
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
+          git fetch origin "$SOURCE_BRANCH" "$TARGET"
+          current_source="$(git rev-parse "origin/$SOURCE_BRANCH")"
+          [ "$current_source" = "$SOURCE_SHA" ] \
+            || fail "SOURCE_MOVED: $SOURCE_BRANCH moved after verification."
+          target_sha="$(git rev-parse "origin/$TARGET")"
+          echo "Source ($SOURCE_BRANCH): $SOURCE_SHA"
+          echo "Target ($TARGET) current: $target_sha"
+          if [ "$SOURCE_SHA" = "$target_sha" ]; then
             echo "Already at target SHA. Nothing to promote."
             exit 0
           fi
-          if ! git merge-base --is-ancestor "$TARGET_SHA" "$SOURCE_SHA"; then
-            echo "::error::PROMOTION_BLOCKED_DIVERGENCE: ${{ inputs.target }} has commits not present in ${{ steps.source.outputs.branch }}. Refusing to move target."
-            exit 1
-          fi
+          git merge-base --is-ancestor "$target_sha" "$SOURCE_SHA" \
+            || fail "DIVERGENCE: $TARGET has commits not present in the source branch."
 
-      - name: Verify source SHA passed its upstream gate
-        run: |
-          STATUS=$(gh api repos/${{ github.repository }}/commits/$source/status --jq .state)
-          echo "Combined status for $source: $STATUS"
-          if [ "$STATUS" = "failure" ] || [ "$STATUS" = "error" ]; then
-            echo "::error::Source SHA has failing checks. Refusing to promote red code."
-            exit 1
-          fi
+      - name: Revalidate migration attestation before push
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+          TARGET: ${{ inputs.target }}
+          MIGRATION_GATE_REQUIRED: ${{ needs.verify.outputs.migration_gate_required }}
+          MIGRATION_ATTESTED_RUN_ID: ${{ needs.verify.outputs.migration_attested_run_id }}
+          MIGRATION_ATTESTED_RUN_ATTEMPT: ${{ needs.verify.outputs.migration_attested_run_attempt }}
+          MIGRATION_MANIFEST_SHA256: ${{ needs.verify.outputs.migration_manifest_sha256 }}
+          MIGRATION_TREE_SHA256: ${{ needs.verify.outputs.migration_tree_sha256 }}
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { createHash } from 'node:crypto'
+          import { execFileSync } from 'node:child_process'
 
-      - name: Fast-forward target ref
-        run: git push origin "$source:refs/heads/${{ inputs.target }}"
+          const fail = (code, msg) => {
+            console.error(`::error::PROMOTION_BLOCKED_${code}: ${msg}`)
+            process.exit(1)
+          }
+          const sha256Hex = (buf) => createHash('sha256').update(buf).digest('hex')
 
-      - name: Main baseline integrity
+          const sourceSha = (process.env.SOURCE_SHA ?? '').trim()
+          const target = (process.env.TARGET ?? 'staging').trim()
+          const repo = (process.env.GITHUB_REPOSITORY ?? '').trim()
+          if (!/^[0-9a-f]{40}$/i.test(sourceSha)) fail('MIGRATION_RACE_DETECTED', 'Invalid SOURCE_SHA.')
+
+          let contractRaw = ''
+          try {
+            contractRaw = execFileSync('git', ['show', `${sourceSha}:.anclora/PRODUCTION_RUNTIME.md`], { encoding: 'utf8' })
+          } catch {
+            fail('MIGRATION_CONTRACT_MISSING', 'Missing .anclora/PRODUCTION_RUNTIME.md during pre-push revalidation.')
+          }
+          const contract = {}
+          for (const line of contractRaw.split(/\r?\n/)) {
+            const m = /^([A-Z][A-Z0-9_]*)=(.*)$/.exec(line)
+            if (m) contract[m[1]] = m[2].trim()
+          }
+          const dbProvider = contract.DATABASE_PROVIDER ?? ''
+          if (!dbProvider) fail('MIGRATION_CONTRACT_MISSING', 'DATABASE_PROVIDER missing during pre-push revalidation.')
+          const gateOnStaging = (contract.MIGRATION_GATE_ON_STAGING ?? 'false').toLowerCase() === 'true'
+          if (dbProvider.toLowerCase() === 'none' || (target === 'staging' && !gateOnStaging)) {
+            process.exit(0)
+          }
+
+          const attestedRunId = Number(process.env.MIGRATION_ATTESTED_RUN_ID ?? '')
+          const attestedAttempt = Number(process.env.MIGRATION_ATTESTED_RUN_ATTEMPT ?? '1')
+          const expectedTree = (process.env.MIGRATION_TREE_SHA256 ?? '').trim()
+          const runnerWorkflow = contract.MIGRATION_RUNNER_WORKFLOW ?? ''
+          if (!runnerWorkflow || !Number.isInteger(attestedRunId) || attestedRunId <= 0 || !/^[0-9a-f]{64}$/.test(expectedTree)) {
+            fail('MIGRATION_RACE_DETECTED', 'Missing attested migration metadata prior to push.')
+          }
+
+          const normalizedDir = (contract.MIGRATION_DIRECTORY ?? '').replace(/^\.\//, '').replace(/\/+$/, '')
+          const treeFiles = execFileSync('git', ['ls-tree', '-r', '--name-only', sourceSha], { encoding: 'utf8' })
+            .split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+          const prismaPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)/migration\\.sql$`)
+          const directPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)\\.(sql|py)$`)
+          const migs = []
+          for (const fp of treeFiles) {
+            const pm = prismaPattern.exec(fp)
+            if (pm) migs.push({ name: pm[1], sha256: sha256Hex(execFileSync('git', ['show', `${sourceSha}:${fp}`])) })
+          }
+          if (migs.length === 0) {
+            for (const fp of treeFiles) {
+              const dm = directPattern.exec(fp)
+              if (dm) migs.push({ name: dm[1], sha256: sha256Hex(execFileSync('git', ['show', `${sourceSha}:${fp}`])) })
+            }
+          }
+          migs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+          const currentTree = sha256Hex(migs.map((m) => `${m.name}:${m.sha256}\n`).join(''))
+          if (currentTree !== expectedTree) {
+            fail('MIGRATION_RACE_DETECTED', 'Migration tree digest changed between verify and push.')
+          }
+
+          if (!repo) fail('MIGRATION_GITHUB_API_UNAVAILABLE', 'GITHUB_REPOSITORY missing.')
+          const workflowFile = runnerWorkflow.replace(/^\.github\/workflows\//, '')
+          let payload
+          try {
+            payload = JSON.parse(execFileSync('gh', ['api', `repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=100`], { encoding: 'utf8' }))
+          } catch (err) {
+            fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Failed pre-push migration run recheck: ${err.message}`)
+          }
+          if (!payload || !Array.isArray(payload.workflow_runs)) {
+            fail('MIGRATION_GITHUB_API_UNAVAILABLE', 'Malformed workflow_runs response during pre-push recheck.')
+          }
+          const runs = payload.workflow_runs
+          const targetRun = runs.find((r) => r && r.id === attestedRunId)
+          if (!targetRun || targetRun.status !== 'completed' || targetRun.conclusion !== 'success' || (targetRun.run_attempt ?? 1) !== attestedAttempt) {
+            fail('MIGRATION_RACE_DETECTED', `Attested migration run ${attestedRunId}#${attestedAttempt} is no longer clean/latest.`)
+          }
+          const newerConflict = runs.find((r) =>
+            r && (r.id > attestedRunId || (r.id === attestedRunId && (r.run_attempt ?? 1) > attestedAttempt)) &&
+            (r.status !== 'completed' || r.conclusion !== 'success'),
+          )
+          if (newerConflict) {
+            fail('MIGRATION_RACE_DETECTED', `Concurrent or newer migration run ${newerConflict.id} (${newerConflict.status}/${newerConflict.conclusion}) detected before push.`)
+          }
+          console.log(`MIGRATION_PRE_PUSH_REVALIDATED: run=${attestedRunId}#${attestedAttempt}`)
+          NODE
+
+      - name: Main baseline integrity (pre-push)
         if: inputs.target == 'main' && hashFiles('package-lock.json') != ''
         run: npm ci
+
+      - name: Fast-forward target ref
+        run: git push origin "${{ needs.verify.outputs.source_sha }}:refs/heads/${{ inputs.target }}"
+
   promote_full:
+    needs: verify
     if: inputs.target == 'full'
     name: Promote development through staging, production, and main
     runs-on: ubuntu-latest
@@ -94,46 +1295,211 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Promote the full chain without waiting for environment checks
+      - name: Verify source and full-chain safety
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_SHA: ${{ inputs.source_sha }}
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
         run: |
           set -euo pipefail
-          if [ "$GITHUB_REF_NAME" != "development" ]; then
-            echo "::error::PROMOTION_BLOCKED_WRONG_REF: dispatch this workflow from development."
-            exit 1
-          fi
-          if [ -z "$SOURCE_SHA" ]; then
-            echo "::error::PROMOTION_BLOCKED_MISSING_REVIEWED_SHA: supply the exact SHA shown in Preview."
-            exit 1
-          fi
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
           git fetch origin \
             "+refs/heads/development:refs/remotes/origin/development" \
             "+refs/heads/staging:refs/remotes/origin/staging" \
             "+refs/heads/production:refs/remotes/origin/production" \
             "+refs/heads/main:refs/remotes/origin/main"
-          git cat-file -e "$SOURCE_SHA^{commit}"
-          current_development_sha="$(git rev-parse origin/development)"
-          if [ "$current_development_sha" != "$SOURCE_SHA" ]; then
-            echo "::error::PROMOTION_BLOCKED_UNREVIEWED_DEVELOPMENT: development moved after Preview review. Review the new Preview first."
-            exit 1
-          fi
-          source_sha="$SOURCE_SHA"
-          echo "Reviewed development SHA: $source_sha"
-          source_status="$(gh api "repos/$GITHUB_REPOSITORY/commits/$source_sha/status" --jq .state)"
-          if [ "$source_status" = "failure" ] || [ "$source_status" = "error" ]; then
-            echo "::error::PROMOTION_BLOCKED_FAILED_SOURCE_CHECKS: development has failing checks."
-            exit 1
-          fi
+          current_development="$(git rev-parse origin/development)"
+          [ "$current_development" = "$SOURCE_SHA" ] \
+            || fail "DEVELOPMENT_MOVED: development moved after verification."
           for target in staging production main; do
             target_sha="$(git rev-parse "origin/$target")"
-            if ! git merge-base --is-ancestor "$target_sha" "$source_sha"; then
-              echo "::error::PROMOTION_BLOCKED_DIVERGENCE: $target has commits outside development."
-              exit 1
+            if ! git merge-base --is-ancestor "$target_sha" "$SOURCE_SHA"; then
+              fail "DIVERGENCE: $target has commits outside development."
             fi
           done
-          for target in staging production main; do
-            git push origin "$source_sha:refs/heads/$target"
-          done
+
+      - name: Revalidate migration attestation before full-chain push
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+          TARGET: full
+          MIGRATION_GATE_REQUIRED: ${{ needs.verify.outputs.migration_gate_required }}
+          MIGRATION_ATTESTED_RUN_ID: ${{ needs.verify.outputs.migration_attested_run_id }}
+          MIGRATION_ATTESTED_RUN_ATTEMPT: ${{ needs.verify.outputs.migration_attested_run_attempt }}
+          MIGRATION_MANIFEST_SHA256: ${{ needs.verify.outputs.migration_manifest_sha256 }}
+          MIGRATION_TREE_SHA256: ${{ needs.verify.outputs.migration_tree_sha256 }}
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { createHash } from 'node:crypto'
+          import { execFileSync } from 'node:child_process'
+
+          const fail = (code, msg) => {
+            console.error(`::error::PROMOTION_BLOCKED_${code}: ${msg}`)
+            process.exit(1)
+          }
+          const sha256Hex = (buf) => createHash('sha256').update(buf).digest('hex')
+
+          const sourceSha = (process.env.SOURCE_SHA ?? '').trim()
+          const repo = (process.env.GITHUB_REPOSITORY ?? '').trim()
+          if (!/^[0-9a-f]{40}$/i.test(sourceSha)) fail('MIGRATION_RACE_DETECTED', 'Invalid SOURCE_SHA.')
+
+          let contractRaw = ''
+          try {
+            contractRaw = execFileSync('git', ['show', `${sourceSha}:.anclora/PRODUCTION_RUNTIME.md`], { encoding: 'utf8' })
+          } catch {
+            fail('MIGRATION_CONTRACT_MISSING', 'Missing .anclora/PRODUCTION_RUNTIME.md during full-chain revalidation.')
+          }
+          const contract = {}
+          for (const line of contractRaw.split(/\r?\n/)) {
+            const m = /^([A-Z][A-Z0-9_]*)=(.*)$/.exec(line)
+            if (m) contract[m[1]] = m[2].trim()
+          }
+          const dbProvider = contract.DATABASE_PROVIDER ?? ''
+          if (!dbProvider) fail('MIGRATION_CONTRACT_MISSING', 'DATABASE_PROVIDER missing during full-chain revalidation.')
+          if (dbProvider.toLowerCase() === 'none') {
+            process.exit(0)
+          }
+
+          const attestedRunId = Number(process.env.MIGRATION_ATTESTED_RUN_ID ?? '')
+          const attestedAttempt = Number(process.env.MIGRATION_ATTESTED_RUN_ATTEMPT ?? '1')
+          const expectedTree = (process.env.MIGRATION_TREE_SHA256 ?? '').trim()
+          const runnerWorkflow = contract.MIGRATION_RUNNER_WORKFLOW ?? ''
+          if (!runnerWorkflow || !Number.isInteger(attestedRunId) || attestedRunId <= 0 || !/^[0-9a-f]{64}$/.test(expectedTree)) {
+            fail('MIGRATION_RACE_DETECTED', 'Missing attested migration metadata prior to full-chain push.')
+          }
+
+          const normalizedDir = (contract.MIGRATION_DIRECTORY ?? '').replace(/^\.\//, '').replace(/\/+$/, '')
+          const treeFiles = execFileSync('git', ['ls-tree', '-r', '--name-only', sourceSha], { encoding: 'utf8' })
+            .split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+          const prismaPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)/migration\\.sql$`)
+          const directPattern = new RegExp(`^${normalizedDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^/]+)\\.(sql|py)$`)
+          const migs = []
+          for (const fp of treeFiles) {
+            const pm = prismaPattern.exec(fp)
+            if (pm) migs.push({ name: pm[1], sha256: sha256Hex(execFileSync('git', ['show', `${sourceSha}:${fp}`])) })
+          }
+          if (migs.length === 0) {
+            for (const fp of treeFiles) {
+              const dm = directPattern.exec(fp)
+              if (dm) migs.push({ name: dm[1], sha256: sha256Hex(execFileSync('git', ['show', `${sourceSha}:${fp}`])) })
+            }
+          }
+          migs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+          const currentTree = sha256Hex(migs.map((m) => `${m.name}:${m.sha256}\n`).join(''))
+          if (currentTree !== expectedTree) {
+            fail('MIGRATION_RACE_DETECTED', 'Migration tree digest changed between verify and full-chain push.')
+          }
+
+          if (!repo) fail('MIGRATION_GITHUB_API_UNAVAILABLE', 'GITHUB_REPOSITORY missing.')
+          const workflowFile = runnerWorkflow.replace(/^\.github\/workflows\//, '')
+          let payload
+          try {
+            payload = JSON.parse(execFileSync('gh', ['api', `repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=100`], { encoding: 'utf8' }))
+          } catch (err) {
+            fail('MIGRATION_GITHUB_API_UNAVAILABLE', `Failed pre-push migration run recheck: ${err.message}`)
+          }
+          if (!payload || !Array.isArray(payload.workflow_runs)) {
+            fail('MIGRATION_GITHUB_API_UNAVAILABLE', 'Malformed workflow_runs response during full-chain recheck.')
+          }
+          const runs = payload.workflow_runs
+          const targetRun = runs.find((r) => r && r.id === attestedRunId)
+          if (!targetRun || targetRun.status !== 'completed' || targetRun.conclusion !== 'success' || (targetRun.run_attempt ?? 1) !== attestedAttempt) {
+            fail('MIGRATION_RACE_DETECTED', `Attested migration run ${attestedRunId}#${attestedAttempt} is no longer clean/latest.`)
+          }
+          const newerConflict = runs.find((r) =>
+            r && (r.id > attestedRunId || (r.id === attestedRunId && (r.run_attempt ?? 1) > attestedAttempt)) &&
+            (r.status !== 'completed' || r.conclusion !== 'success'),
+          )
+          if (newerConflict) {
+            fail('MIGRATION_RACE_DETECTED', `Concurrent or newer migration run ${newerConflict.id} (${newerConflict.status}/${newerConflict.conclusion}) detected before full-chain push.`)
+          }
+          console.log(`MIGRATION_PRE_PUSH_REVALIDATED: run=${attestedRunId}#${attestedAttempt}`)
+          NODE
+
+      - name: Promote the full chain after fail-closed checks
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::PROMOTION_BLOCKED_$1"; exit 1; }
+
+          # 1. Advance staging ref
+          git push origin "$SOURCE_SHA:refs/heads/staging"
+
+          # 2. Inspect runtime contract for optional Render backend gate
+          contract="$(git show "$SOURCE_SHA:.anclora/PRODUCTION_RUNTIME.md" 2>/dev/null || true)"
+          gate_mode="$(printf '%s\n' "$contract" | grep -E '^BACKEND_COMPAT_GATE=' | head -n 1 || true)"
+          gate_mode="${gate_mode#BACKEND_COMPAT_GATE=}"
+          service_id="$(printf '%s\n' "$contract" | grep -E '^BACKEND_RENDER_SERVICE_ID=' | head -n 1 || true)"
+          service_id="${service_id#BACKEND_RENDER_SERVICE_ID=}"
+
+          target_prod_sha="$(git rev-parse origin/production)"
+          backend_changed=false
+          if ! git diff --quiet "$target_prod_sha" "$SOURCE_SHA" -- backend/; then
+            backend_changed=true
+          fi
+
+          # 3. Advance production ref (triggers native Render Auto-Deploy if connected to production)
+          git push origin "$SOURCE_SHA:refs/heads/production"
+
+          # 4. If backend changed and Render gate is active, wait boundedly for Render deploy to become live
+          if [ "$gate_mode" = "required" ] && [ "$backend_changed" = "true" ]; then
+            [ -n "${RENDER_API_KEY:-}" ] || fail "BACKEND_DEPLOY_UNVERIFIABLE: RENDER_API_KEY missing during production advance."
+            [[ "$service_id" =~ ^srv-[a-z0-9]+$ ]] || fail "BACKEND_DEPLOY_UNVERIFIABLE: invalid Render service id."
+
+            echo "Backend changed; awaiting Render Auto-Deploy for commit $SOURCE_SHA to reach 'live'..."
+            max_attempts=60
+            sleep_interval=10
+            attempt=1
+            deploy_live=false
+
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if deploys="$(curl -fsS --max-time 15 \
+                  -H "Authorization: Bearer $RENDER_API_KEY" \
+                  -H 'Accept: application/json' \
+                  "https://api.render.com/v1/services/$service_id/deploys?limit=10" 2>/dev/null)"; then
+
+                deploy_info="$(jq -r --arg sha "$SOURCE_SHA" '
+                  [.[] | .deploy? | select(type == "object" and .commit.id == $sha)] | first // empty
+                  | if . == null then "NOT_FOUND" else "\(.id)\t\(.status)" end
+                ' <<< "$deploys" 2>/dev/null || echo "ERROR")"
+
+                if [ "$deploy_info" != "NOT_FOUND" ] && [ "$deploy_info" != "ERROR" ]; then
+                  IFS=$'\t' read -r dep_id dep_status <<< "$deploy_info"
+                  echo "Attempt $attempt/$max_attempts: deploy $dep_id status is '$dep_status'..."
+                  case "$dep_status" in
+                    live)
+                      deploy_live=true
+                      break
+                      ;;
+                    build_failed|update_failed|canceled)
+                      fail "BACKEND_DEPLOY_FAILED: Render deploy $dep_id ended with status $dep_status."
+                      ;;
+                    created|queued|in_progress|pre_deploy_in_progress)
+                      ;;
+                    *)
+                      echo "Unhandled deploy status: $dep_status"
+                      ;;
+                  esac
+                else
+                  echo "Attempt $attempt/$max_attempts: Render deploy for $SOURCE_SHA not registered yet..."
+                fi
+              else
+                echo "Attempt $attempt/$max_attempts: transient failure reading Render deploys, retrying..."
+              fi
+
+              attempt=$((attempt + 1))
+              sleep "$sleep_interval"
+            done
+
+            [ "$deploy_live" = "true" ] || fail "BACKEND_DEPLOY_TIMEOUT: Render deploy for $SOURCE_SHA did not reach 'live' within $((max_attempts * sleep_interval))s."
+            echo "Render deploy for $SOURCE_SHA is live."
+          else
+            echo "No backend changes or Render gate not required; proceeding directly to main."
+          fi
+
+          # 5. Advance main ref (triggers Vercel frontend deploy)
+          git push origin "$SOURCE_SHA:refs/heads/main"
